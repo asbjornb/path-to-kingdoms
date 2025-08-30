@@ -247,6 +247,12 @@
   font-size: 0.8rem;
 }
 
+.building-effect {
+  color: #a855f7;
+  font-size: 0.75rem;
+  font-style: italic;
+}
+
 .buy-btn {
   padding: 0.25rem 0.75rem;
   background: #3b82f6;

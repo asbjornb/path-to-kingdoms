@@ -29,10 +29,13 @@ describe('GameStateManager', () => {
     it('should initialize settlement with empty buildings', () => {
       const settlement = game.getState().settlements[0];
 
-      expect(settlement?.buildings.size).toBe(3); // Hamlet has 3 buildings
+      expect(settlement?.buildings.size).toBe(6); // Hamlet has 6 buildings
       expect(settlement?.buildings.get('hamlet_hut')).toBe(0);
       expect(settlement?.buildings.get('hamlet_garden')).toBe(0);
       expect(settlement?.buildings.get('hamlet_workshop')).toBe(0);
+      expect(settlement?.buildings.get('hamlet_shrine')).toBe(0);
+      expect(settlement?.buildings.get('hamlet_market')).toBe(0);
+      expect(settlement?.buildings.get('hamlet_library')).toBe(0);
     });
 
     it('should spawn more settlements when parallel research is purchased', () => {
@@ -93,6 +96,24 @@ describe('GameStateManager', () => {
       const success = game.buyBuilding(settlementId, 'fake-building');
       expect(success).toBe(false);
     });
+
+    it('should apply building effects correctly', () => {
+      // Give player more money for testing
+      (game as any).currency = 10000;
+
+      // Buy a shrine (income multiplier) and a hut
+      game.buyBuilding(settlementId, 'hamlet_shrine');
+      game.buyBuilding(settlementId, 'hamlet_hut');
+
+      const settlement = game.getState().settlements[0];
+      // Base income: shrine (2) + hut (1) = 3
+      // Shrine effect: +5% income = 3 * 1.05 = 3.15
+      expect(settlement.totalIncome).toBeCloseTo(3.15, 2);
+
+      // Test that the shrine building was purchased
+      expect(settlement.buildings.get('hamlet_shrine')).toBe(1);
+      expect(settlement.buildings.get('hamlet_hut')).toBe(1);
+    });
   });
 
   describe('Settlement completion', () => {
@@ -118,6 +139,26 @@ describe('GameStateManager', () => {
       expect(freshGame.getState().settlements).toHaveLength(1); // Still have 1 settlement (new autospawned one)
       expect(freshGame.getResearchPoints(TierType.Hamlet)).toBe(initialResearchPoints + 10);
       expect(freshGame.getState().completedSettlements.get(TierType.Hamlet)).toBe(1);
+    });
+
+    it('should apply completion bonuses from buildings', () => {
+      // Create fresh game to avoid test interference
+      const freshGame = new GameStateManager();
+      const settlement = freshGame.getState().settlements[0];
+      const testSettlementId = settlement.id;
+
+      // Give player more money for testing
+      (freshGame as any).currency = 10000;
+      const initialResearchPoints = freshGame.getResearchPoints(TierType.Hamlet);
+
+      // Buy a library (completion bonus) and enough huts to complete
+      freshGame.buyBuilding(testSettlementId, 'hamlet_library'); // +2 research points on completion
+      for (let i = 0; i < 10; i++) {
+        freshGame.buyBuilding(testSettlementId, 'hamlet_hut');
+      }
+
+      // Should get 10 base + 2 from library = 12 research points
+      expect(freshGame.getResearchPoints(TierType.Hamlet)).toBe(initialResearchPoints + 12);
     });
 
     it('should track completed settlements', () => {

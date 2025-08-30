@@ -25,7 +25,7 @@ describe('Tier data', () => {
     it('should have valid building data for each tier', () => {
       TIER_DATA.forEach((tier) => {
         expect(tier.buildings.length).toBeGreaterThanOrEqual(3);
-        expect(tier.buildings.length).toBeLessThanOrEqual(4);
+        expect(tier.buildings.length).toBeLessThanOrEqual(6);
 
         tier.buildings.forEach((building) => {
           expect(building.id).toBeTruthy();

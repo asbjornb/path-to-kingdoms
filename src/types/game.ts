@@ -16,6 +16,11 @@ export interface Building {
   baseIncome: number;
   costMultiplier: number;
   description?: string;
+  effect?: {
+    type: 'income_multiplier' | 'cost_reduction' | 'completion_bonus';
+    value: number;
+    description: string;
+  };
 }
 
 export interface TierDefinition {

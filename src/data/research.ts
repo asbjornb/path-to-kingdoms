@@ -81,44 +81,29 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
 
   // Village Research (unlocked when villages are unlocked)
   {
-    id: 'village_parallel_2',
-    name: 'Dual Village Management',
-    description: 'Run 2 villages in parallel',
-    cost: 50,
+    id: 'village_autobuy_unlock',
+    name: 'Village Automated Purchasing',
+    description: 'Enables automatic building purchases for villages',
+    cost: 100,
     tier: TierType.Village,
     effect: {
-      type: 'parallel_slots',
-      value: 2,
+      type: 'autobuy_speed',
+      value: 1,
     },
     purchased: false,
   },
-  {
-    id: 'village_parallel_3',
-    name: 'Triple Village Management',
-    description: 'Run 3 villages in parallel',
-    cost: 200,
-    tier: TierType.Village,
-    prerequisite: 'village_parallel_2',
-    effect: {
-      type: 'parallel_slots',
-      value: 3,
-    },
-    purchased: false,
-  },
-  // More village research can be added later...
 
   // Town Research (unlocked when towns are unlocked)
   {
-    id: 'town_parallel_2',
-    name: 'Dual Town Management',
-    description: 'Run 2 towns in parallel',
-    cost: 50,
+    id: 'town_autobuy_unlock',
+    name: 'Town Automated Purchasing',
+    description: 'Enables automatic building purchases for towns',
+    cost: 100,
     tier: TierType.Town,
     effect: {
-      type: 'parallel_slots',
-      value: 2,
+      type: 'autobuy_speed',
+      value: 1,
     },
     purchased: false,
   },
-  // More tiers can be added later...
 ];

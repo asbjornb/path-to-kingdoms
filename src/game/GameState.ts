@@ -80,21 +80,94 @@ export class GameStateManager {
       building.baseCost,
       building.costMultiplier,
       currentCount,
+      settlementId,
     );
 
     if (this.currency < cost) return false;
 
     this.currency -= cost;
     settlement.buildings.set(buildingId, currentCount + 1);
-    settlement.totalIncome += building.baseIncome;
+
+    // Recalculate total income for the settlement (accounts for building effects)
+    settlement.totalIncome = this.calculateSettlementIncome(settlement);
 
     this.checkSettlementCompletion(settlement);
     return true;
   }
 
-  private calculateBuildingCost(baseCost: number, multiplier: number, count: number): number {
-    const costReduction = this.getResearchEffect('cost_reduction');
+  private calculateBuildingCost(
+    baseCost: number,
+    multiplier: number,
+    count: number,
+    settlementId?: string,
+  ): number {
+    let costReduction = this.getResearchEffect('cost_reduction');
+
+    // Apply building-specific cost reduction effects
+    if (settlementId !== undefined && settlementId !== '') {
+      const settlement = this.state.settlements.find((s) => s.id === settlementId);
+      if (settlement) {
+        costReduction *= this.getBuildingEffectMultiplier(settlement, 'cost_reduction');
+      }
+    }
+
     return Math.floor(baseCost * Math.pow(multiplier, count) * costReduction);
+  }
+
+  private getBuildingEffectMultiplier(settlement: Settlement, effectType: string): number {
+    const tierDef = getTierByType(settlement.tier);
+    if (!tierDef) return 1;
+
+    let multiplier = 1;
+
+    for (const building of tierDef.buildings) {
+      if (building.effect && building.effect.type === effectType) {
+        const count = settlement.buildings.get(building.id) ?? 0;
+        if (effectType === 'cost_reduction') {
+          // Cost reduction stacks multiplicatively (each building reduces cost by the percentage)
+          multiplier *= Math.pow(1 - building.effect.value, count);
+        } else if (effectType === 'income_multiplier') {
+          // Income multiplier stacks additively (each building adds to the multiplier)
+          multiplier += building.effect.value * count;
+        }
+      }
+    }
+
+    return multiplier;
+  }
+
+  private getBuildingCompletionBonus(settlement: Settlement): number {
+    const tierDef = getTierByType(settlement.tier);
+    if (!tierDef) return 0;
+
+    let bonus = 0;
+
+    for (const building of tierDef.buildings) {
+      if (building.effect && building.effect.type === 'completion_bonus') {
+        const count = settlement.buildings.get(building.id) ?? 0;
+        bonus += building.effect.value * count;
+      }
+    }
+
+    return bonus;
+  }
+
+  private calculateSettlementIncome(settlement: Settlement): number {
+    const tierDef = getTierByType(settlement.tier);
+    if (!tierDef) return 0;
+
+    let baseIncome = 0;
+
+    // Calculate base income from all buildings
+    for (const building of tierDef.buildings) {
+      const count = settlement.buildings.get(building.id) ?? 0;
+      baseIncome += building.baseIncome * count;
+    }
+
+    // Apply income multiplier effects
+    const incomeMultiplier = this.getBuildingEffectMultiplier(settlement, 'income_multiplier');
+
+    return baseIncome * incomeMultiplier;
   }
 
   private getResearchEffect(type: string, tier?: TierType): number {
@@ -125,8 +198,14 @@ export class GameStateManager {
       settlement.isComplete = true;
 
       // Award 10 research points for the completed tier
+      let researchBonus = 10;
+
+      // Add completion bonus from buildings (like libraries)
+      const completionBonus = this.getBuildingCompletionBonus(settlement);
+      researchBonus += completionBonus;
+
       const currentPoints = this.state.researchPoints.get(settlement.tier) ?? 0;
-      this.state.researchPoints.set(settlement.tier, currentPoints + 10);
+      this.state.researchPoints.set(settlement.tier, currentPoints + researchBonus);
 
       const completedCount = (this.state.completedSettlements.get(settlement.tier) ?? 0) + 1;
       this.state.completedSettlements.set(settlement.tier, completedCount);
@@ -231,7 +310,12 @@ export class GameStateManager {
     if (!building) return null;
 
     const currentCount = settlement.buildings.get(buildingId) ?? 0;
-    return this.calculateBuildingCost(building.baseCost, building.costMultiplier, currentCount);
+    return this.calculateBuildingCost(
+      building.baseCost,
+      building.costMultiplier,
+      currentCount,
+      settlementId,
+    );
   }
 
   // For testing - manually trigger autospawn
