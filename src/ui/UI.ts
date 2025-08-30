@@ -8,6 +8,7 @@ export class UI {
   private container: HTMLElement;
   private selectedTier: TierType = TierType.Hamlet;
   private isInitialized: boolean = false;
+  private lastSettlementCount: number = 0;
 
   constructor(game: GameStateManager, container: HTMLElement) {
     this.game = game;
@@ -16,6 +17,7 @@ export class UI {
 
   public render(): void {
     this.isInitialized = true;
+    this.lastSettlementCount = this.game.getState().settlements.length;
 
     this.container.innerHTML = `
       <div class="game-container">
@@ -250,6 +252,14 @@ export class UI {
 
   public update(): void {
     if (!this.isInitialized) return;
+
+    // Check if settlement count has changed (completion/spawning)
+    const currentSettlementCount = this.game.getState().settlements.length;
+    if (currentSettlementCount !== this.lastSettlementCount) {
+      this.lastSettlementCount = currentSettlementCount;
+      this.render(); // Full re-render when settlements change
+      return;
+    }
 
     // Update dynamic values without full re-render to prevent button flickering
     this.updateDynamicValues();

@@ -292,6 +292,36 @@ describe('GameStateManager', () => {
         initialCompletedCount + 1,
       );
     });
+
+    it('should create a completely new settlement when one is completed', () => {
+      const originalSettlement = game.getState().settlements[0];
+      const originalId = originalSettlement.id;
+
+      // Give settlement some currency and buy buildings
+      originalSettlement.currency = 1000;
+      game.buyBuilding(originalSettlement.id, 'hamlet_hut');
+      game.buyBuilding(originalSettlement.id, 'hamlet_garden');
+
+      // Complete all goals
+      originalSettlement.goals.forEach((goal) => {
+        goal.isCompleted = true;
+        goal.currentValue = goal.targetValue;
+      });
+
+      // Trigger completion
+      game.update();
+
+      // Should have a new settlement with different ID and fresh state
+      const newSettlement = game.getState().settlements[0];
+      expect(newSettlement.id).not.toBe(originalId);
+      expect(newSettlement.currency).toBe(10); // Fresh starting currency
+      expect(newSettlement.totalIncome).toBe(0); // No buildings yet
+      expect(newSettlement.buildings.get('hamlet_hut')).toBe(0);
+      expect(newSettlement.buildings.get('hamlet_garden')).toBe(0);
+      expect(newSettlement.lifetimeCurrencyEarned).toBe(0);
+      expect(newSettlement.goals).toHaveLength(1);
+      expect(newSettlement.goals[0].isCompleted).toBe(false);
+    });
   });
 
   describe('Dev Mode', () => {
