@@ -14,7 +14,7 @@ describe('GameStateManager', () => {
       expect(game.getCurrency()).toBe(100);
       expect(game.getTotalIncome()).toBe(0);
       expect(game.getState().settlements).toHaveLength(1); // Now auto-spawns 1 hamlet
-      expect(game.getState().researchPoints).toBe(0);
+      expect(game.getResearchPoints(TierType.Hamlet)).toBe(0);
       expect(game.getState().unlockedTiers.has(TierType.Hamlet)).toBe(true);
     });
   });
@@ -36,9 +36,9 @@ describe('GameStateManager', () => {
     });
 
     it('should spawn more settlements when parallel research is purchased', () => {
-      // Give research points and buy parallel slots
-      (game as any).state.researchPoints = 10;
-      game.purchaseResearch('parallel_2');
+      // Give hamlet research points and buy parallel slots
+      game.getState().researchPoints.set(TierType.Hamlet, 100);
+      game.purchaseResearch('hamlet_parallel_2');
 
       // Should now have 2 hamlets
       expect(game.getState().settlements).toHaveLength(2);
@@ -104,7 +104,7 @@ describe('GameStateManager', () => {
 
       // Give player more money for testing
       (freshGame as any).currency = 1000;
-      const initialResearchPoints = freshGame.getState().researchPoints;
+      const initialResearchPoints = freshGame.getResearchPoints(TierType.Hamlet);
 
       // Ensure we have exactly 1 settlement to start
       expect(freshGame.getState().settlements).toHaveLength(1);
@@ -116,7 +116,7 @@ describe('GameStateManager', () => {
 
       // Settlement should be completed and removed, replaced by new one
       expect(freshGame.getState().settlements).toHaveLength(1); // Still have 1 settlement (new autospawned one)
-      expect(freshGame.getState().researchPoints).toBe(initialResearchPoints + 1);
+      expect(freshGame.getResearchPoints(TierType.Hamlet)).toBe(initialResearchPoints + 10);
       expect(freshGame.getState().completedSettlements.get(TierType.Hamlet)).toBe(1);
     });
 
@@ -125,8 +125,8 @@ describe('GameStateManager', () => {
       (game as any).currency = 100000;
 
       // Purchase parallel slots research to get more settlements
-      (game as any).state.researchPoints = 10;
-      game.purchaseResearch('parallel_2');
+      game.getState().researchPoints.set(TierType.Hamlet, 100);
+      game.purchaseResearch('hamlet_parallel_2');
 
       // Complete the settlements
       const settlements = game.getState().settlements.filter((s) => s.tier === TierType.Hamlet);
@@ -143,52 +143,21 @@ describe('GameStateManager', () => {
 
   describe('Research system', () => {
     it('should purchase research when player has enough points', () => {
-      // Give player enough research points by completing settlements
-      (game as any).currency = 100000; // Much more money for escalating costs
-
-      // Purchase parallel slots to get multiple settlements
-      (game as any).state.researchPoints = 50;
-      game.purchaseResearch('parallel_6'); // Get 6 parallel slots
-
-      // Complete settlements to get research points
-      let completedCount = 0;
-      const targetCompletions = 3;
-
-      while (completedCount < targetCompletions) {
-        const settlements = game.getState().settlements.filter((s) => s.tier === TierType.Hamlet);
-        for (const settlement of settlements) {
-          if (completedCount >= targetCompletions) break;
-
-          for (let j = 0; j < 10; j++) {
-            if (!game.buyBuilding(settlement.id, 'hamlet_hut')) break;
-          }
-
-          // Check if it completed (will be removed from settlements list)
-          if (!game.getState().settlements.find((s) => s.id === settlement.id)) {
-            completedCount++;
-          }
-        }
-      }
-
-      // Test that we get at least some research points from completed settlements
-      expect(game.getState().researchPoints).toBeGreaterThanOrEqual(1);
+      // Give player enough hamlet research points
+      game.getState().researchPoints.set(TierType.Hamlet, 100);
 
       // Test that we can purchase research when we have enough points
-      const initialPoints = game.getState().researchPoints;
-      const success = game.purchaseResearch('autobuy_unlock');
+      const initialPoints = game.getResearchPoints(TierType.Hamlet);
+      const success = game.purchaseResearch('hamlet_autobuy_unlock');
 
-      if (initialPoints >= 32) {
-        expect(success).toBe(true);
-        expect(game.getState().researchPoints).toBe(initialPoints - 32);
-      } else {
-        expect(success).toBe(false);
-      }
+      expect(success).toBe(true);
+      expect(game.getResearchPoints(TierType.Hamlet)).toBe(initialPoints - 100);
     });
 
     it('should not purchase research without enough points', () => {
-      const success = game.purchaseResearch('autobuy_unlock');
+      const success = game.purchaseResearch('hamlet_autobuy_unlock');
       expect(success).toBe(false);
-      expect(game.getState().researchPoints).toBe(0);
+      expect(game.getResearchPoints(TierType.Hamlet)).toBe(0);
     });
   });
 

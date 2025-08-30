@@ -16,7 +16,7 @@ export class GameStateManager {
   private initializeState(): GameState {
     return {
       settlements: [],
-      researchPoints: 0,
+      researchPoints: new Map([[TierType.Hamlet, 0]]),
       unlockedTiers: new Set([TierType.Hamlet]),
       completedSettlements: new Map(),
       research: RESEARCH_DATA.map((r) => ({ ...r, purchased: false })),
@@ -37,6 +37,10 @@ export class GameStateManager {
 
   public getTotalIncome(): number {
     return this.state.settlements.reduce((total, settlement) => total + settlement.totalIncome, 0);
+  }
+
+  public getResearchPoints(tier: TierType): number {
+    return this.state.researchPoints.get(tier) ?? 0;
   }
 
   private spawnSettlement(tierType: TierType): Settlement | null {
@@ -93,14 +97,22 @@ export class GameStateManager {
     return Math.floor(baseCost * Math.pow(multiplier, count) * costReduction);
   }
 
-  private getResearchEffect(type: string): number {
-    const upgrades = this.state.research.filter((r) => r.purchased && r.effect.type === type);
+  private getResearchEffect(type: string, tier?: TierType): number {
+    const upgrades = this.state.research.filter(
+      (r) => r.purchased && r.effect.type === type && (tier !== undefined ? r.tier === tier : true),
+    );
+
     if (type === 'cost_reduction') {
       return upgrades.reduce((mult, upgrade) => mult * upgrade.effect.value, 1);
     }
     if (type === 'parallel_slots') {
-      // Return the highest parallel slots research (they don't stack)
-      return upgrades.reduce((max, upgrade) => Math.max(max, upgrade.effect.value), 1);
+      if (tier !== undefined) {
+        // Return the highest parallel slots research for this tier
+        return upgrades.reduce((max, upgrade) => Math.max(max, upgrade.effect.value), 1);
+      } else {
+        // Return the highest across all tiers for general parallel slots
+        return upgrades.reduce((max, upgrade) => Math.max(max, upgrade.effect.value), 1);
+      }
     }
     return upgrades.reduce((sum, upgrade) => sum + upgrade.effect.value, 0);
   }
@@ -111,7 +123,10 @@ export class GameStateManager {
 
     if (settlement.totalIncome >= tierDef.completionThreshold) {
       settlement.isComplete = true;
-      this.state.researchPoints += 1;
+
+      // Award 10 research points for the completed tier
+      const currentPoints = this.state.researchPoints.get(settlement.tier) ?? 0;
+      this.state.researchPoints.set(settlement.tier, currentPoints + 10);
 
       const completedCount = (this.state.completedSettlements.get(settlement.tier) ?? 0) + 1;
       this.state.completedSettlements.set(settlement.tier, completedCount);
@@ -136,18 +151,23 @@ export class GameStateManager {
       if (tierIndex !== -1 && tierIndex < TIER_DATA.length - 1) {
         const nextTier = TIER_DATA[tierIndex + 1];
         this.state.unlockedTiers.add(nextTier.type);
+
+        // Initialize research points for the new tier
+        if (!this.state.researchPoints.has(nextTier.type)) {
+          this.state.researchPoints.set(nextTier.type, 0);
+        }
+
         // The autospawn will handle creating the settlement
       }
     }
   }
 
   private autospawnSettlements(): void {
-    const maxSlots = this.getResearchEffect('parallel_slots');
-
     // For each tier, check if we need to spawn settlements
     for (const tierDef of TIER_DATA) {
       if (!this.state.unlockedTiers.has(tierDef.type)) continue;
 
+      const maxSlots = this.getResearchEffect('parallel_slots', tierDef.type);
       const currentCount = this.state.settlements.filter((s) => s.tier === tierDef.type).length;
       const slotsNeeded = maxSlots - currentCount;
 
@@ -159,14 +179,27 @@ export class GameStateManager {
 
   public purchaseResearch(researchId: string): boolean {
     const research = this.state.research.find((r) => r.id === researchId);
-    if (!research || research.purchased || this.state.researchPoints < research.cost) {
-      return false;
+    if (!research || research.purchased) return false;
+
+    // Check if tier is unlocked
+    if (!this.state.unlockedTiers.has(research.tier)) return false;
+
+    // Check if player has enough research points for this tier
+    const tierPoints = this.state.researchPoints.get(research.tier) ?? 0;
+    if (tierPoints < research.cost) return false;
+
+    // Check prerequisites
+    if (research.prerequisite !== undefined && research.prerequisite !== '') {
+      const prereq = this.state.research.find((r) => r.id === research.prerequisite);
+      if (!prereq || !prereq.purchased) return false;
     }
 
-    this.state.researchPoints -= research.cost;
+    // Purchase the research
+    this.state.researchPoints.set(research.tier, tierPoints - research.cost);
     research.purchased = true;
 
-    if (research.id === 'autobuy_unlock') {
+    // Handle special research effects
+    if (research.id.includes('autobuy_unlock')) {
       this.state.settings.autobuyEnabled = true;
     }
 

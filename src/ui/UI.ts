@@ -16,7 +16,6 @@ export class UI {
 
   public render(): void {
     this.isInitialized = true;
-    const state = this.game.getState();
 
     this.container.innerHTML = `
       <div class="game-container">
@@ -32,8 +31,8 @@ export class UI {
               <span class="stat-value" id="income">${formatIncome(this.game.getTotalIncome())}</span>
             </div>
             <div class="stat">
-              <span class="stat-label">Research:</span>
-              <span class="stat-value" id="research">${state.researchPoints}</span>
+              <span class="stat-label">${this.selectedTier.charAt(0).toUpperCase() + this.selectedTier.slice(1)} Research:</span>
+              <span class="stat-value" id="research">${this.game.getResearchPoints(this.selectedTier)}</span>
             </div>
           </div>
         </header>
@@ -56,7 +55,7 @@ export class UI {
           </main>
           
           <aside class="research-panel">
-            <h3>Research</h3>
+            <h3>${this.selectedTier.charAt(0).toUpperCase() + this.selectedTier.slice(1)} Research</h3>
             ${this.renderResearch()}
           </aside>
         </div>
@@ -153,12 +152,23 @@ export class UI {
 
   private renderResearch(): string {
     const state = this.game.getState();
+    const tierResearchPoints = this.game.getResearchPoints(this.selectedTier);
+
+    // Filter research for current tier
+    const tierResearch = state.research.filter((r) => r.tier === this.selectedTier);
+
+    // Filter out research that doesn't meet prerequisites
+    const availableResearch = tierResearch.filter((research) => {
+      if (research.prerequisite === undefined || research.prerequisite === '') return true;
+      const prereq = state.research.find((r) => r.id === research.prerequisite);
+      return prereq !== undefined && prereq.purchased;
+    });
 
     return `
       <div class="research-list">
-        ${state.research
+        ${availableResearch
           .map((research) => {
-            const canAfford = state.researchPoints >= research.cost;
+            const canAfford = tierResearchPoints >= research.cost;
 
             return `
             <div class="research-item ${research.purchased ? 'purchased' : ''}">
@@ -227,7 +237,7 @@ export class UI {
       incomeEl.textContent = formatIncome(this.game.getTotalIncome());
     }
     if (researchEl) {
-      researchEl.textContent = state.researchPoints.toString();
+      researchEl.textContent = this.game.getResearchPoints(this.selectedTier).toString();
     }
 
     // Update buy button states

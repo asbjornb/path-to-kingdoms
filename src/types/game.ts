@@ -39,16 +39,18 @@ export interface ResearchUpgrade {
   name: string;
   description: string;
   cost: number;
+  tier: TierType;
   effect: {
     type: 'autobuy_speed' | 'bulk_buy' | 'cost_reduction' | 'parallel_slots';
     value: number;
   };
   purchased: boolean;
+  prerequisite?: string; // ID of research that must be purchased first
 }
 
 export interface GameState {
   settlements: Settlement[];
-  researchPoints: number;
+  researchPoints: Map<TierType, number>; // Tier-specific research points
   unlockedTiers: Set<TierType>;
   completedSettlements: Map<TierType, number>;
   research: ResearchUpgrade[];

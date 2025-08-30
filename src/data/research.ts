@@ -1,11 +1,13 @@
-import { ResearchUpgrade } from '../types/game';
+import { ResearchUpgrade, TierType } from '../types/game';
 
 export const RESEARCH_DATA: ResearchUpgrade[] = [
+  // Hamlet Research
   {
-    id: 'parallel_2',
-    name: 'Dual Management',
-    description: 'Run 2 settlements in parallel',
-    cost: 1,
+    id: 'hamlet_parallel_2',
+    name: 'Dual Hamlet Management',
+    description: 'Run 2 hamlets in parallel',
+    cost: 50,
+    tier: TierType.Hamlet,
     effect: {
       type: 'parallel_slots',
       value: 2,
@@ -13,10 +15,12 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     purchased: false,
   },
   {
-    id: 'parallel_3',
-    name: 'Triple Management',
-    description: 'Run 3 settlements in parallel',
-    cost: 2,
+    id: 'hamlet_parallel_3',
+    name: 'Triple Hamlet Management',
+    description: 'Run 3 hamlets in parallel',
+    cost: 200,
+    tier: TierType.Hamlet,
+    prerequisite: 'hamlet_parallel_2',
     effect: {
       type: 'parallel_slots',
       value: 3,
@@ -24,10 +28,12 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     purchased: false,
   },
   {
-    id: 'parallel_4',
-    name: 'Quad Management',
-    description: 'Run 4 settlements in parallel',
-    cost: 4,
+    id: 'hamlet_parallel_4',
+    name: 'Quad Hamlet Management',
+    description: 'Run 4 hamlets in parallel',
+    cost: 800,
+    tier: TierType.Hamlet,
+    prerequisite: 'hamlet_parallel_3',
     effect: {
       type: 'parallel_slots',
       value: 4,
@@ -35,10 +41,12 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     purchased: false,
   },
   {
-    id: 'parallel_5',
-    name: 'Penta Management',
-    description: 'Run 5 settlements in parallel',
-    cost: 8,
+    id: 'hamlet_parallel_5',
+    name: 'Penta Hamlet Management',
+    description: 'Run 5 hamlets in parallel',
+    cost: 3200,
+    tier: TierType.Hamlet,
+    prerequisite: 'hamlet_parallel_4',
     effect: {
       type: 'parallel_slots',
       value: 5,
@@ -46,10 +54,12 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     purchased: false,
   },
   {
-    id: 'parallel_6',
-    name: 'Hexa Management',
-    description: 'Run 6 settlements in parallel',
-    cost: 16,
+    id: 'hamlet_parallel_6',
+    name: 'Hexa Hamlet Management',
+    description: 'Run 6 hamlets in parallel',
+    cost: 12800,
+    tier: TierType.Hamlet,
+    prerequisite: 'hamlet_parallel_5',
     effect: {
       type: 'parallel_slots',
       value: 6,
@@ -57,14 +67,58 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     purchased: false,
   },
   {
-    id: 'autobuy_unlock',
-    name: 'Automated Purchasing',
-    description: 'Enables automatic building purchases',
-    cost: 32,
+    id: 'hamlet_autobuy_unlock',
+    name: 'Hamlet Automated Purchasing',
+    description: 'Enables automatic building purchases for hamlets',
+    cost: 100,
+    tier: TierType.Hamlet,
     effect: {
       type: 'autobuy_speed',
       value: 1,
     },
     purchased: false,
   },
+
+  // Village Research (unlocked when villages are unlocked)
+  {
+    id: 'village_parallel_2',
+    name: 'Dual Village Management',
+    description: 'Run 2 villages in parallel',
+    cost: 50,
+    tier: TierType.Village,
+    effect: {
+      type: 'parallel_slots',
+      value: 2,
+    },
+    purchased: false,
+  },
+  {
+    id: 'village_parallel_3',
+    name: 'Triple Village Management',
+    description: 'Run 3 villages in parallel',
+    cost: 200,
+    tier: TierType.Village,
+    prerequisite: 'village_parallel_2',
+    effect: {
+      type: 'parallel_slots',
+      value: 3,
+    },
+    purchased: false,
+  },
+  // More village research can be added later...
+
+  // Town Research (unlocked when towns are unlocked)
+  {
+    id: 'town_parallel_2',
+    name: 'Dual Town Management',
+    description: 'Run 2 towns in parallel',
+    cost: 50,
+    tier: TierType.Town,
+    effect: {
+      type: 'parallel_slots',
+      value: 2,
+    },
+    purchased: false,
+  },
+  // More tiers can be added later...
 ];
