@@ -41,6 +41,13 @@ export class UI {
                 <span class="dev-mode-label">Dev Mode (1000x income)</span>
               </label>
             </div>
+            <div class="save-controls">
+              <button onclick="window.saveGame()" class="save-btn">Save</button>
+              <button onclick="window.deleteSave()" class="save-btn danger">Reset</button>
+              <button onclick="window.exportSave()" class="save-btn">Export</button>
+              <input type="file" id="import-file" style="display: none;" accept=".json" onchange="window.importSave(event)">
+              <button onclick="document.getElementById('import-file').click()" class="save-btn">Import</button>
+            </div>
           </div>
         </header>
         

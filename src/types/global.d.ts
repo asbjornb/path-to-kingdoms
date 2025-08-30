@@ -7,6 +7,10 @@ declare global {
     purchaseResearch: (researchId: string) => void;
     toggleDevMode: () => void;
     toggleShowCompletedResearch: () => void;
+    saveGame: () => void;
+    deleteSave: () => void;
+    exportSave: () => void;
+    importSave: (event: Event) => void;
   }
 }
 

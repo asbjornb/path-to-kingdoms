@@ -1,4 +1,4 @@
-import { GameState, Settlement, TierType, GoalType } from '../types/game';
+import { GameState, Settlement, TierType, GoalType, SaveData } from '../types/game';
 import { TIER_DATA, getTierByType } from '../data/tiers';
 import { RESEARCH_DATA } from '../data/research';
 import { GoalGenerator } from '../data/goals';
@@ -45,10 +45,21 @@ function createSettlement(tierType: TierType, gameState?: GameState): Settlement
 export class GameStateManager {
   private state: GameState;
   private lastUpdate: number = Date.now();
+  private readonly GAME_VERSION = '0.1.0';
+  private readonly SAVE_KEY = 'path-to-kingdoms-save';
+  private autoSaveInterval: number | null = null;
 
   constructor() {
+    // Initialize state first
     this.state = this.initializeState();
-    this.autospawnSettlements();
+
+    // Try to load existing save, otherwise use the initialized state
+    if (!this.loadGame()) {
+      this.autospawnSettlements();
+    }
+
+    // Start auto-save every 30 seconds
+    this.startAutoSave();
   }
 
   private initializeState(): GameState {
@@ -465,5 +476,102 @@ export class GameStateManager {
   // For testing - manually trigger autospawn
   public triggerAutospawn(): void {
     this.autospawnSettlements();
+  }
+
+  private startAutoSave(): void {
+    // Save every 30 seconds
+    this.autoSaveInterval = window.setInterval(() => {
+      this.saveGame();
+    }, 30000);
+  }
+
+  public stopAutoSave(): void {
+    if (this.autoSaveInterval !== null) {
+      clearInterval(this.autoSaveInterval);
+      this.autoSaveInterval = null;
+    }
+  }
+
+  public saveGame(): boolean {
+    try {
+      const saveData: SaveData = {
+        version: this.GAME_VERSION,
+        timestamp: Date.now(),
+        gameState: {
+          settlements: this.state.settlements,
+          researchPoints: Array.from(this.state.researchPoints.entries()),
+          unlockedTiers: Array.from(this.state.unlockedTiers),
+          completedSettlements: Array.from(this.state.completedSettlements.entries()),
+          research: this.state.research,
+          autoBuildingTimers: Array.from(this.state.autoBuildingTimers.entries()),
+          settings: this.state.settings,
+        },
+      };
+
+      localStorage.setItem(this.SAVE_KEY, JSON.stringify(saveData));
+      console.warn('Game saved successfully');
+      return true;
+    } catch (error) {
+      console.error('Failed to save game:', error);
+      return false;
+    }
+  }
+
+  public loadGame(): boolean {
+    try {
+      const saveString = localStorage.getItem(this.SAVE_KEY);
+      if (saveString === null || saveString === '') {
+        console.warn('No save data found');
+        return false;
+      }
+
+      const saveData = JSON.parse(saveString) as SaveData;
+
+      // Check version compatibility
+      if (saveData.version !== this.GAME_VERSION) {
+        console.warn(`Save version mismatch: ${saveData.version} vs ${this.GAME_VERSION}`);
+        // For now, we'll try to load anyway, but in the future we could add migration logic here
+      }
+
+      // Reconstruct the state from serialized data
+      this.state = {
+        settlements: saveData.gameState.settlements,
+        researchPoints: new Map(saveData.gameState.researchPoints),
+        unlockedTiers: new Set(saveData.gameState.unlockedTiers),
+        completedSettlements: new Map(saveData.gameState.completedSettlements),
+        research: saveData.gameState.research,
+        autoBuildingTimers: new Map(saveData.gameState.autoBuildingTimers),
+        settings: saveData.gameState.settings,
+      };
+
+      console.warn(
+        `Game loaded successfully from ${new Date(saveData.timestamp).toLocaleString()}`,
+      );
+      return true;
+    } catch (error) {
+      console.error('Failed to load game:', error);
+      return false;
+    }
+  }
+
+  public deleteSave(): void {
+    localStorage.removeItem(this.SAVE_KEY);
+    console.warn('Save data deleted');
+  }
+
+  public exportSave(): string {
+    const saveString = localStorage.getItem(this.SAVE_KEY);
+    return saveString ?? '';
+  }
+
+  public importSave(saveString: string): boolean {
+    try {
+      JSON.parse(saveString) as SaveData;
+      localStorage.setItem(this.SAVE_KEY, saveString);
+      return this.loadGame();
+    } catch (error) {
+      console.error('Failed to import save:', error);
+      return false;
+    }
   }
 }

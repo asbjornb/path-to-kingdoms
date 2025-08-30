@@ -98,3 +98,22 @@ export interface GameState {
     showCompletedResearch: boolean;
   };
 }
+
+export interface SaveData {
+  version: string; // Game version for compatibility checking
+  timestamp: number; // When the save was created
+  gameState: {
+    settlements: Settlement[];
+    researchPoints: [TierType, number][]; // Serialized Map
+    unlockedTiers: TierType[]; // Serialized Set
+    completedSettlements: [TierType, number][]; // Serialized Map
+    research: ResearchUpgrade[];
+    autoBuildingTimers: [string, number][]; // Serialized Map
+    settings: {
+      autobuyEnabled: boolean;
+      autobuyInterval: number;
+      devModeEnabled: boolean;
+      showCompletedResearch: boolean;
+    };
+  };
+}
