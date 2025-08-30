@@ -224,7 +224,6 @@ export class UI {
     if (!this.isInitialized) return;
 
     const currentCurrency = this.game.getCurrency();
-    const state = this.game.getState();
 
     // Update the values that change frequently
     const currencyEl = document.getElementById('currency');
@@ -267,7 +266,7 @@ export class UI {
       const costText = button.textContent?.match(/\((\d+)\s+points\)/);
       if (costText && costText[1]) {
         const cost = parseInt(costText[1]);
-        const canAfford = state.researchPoints >= cost;
+        const canAfford = this.game.getResearchPoints(this.selectedTier) >= cost;
 
         if (canAfford && button.disabled === true) {
           button.disabled = false;
