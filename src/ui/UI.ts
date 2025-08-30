@@ -109,17 +109,22 @@ export class UI {
     const tierDef = getTierByType(settlement.tier);
     if (!tierDef) return '';
 
-    const progressPercent = (settlement.totalIncome / tierDef.completionThreshold) * 100;
+    const goal = settlement.goals[0]; // Single goal per settlement
+    const goalProgress = goal !== undefined ? `${this.formatGoalProgress(goal)}` : '';
 
     return `
       <div class="settlement ${settlement.isComplete ? 'complete' : ''}">
         <div class="settlement-header">
           <h4>${tierDef.name} #${settlement.id.split('_')[1].slice(-4)}</h4>
+          ${
+            goal !== undefined
+              ? `<div class="goal-display ${goal.isCompleted ? 'completed' : ''}">
+            <span class="goal-description">${goal.description}</span>
+            <span class="goal-progress">${goalProgress}</span>
+          </div>`
+              : ''
+          }
           <span class="income">${formatIncome(settlement.totalIncome)}</span>
-        </div>
-        <div class="progress-bar">
-          <div class="progress-fill" style="width: ${Math.min(progressPercent, 100)}%"></div>
-          <span class="progress-text">${formatNumber(settlement.totalIncome)} / ${formatNumber(tierDef.completionThreshold)}</span>
         </div>
         <div class="settlement-stats">
           <div class="settlement-stat">
@@ -130,25 +135,6 @@ export class UI {
             <span class="stat-label">Income:</span>
             <span class="stat-value">${formatIncome(settlement.totalIncome)}</span>
           </div>
-        </div>
-        <div class="settlement-goals">
-          <h5>Goals:</h5>
-          ${settlement.goals
-            .map((goal) => {
-              const progressPercent = Math.min((goal.currentValue / goal.targetValue) * 100, 100);
-              return `
-              <div class="goal ${goal.isCompleted ? 'completed' : ''}">
-                <div class="goal-description">${goal.description}</div>
-                <div class="goal-progress">
-                  <div class="goal-progress-bar">
-                    <div class="goal-progress-fill" style="width: ${progressPercent}%"></div>
-                  </div>
-                  <span class="goal-progress-text">${this.formatGoalProgress(goal)}</span>
-                </div>
-              </div>
-            `;
-            })
-            .join('')}
         </div>
         <div class="buildings">
           ${tierDef.buildings
@@ -303,28 +289,25 @@ export class UI {
         incomeEl.textContent = formatIncome(settlement.totalIncome);
       }
 
-      // Update goal progress
-      const goalElements = settlementEl.querySelectorAll('.goal');
-      settlement.goals.forEach((goal, goalIndex) => {
-        const goalEl = goalElements[goalIndex];
-        if (goalEl === null || goalEl === undefined) return;
+      // Update goal progress (single goal in header)
+      const goal = settlement.goals[0];
+      if (goal !== undefined) {
+        const goalDisplay = settlementEl.querySelector('.goal-display');
+        const goalProgressText = settlementEl.querySelector('.goal-progress');
 
-        const progressPercent = Math.min((goal.currentValue / goal.targetValue) * 100, 100);
-        const progressFill = goalEl.querySelector('.goal-progress-fill') as HTMLElement;
-        const progressText = goalEl.querySelector('.goal-progress-text');
-
-        if (progressFill !== null) {
-          progressFill.style.width = `${progressPercent}%`;
-        }
-        if (progressText !== null) {
-          progressText.textContent = this.formatGoalProgress(goal);
+        if (goalProgressText !== null) {
+          goalProgressText.textContent = this.formatGoalProgress(goal);
         }
 
         // Update completion status
-        if (goal.isCompleted && !goalEl.classList.contains('completed')) {
-          goalEl.classList.add('completed');
+        if (
+          goal.isCompleted &&
+          goalDisplay !== null &&
+          !goalDisplay.classList.contains('completed')
+        ) {
+          goalDisplay.classList.add('completed');
         }
-      });
+      }
 
       // Update building button states
       const buildingButtons = settlementEl.querySelectorAll('.buy-btn');

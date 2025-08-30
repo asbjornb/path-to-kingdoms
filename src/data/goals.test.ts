@@ -4,8 +4,8 @@ import { TierType, GoalType } from '../types/game';
 
 describe('GoalGenerator', () => {
   it('should generate the correct number of goals', () => {
-    const goals = GoalGenerator.generateRandomGoals(TierType.Hamlet, 3);
-    expect(goals).toHaveLength(3);
+    const goals = GoalGenerator.generateRandomGoals(TierType.Hamlet, 1);
+    expect(goals).toHaveLength(1);
   });
 
   it('should generate goals with required properties', () => {

@@ -19,7 +19,7 @@ describe('GameStateManager', () => {
       // Each hamlet should start with enough currency for first building and have goals
       const settlement = game.getState().settlements[0];
       expect(settlement.currency).toBe(10); // Cost of first building (hut)
-      expect(settlement.goals).toHaveLength(3); // Should have 3 random goals
+      expect(settlement.goals).toHaveLength(1); // Should have 1 random goal
       expect(settlement.lifetimeCurrencyEarned).toBe(0);
       expect(settlement.spawnTime).toBeGreaterThan(0);
     });
@@ -44,7 +44,7 @@ describe('GameStateManager', () => {
       expect(settlement?.buildings.get('hamlet_library')).toBe(0);
 
       // Should have goals
-      expect(settlement?.goals).toHaveLength(3);
+      expect(settlement?.goals).toHaveLength(1);
     });
 
     it('should spawn more settlements when parallel research is purchased', () => {
@@ -243,7 +243,7 @@ describe('GameStateManager', () => {
     it('should generate random goals for each settlement', () => {
       const settlement = game.getState().settlements[0];
 
-      expect(settlement.goals).toHaveLength(3);
+      expect(settlement.goals).toHaveLength(1);
       settlement.goals.forEach((goal) => {
         expect(goal.id).toBeDefined();
         expect(goal.type).toBeDefined();

@@ -55,7 +55,7 @@ export class GameStateManager {
       buildings: new Map(),
       lifetimeCurrencyEarned: 0,
       spawnTime: now,
-      goals: GoalGenerator.generateRandomGoals(tierType, 3),
+      goals: GoalGenerator.generateRandomGoals(tierType, 1),
     };
 
     tierDef.buildings.forEach((building) => {
