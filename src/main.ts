@@ -16,9 +16,7 @@ function initGame(): void {
 
   // Set up global functions for UI interactions
   window.spawnSettlement = (tierType: TierType): void => {
-    console.log('Spawning settlement:', tierType);
-    const settlement = game.spawnSettlement(tierType);
-    console.log('Spawned:', settlement);
+    game.spawnSettlement(tierType);
     ui.render();
   };
 
@@ -47,9 +45,6 @@ function initGame(): void {
 
   // Initial render
   ui.render();
-
-  // Debug: Check if functions are properly set
-  console.log('spawnSettlement function:', window.spawnSettlement);
 }
 
 document.addEventListener('DOMContentLoaded', initGame);
