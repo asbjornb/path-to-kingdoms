@@ -441,4 +441,271 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     },
     purchased: false,
   },
+
+  // ===== VILLAGE RESEARCH =====
+
+  // Village Parallel Slots
+  {
+    id: 'village_parallel_2',
+    name: 'Dual Village Management',
+    description: 'Run 2 villages in parallel',
+    cost: 100,
+    tier: TierType.Village,
+    effect: {
+      type: 'parallel_slots',
+      value: 2,
+    },
+    purchased: false,
+  },
+  {
+    id: 'village_parallel_3',
+    name: 'Triple Village Management',
+    description: 'Run 3 villages in parallel',
+    cost: 400,
+    tier: TierType.Village,
+    prerequisite: 'village_parallel_2',
+    effect: {
+      type: 'parallel_slots',
+      value: 3,
+    },
+    purchased: false,
+  },
+
+  // Village Starting Income
+  {
+    id: 'village_starting_income_1',
+    name: 'Village Foundation Funds',
+    description: '+50 starting income for new villages',
+    cost: 50,
+    tier: TierType.Village,
+    effect: {
+      type: 'starting_income',
+      value: 50,
+    },
+    purchased: false,
+  },
+  {
+    id: 'village_starting_income_2',
+    name: 'Enhanced Village Resources',
+    description: '+150 starting income for new villages',
+    cost: 150,
+    tier: TierType.Village,
+    prerequisite: 'village_starting_income_1',
+    effect: {
+      type: 'starting_income',
+      value: 150,
+    },
+    purchased: false,
+  },
+
+  // Village Cost Reduction
+  {
+    id: 'village_cost_reduction_1',
+    name: 'Village Construction Efficiency',
+    description: 'Reduces all village building costs by 8%',
+    cost: 100,
+    tier: TierType.Village,
+    effect: {
+      type: 'cost_reduction',
+      value: 0.92,
+    },
+    purchased: false,
+  },
+  {
+    id: 'village_cost_reduction_2',
+    name: 'Advanced Village Engineering',
+    description: 'Reduces all village building costs by 16%',
+    cost: 300,
+    tier: TierType.Village,
+    prerequisite: 'village_cost_reduction_1',
+    effect: {
+      type: 'cost_reduction',
+      value: 0.84,
+    },
+    purchased: false,
+  },
+
+  // Village Automation (Basic buildings only)
+  {
+    id: 'village_auto_cottage_1',
+    name: 'Automated Cottage Construction',
+    description: 'Automatically buys 1 cottage every 45 seconds',
+    cost: 75,
+    tier: TierType.Village,
+    effect: {
+      type: 'auto_building',
+      buildingId: 'village_cottage',
+      interval: 45000,
+    },
+    purchased: false,
+  },
+  {
+    id: 'village_auto_farm_1',
+    name: 'Automated Farm Development',
+    description: 'Automatically buys 1 farm every 90 seconds',
+    cost: 150,
+    tier: TierType.Village,
+    prerequisite: 'village_auto_cottage_1',
+    effect: {
+      type: 'auto_building',
+      buildingId: 'village_farm',
+      interval: 90000,
+    },
+    purchased: false,
+  },
+
+  // ===== TOWN RESEARCH =====
+
+  // Town Parallel Slots
+  {
+    id: 'town_parallel_2',
+    name: 'Dual Town Administration',
+    description: 'Run 2 towns in parallel',
+    cost: 200,
+    tier: TierType.Town,
+    effect: {
+      type: 'parallel_slots',
+      value: 2,
+    },
+    purchased: false,
+  },
+  {
+    id: 'town_parallel_3',
+    name: 'Triple Town Administration',
+    description: 'Run 3 towns in parallel',
+    cost: 800,
+    tier: TierType.Town,
+    prerequisite: 'town_parallel_2',
+    effect: {
+      type: 'parallel_slots',
+      value: 3,
+    },
+    purchased: false,
+  },
+
+  // Town Starting Income
+  {
+    id: 'town_starting_income_1',
+    name: 'Town Development Fund',
+    description: '+500 starting income for new towns',
+    cost: 150,
+    tier: TierType.Town,
+    effect: {
+      type: 'starting_income',
+      value: 500,
+    },
+    purchased: false,
+  },
+  {
+    id: 'town_starting_income_2',
+    name: 'Major Town Investment',
+    description: '+1500 starting income for new towns',
+    cost: 450,
+    tier: TierType.Town,
+    prerequisite: 'town_starting_income_1',
+    effect: {
+      type: 'starting_income',
+      value: 1500,
+    },
+    purchased: false,
+  },
+
+  // Town Cost Reduction
+  {
+    id: 'town_cost_reduction_1',
+    name: 'Town Planning Expertise',
+    description: 'Reduces all town building costs by 10%',
+    cost: 250,
+    tier: TierType.Town,
+    effect: {
+      type: 'cost_reduction',
+      value: 0.9,
+    },
+    purchased: false,
+  },
+  {
+    id: 'town_cost_reduction_2',
+    name: 'Master Town Engineering',
+    description: 'Reduces all town building costs by 20%',
+    cost: 750,
+    tier: TierType.Town,
+    prerequisite: 'town_cost_reduction_1',
+    effect: {
+      type: 'cost_reduction',
+      value: 0.8,
+    },
+    purchased: false,
+  },
+
+  // Town Cost Scaling Reduction
+  {
+    id: 'town_scaling_reduction_1',
+    name: 'Town Mass Production',
+    description: 'Reduces town building cost scaling',
+    cost: 300,
+    tier: TierType.Town,
+    effect: {
+      type: 'cost_scaling_reduction',
+      value: 0.03,
+    },
+    purchased: false,
+  },
+
+  // ===== CITY RESEARCH =====
+
+  // City Parallel Slots
+  {
+    id: 'city_parallel_2',
+    name: 'Dual City Governance',
+    description: 'Run 2 cities in parallel',
+    cost: 500,
+    tier: TierType.City,
+    effect: {
+      type: 'parallel_slots',
+      value: 2,
+    },
+    purchased: false,
+  },
+
+  // City Starting Income
+  {
+    id: 'city_starting_income_1',
+    name: 'City Development Grant',
+    description: '+5000 starting income for new cities',
+    cost: 400,
+    tier: TierType.City,
+    effect: {
+      type: 'starting_income',
+      value: 5000,
+    },
+    purchased: false,
+  },
+
+  // City Cost Reduction
+  {
+    id: 'city_cost_reduction_1',
+    name: 'Metropolitan Efficiency',
+    description: 'Reduces all city building costs by 12%',
+    cost: 600,
+    tier: TierType.City,
+    effect: {
+      type: 'cost_reduction',
+      value: 0.88,
+    },
+    purchased: false,
+  },
+
+  // City Cost Scaling Reduction
+  {
+    id: 'city_scaling_reduction_1',
+    name: 'Urban Industrial Complex',
+    description: 'Reduces city building cost scaling',
+    cost: 800,
+    tier: TierType.City,
+    effect: {
+      type: 'cost_scaling_reduction',
+      value: 0.04,
+    },
+    purchased: false,
+  },
 ];
