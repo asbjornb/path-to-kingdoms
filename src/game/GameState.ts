@@ -1,6 +1,7 @@
-import { GameState, Settlement, TierType } from '../types/game';
+import { GameState, Settlement, TierType, GoalType } from '../types/game';
 import { TIER_DATA, getTierByType } from '../data/tiers';
 import { RESEARCH_DATA } from '../data/research';
+import { GoalGenerator } from '../data/goals';
 
 export class GameStateManager {
   private state: GameState;
@@ -43,13 +44,17 @@ export class GameStateManager {
       return null;
     }
 
+    const now = Date.now();
     const newSettlement: Settlement = {
-      id: `${tierType}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `${tierType}_${now}_${Math.random().toString(36).substr(2, 9)}`,
       tier: tierType,
       isComplete: false,
       currency: tierDef.buildings[0]?.baseCost ?? 10,
       totalIncome: 0,
       buildings: new Map(),
+      lifetimeCurrencyEarned: 0,
+      spawnTime: now,
+      goals: GoalGenerator.generateRandomGoals(tierType, 3),
     };
 
     tierDef.buildings.forEach((building) => {
@@ -186,10 +191,13 @@ export class GameStateManager {
   }
 
   private checkSettlementCompletion(settlement: Settlement): void {
-    const tierDef = getTierByType(settlement.tier);
-    if (!tierDef || settlement.isComplete) return;
+    if (settlement.isComplete) return;
 
-    if (settlement.totalIncome >= tierDef.completionThreshold) {
+    // Check if all goals are completed
+    const allGoalsCompleted =
+      settlement.goals.length > 0 && settlement.goals.every((goal) => goal.isCompleted);
+
+    if (allGoalsCompleted) {
       settlement.isComplete = true;
 
       // Award 10 research points for the completed tier
@@ -292,7 +300,12 @@ export class GameStateManager {
 
     // Update currency for each settlement based on its income
     this.state.settlements.forEach((settlement) => {
-      settlement.currency += settlement.totalIncome * deltaTime;
+      const currencyGained = settlement.totalIncome * deltaTime;
+      settlement.currency += currencyGained;
+      settlement.lifetimeCurrencyEarned += currencyGained;
+
+      // Update goal progress
+      this.updateGoalProgress(settlement);
     });
   }
 
@@ -313,6 +326,54 @@ export class GameStateManager {
       currentCount,
       settlementId,
     );
+  }
+
+  private updateGoalProgress(settlement: Settlement): void {
+    const now = Date.now();
+
+    settlement.goals.forEach((goal) => {
+      if (goal.isCompleted) return;
+
+      let newValue = 0;
+      let completed = false;
+
+      switch (goal.type) {
+        case GoalType.ReachIncome:
+          newValue = settlement.totalIncome;
+          completed = newValue >= goal.targetValue;
+          break;
+
+        case GoalType.AccumulateCurrency:
+          newValue = settlement.lifetimeCurrencyEarned;
+          completed = newValue >= goal.targetValue;
+          break;
+
+        case GoalType.CurrentCurrency:
+          newValue = settlement.currency;
+          completed = newValue >= goal.targetValue;
+          break;
+
+        case GoalType.BuildingCount:
+          if (goal.buildingId !== undefined && goal.buildingId !== '') {
+            newValue = settlement.buildings.get(goal.buildingId) ?? 0;
+            completed = newValue >= goal.targetValue;
+          }
+          break;
+
+        case GoalType.Survival:
+          newValue = Math.floor((now - settlement.spawnTime) / 1000); // seconds
+          completed = newValue >= goal.targetValue;
+          break;
+      }
+
+      goal.currentValue = newValue;
+      if (completed && !goal.isCompleted) {
+        goal.isCompleted = true;
+      }
+    });
+
+    // Check if all goals are completed after updating all goals
+    this.checkSettlementCompletion(settlement);
   }
 
   // For testing - manually trigger autospawn

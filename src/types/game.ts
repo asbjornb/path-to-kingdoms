@@ -31,6 +31,24 @@ export interface TierDefinition {
   buildings: Building[];
 }
 
+export enum GoalType {
+  ReachIncome = 'reach_income',
+  AccumulateCurrency = 'accumulate_currency',
+  BuildingCount = 'building_count',
+  CurrentCurrency = 'current_currency',
+  Survival = 'survival',
+}
+
+export interface Goal {
+  id: string;
+  type: GoalType;
+  description: string;
+  targetValue: number;
+  currentValue: number;
+  isCompleted: boolean;
+  buildingId?: string; // For building count goals
+}
+
 export interface Settlement {
   id: string;
   tier: TierType;
@@ -38,6 +56,9 @@ export interface Settlement {
   currency: number;
   totalIncome: number;
   buildings: Map<string, number>;
+  lifetimeCurrencyEarned: number;
+  spawnTime: number;
+  goals: Goal[];
 }
 
 export interface ResearchUpgrade {

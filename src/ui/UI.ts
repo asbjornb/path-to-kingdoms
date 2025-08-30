@@ -1,5 +1,5 @@
 import { GameStateManager } from '../game/GameState';
-import { TierType, Settlement } from '../types/game';
+import { TierType, Settlement, Goal, GoalType } from '../types/game';
 import { TIER_DATA, getTierByType } from '../data/tiers';
 import { formatNumber, formatIncome } from '../utils/format';
 
@@ -120,6 +120,25 @@ export class UI {
             <span class="stat-value">${formatIncome(settlement.totalIncome)}</span>
           </div>
         </div>
+        <div class="settlement-goals">
+          <h5>Goals:</h5>
+          ${settlement.goals
+            .map((goal) => {
+              const progressPercent = Math.min((goal.currentValue / goal.targetValue) * 100, 100);
+              return `
+              <div class="goal ${goal.isCompleted ? 'completed' : ''}">
+                <div class="goal-description">${goal.description}</div>
+                <div class="goal-progress">
+                  <div class="goal-progress-bar">
+                    <div class="goal-progress-fill" style="width: ${progressPercent}%"></div>
+                  </div>
+                  <span class="goal-progress-text">${this.formatGoalProgress(goal)}</span>
+                </div>
+              </div>
+            `;
+            })
+            .join('')}
+        </div>
         <div class="buildings">
           ${tierDef.buildings
             .map((building) => {
@@ -220,6 +239,16 @@ export class UI {
         <span class="tier-progress-text">${progressToNext} / 6</span>
       </div>
     `;
+  }
+
+  private formatGoalProgress(goal: Goal): string {
+    if (goal.type === GoalType.Survival) {
+      const currentMinutes = Math.floor(goal.currentValue / 60);
+      const targetMinutes = Math.floor(goal.targetValue / 60);
+      return `${currentMinutes}/${targetMinutes} min`;
+    }
+
+    return `${formatNumber(goal.currentValue)}/${formatNumber(goal.targetValue)}`;
   }
 
   public update(): void {
