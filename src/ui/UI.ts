@@ -23,14 +23,6 @@ export class UI {
           <h1>Path to Kingdoms</h1>
           <div class="stats">
             <div class="stat">
-              <span class="stat-label">Currency:</span>
-              <span class="stat-value" id="currency">${formatNumber(this.game.getCurrency())}</span>
-            </div>
-            <div class="stat">
-              <span class="stat-label">Income:</span>
-              <span class="stat-value" id="income">${formatIncome(this.game.getTotalIncome())}</span>
-            </div>
-            <div class="stat">
               <span class="stat-label">${this.selectedTier.charAt(0).toUpperCase() + this.selectedTier.slice(1)} Research:</span>
               <span class="stat-value" id="research">${this.game.getResearchPoints(this.selectedTier)}</span>
             </div>
@@ -118,12 +110,22 @@ export class UI {
           <div class="progress-fill" style="width: ${Math.min(progressPercent, 100)}%"></div>
           <span class="progress-text">${formatNumber(settlement.totalIncome)} / ${formatNumber(tierDef.completionThreshold)}</span>
         </div>
+        <div class="settlement-stats">
+          <div class="settlement-stat">
+            <span class="stat-label">Currency:</span>
+            <span class="stat-value">${formatNumber(settlement.currency)}</span>
+          </div>
+          <div class="settlement-stat">
+            <span class="stat-label">Income:</span>
+            <span class="stat-value">${formatIncome(settlement.totalIncome)}</span>
+          </div>
+        </div>
         <div class="buildings">
           ${tierDef.buildings
             .map((building) => {
               const count = settlement.buildings.get(building.id) ?? 0;
               const cost = this.game.getBuildingCost(settlement.id, building.id) ?? 0;
-              const canAfford = this.game.getCurrency() >= cost;
+              const canAfford = settlement.currency >= cost;
 
               return `
               <div class="building">
@@ -223,59 +225,7 @@ export class UI {
   public update(): void {
     if (!this.isInitialized) return;
 
-    const currentCurrency = this.game.getCurrency();
-
-    // Update the values that change frequently
-    const currencyEl = document.getElementById('currency');
-    const incomeEl = document.getElementById('income');
-    const researchEl = document.getElementById('research');
-
-    if (currencyEl) {
-      currencyEl.textContent = formatNumber(currentCurrency);
-    }
-    if (incomeEl) {
-      incomeEl.textContent = formatIncome(this.game.getTotalIncome());
-    }
-    if (researchEl) {
-      researchEl.textContent = this.game.getResearchPoints(this.selectedTier).toString();
-    }
-
-    // Update buy button states
-    const buyButtons = document.querySelectorAll('.buy-btn');
-    buyButtons.forEach((button) => {
-      if (!(button instanceof HTMLButtonElement)) return;
-      const costAttr = button.getAttribute('data-cost');
-      if (costAttr === null || costAttr === '') return;
-
-      const cost = parseFloat(costAttr);
-      const canAfford = currentCurrency >= cost;
-
-      if (canAfford && button.disabled === true) {
-        button.disabled = false;
-        button.classList.remove('disabled');
-      } else if (!canAfford && button.disabled === false) {
-        button.disabled = true;
-        button.classList.add('disabled');
-      }
-    });
-
-    // Update research button states
-    const researchButtons = document.querySelectorAll('.research-btn');
-    researchButtons.forEach((button) => {
-      if (!(button instanceof HTMLButtonElement)) return;
-      const costText = button.textContent?.match(/\((\d+)\s+points\)/);
-      if (costText && costText[1]) {
-        const cost = parseInt(costText[1]);
-        const canAfford = this.game.getResearchPoints(this.selectedTier) >= cost;
-
-        if (canAfford && button.disabled === true) {
-          button.disabled = false;
-          button.classList.remove('disabled');
-        } else if (!canAfford && button.disabled === false) {
-          button.disabled = true;
-          button.classList.add('disabled');
-        }
-      }
-    });
+    // Just re-render the entire UI since currency/income are now per-settlement
+    this.render();
   }
 }

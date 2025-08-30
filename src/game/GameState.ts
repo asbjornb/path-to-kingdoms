@@ -4,12 +4,10 @@ import { RESEARCH_DATA } from '../data/research';
 
 export class GameStateManager {
   private state: GameState;
-  private currency: number = 0;
   private lastUpdate: number = Date.now();
 
   constructor() {
     this.state = this.initializeState();
-    this.currency = 100; // Starting currency
     this.autospawnSettlements();
   }
 
@@ -31,10 +29,6 @@ export class GameStateManager {
     return this.state;
   }
 
-  public getCurrency(): number {
-    return this.currency;
-  }
-
   public getTotalIncome(): number {
     return this.state.settlements.reduce((total, settlement) => total + settlement.totalIncome, 0);
   }
@@ -53,6 +47,7 @@ export class GameStateManager {
       id: `${tierType}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       tier: tierType,
       isComplete: false,
+      currency: tierDef.buildings[0]?.baseCost ?? 10,
       totalIncome: 0,
       buildings: new Map(),
     };
@@ -83,9 +78,9 @@ export class GameStateManager {
       settlementId,
     );
 
-    if (this.currency < cost) return false;
+    if (settlement.currency < cost) return false;
 
-    this.currency -= cost;
+    settlement.currency -= cost;
     settlement.buildings.set(buildingId, currentCount + 1);
 
     // Recalculate total income for the settlement (accounts for building effects)
@@ -295,8 +290,10 @@ export class GameStateManager {
     const deltaTime = (now - this.lastUpdate) / 1000;
     this.lastUpdate = now;
 
-    const income = this.getTotalIncome();
-    this.currency += income * deltaTime;
+    // Update currency for each settlement based on its income
+    this.state.settlements.forEach((settlement) => {
+      settlement.currency += settlement.totalIncome * deltaTime;
+    });
   }
 
   public getBuildingCost(settlementId: string, buildingId: string): number | null {

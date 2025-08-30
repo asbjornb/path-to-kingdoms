@@ -35,6 +35,7 @@ export interface Settlement {
   id: string;
   tier: TierType;
   isComplete: boolean;
+  currency: number;
   totalIncome: number;
   buildings: Map<string, number>;
 }

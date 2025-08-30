@@ -30,13 +30,8 @@ describe('UI', () => {
       const title = container.querySelector('h1');
       expect(title?.textContent).toBe('Path to Kingdoms');
 
-      // Check for currency and income stats
-      const currencyValue = container.querySelector('#currency');
-      const incomeValue = container.querySelector('#income');
+      // Check for research stats (currency/income are now per-settlement)
       const researchValue = container.querySelector('#research');
-
-      expect(currencyValue).toBeTruthy();
-      expect(incomeValue).toBeTruthy();
       expect(researchValue).toBeTruthy();
     });
 
@@ -120,12 +115,12 @@ describe('UI', () => {
       }).not.toThrow();
     });
 
-    it('should display current currency', () => {
+    it('should display settlement currency and income', () => {
       ui.render();
 
-      const currencyElement = container.querySelector('#currency');
-      expect(currencyElement).toBeTruthy();
-      expect(currencyElement?.textContent).toBe('100'); // Should start with 100
+      // Each settlement should show its own currency and income
+      const settlementStats = container.querySelectorAll('.settlement-stat');
+      expect(settlementStats.length).toBeGreaterThan(0);
     });
 
     it('should update research points display when tier changes', () => {
