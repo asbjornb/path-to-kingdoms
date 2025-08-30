@@ -94,5 +94,6 @@ export interface GameState {
     autobuyEnabled: boolean;
     autobuyInterval: number;
     devModeEnabled: boolean;
+    showCompletedResearch: boolean;
   };
 }

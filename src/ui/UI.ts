@@ -62,7 +62,6 @@ export class UI {
           </main>
           
           <aside class="research-panel">
-            <h3>${this.selectedTier.charAt(0).toUpperCase() + this.selectedTier.slice(1)} Research</h3>
             ${this.renderResearch()}
           </aside>
         </div>
@@ -176,18 +175,38 @@ export class UI {
   private renderResearch(): string {
     const state = this.game.getState();
     const tierResearchPoints = this.game.getResearchPoints(this.selectedTier);
+    const showCompleted = this.game.isShowCompletedResearchEnabled();
 
     // Filter research for current tier
     const tierResearch = state.research.filter((r) => r.tier === this.selectedTier);
 
     // Filter out research that doesn't meet prerequisites
-    const availableResearch = tierResearch.filter((research) => {
+    let availableResearch = tierResearch.filter((research) => {
       if (research.prerequisite === undefined || research.prerequisite === '') return true;
       const prereq = state.research.find((r) => r.id === research.prerequisite);
       return prereq !== undefined && prereq.purchased;
     });
 
+    // Filter out completed research if toggle is disabled
+    if (!showCompleted) {
+      availableResearch = availableResearch.filter((research) => !research.purchased);
+    }
+
     return `
+      <div class="research-header">
+        <h3>${this.selectedTier.charAt(0).toUpperCase() + this.selectedTier.slice(1)} Research</h3>
+        <div class="research-toggle">
+          <label>
+            <input 
+              type="checkbox" 
+              id="show-completed-research" 
+              ${showCompleted ? 'checked' : ''}
+              onchange="window.toggleShowCompletedResearch()"
+            >
+            <span class="toggle-label">Show completed</span>
+          </label>
+        </div>
+      </div>
       <div class="research-list">
         ${availableResearch
           .map((research) => {
@@ -285,6 +304,14 @@ export class UI {
     const devModeCheckbox = document.getElementById('dev-mode') as HTMLInputElement;
     if (devModeCheckbox !== null) {
       devModeCheckbox.checked = this.game.isDevModeEnabled();
+    }
+
+    // Update show completed research checkbox state
+    const showCompletedCheckbox = document.getElementById(
+      'show-completed-research',
+    ) as HTMLInputElement;
+    if (showCompletedCheckbox !== null) {
+      showCompletedCheckbox.checked = this.game.isShowCompletedResearchEnabled();
     }
 
     // Update settlement-specific values

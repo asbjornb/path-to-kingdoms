@@ -40,6 +40,11 @@ function initGame(): void {
     ui.render(); // Re-render to update checkbox state
   };
 
+  window.toggleShowCompletedResearch = (): void => {
+    game.toggleShowCompletedResearch();
+    ui.render(); // Re-render to update research list
+  };
+
   // Game loop - update stats frequently without re-rendering
   setInterval(() => {
     game.update();

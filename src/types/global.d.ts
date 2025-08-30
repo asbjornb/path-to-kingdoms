@@ -6,6 +6,7 @@ declare global {
     selectTier: (tierType: TierType) => void;
     purchaseResearch: (researchId: string) => void;
     toggleDevMode: () => void;
+    toggleShowCompletedResearch: () => void;
   }
 }
 

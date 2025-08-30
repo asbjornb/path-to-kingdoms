@@ -63,6 +63,7 @@ export class GameStateManager {
         autobuyEnabled: false,
         autobuyInterval: 1000,
         devModeEnabled: false,
+        showCompletedResearch: true, // Default to showing all research
       },
     };
   }
@@ -446,6 +447,15 @@ export class GameStateManager {
 
   public isDevModeEnabled(): boolean {
     return this.state.settings.devModeEnabled;
+  }
+
+  public toggleShowCompletedResearch(): boolean {
+    this.state.settings.showCompletedResearch = !this.state.settings.showCompletedResearch;
+    return this.state.settings.showCompletedResearch;
+  }
+
+  public isShowCompletedResearchEnabled(): boolean {
+    return this.state.settings.showCompletedResearch;
   }
 
   // For testing - manually trigger autospawn
