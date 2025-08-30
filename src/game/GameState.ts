@@ -9,6 +9,7 @@ export class GameStateManager {
 
   constructor() {
     this.state = this.initializeState();
+    this.currency = 100; // Starting currency
   }
 
   private initializeState(): GameState {
