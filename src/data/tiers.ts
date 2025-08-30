@@ -1,0 +1,296 @@
+import { TierDefinition, TierType } from '../types/game';
+
+export const TIER_DATA: TierDefinition[] = [
+  {
+    type: TierType.Hamlet,
+    name: 'Hamlet',
+    unlockRequirement: 0,
+    completionThreshold: 10,
+    buildings: [
+      {
+        id: 'hamlet_hut',
+        name: 'Hut',
+        baseCost: 10,
+        baseIncome: 1,
+        costMultiplier: 1.15,
+        description: 'A simple dwelling for a small family',
+      },
+      {
+        id: 'hamlet_garden',
+        name: 'Garden',
+        baseCost: 50,
+        baseIncome: 3,
+        costMultiplier: 1.2,
+        description: 'Grows vegetables for the community',
+      },
+      {
+        id: 'hamlet_workshop',
+        name: 'Workshop',
+        baseCost: 200,
+        baseIncome: 8,
+        costMultiplier: 1.25,
+        description: 'Basic tools and crafts are made here',
+      },
+    ],
+  },
+  {
+    type: TierType.Village,
+    name: 'Village',
+    unlockRequirement: 4,
+    completionThreshold: 100,
+    buildings: [
+      {
+        id: 'village_cottage',
+        name: 'Cottage',
+        baseCost: 100,
+        baseIncome: 10,
+        costMultiplier: 1.15,
+        description: 'A cozy home for villagers',
+      },
+      {
+        id: 'village_farm',
+        name: 'Farm',
+        baseCost: 500,
+        baseIncome: 30,
+        costMultiplier: 1.2,
+        description: 'Produces food for the growing population',
+      },
+      {
+        id: 'village_mill',
+        name: 'Mill',
+        baseCost: 2000,
+        baseIncome: 80,
+        costMultiplier: 1.25,
+        description: 'Grinds grain into flour',
+      },
+      {
+        id: 'village_chapel',
+        name: 'Chapel',
+        baseCost: 5000,
+        baseIncome: 150,
+        costMultiplier: 1.3,
+        description: 'A place of worship and community',
+      },
+    ],
+  },
+  {
+    type: TierType.Town,
+    name: 'Town',
+    unlockRequirement: 4,
+    completionThreshold: 1000,
+    buildings: [
+      {
+        id: 'town_house',
+        name: 'Town House',
+        baseCost: 1000,
+        baseIncome: 100,
+        costMultiplier: 1.15,
+        description: 'Multi-story housing for townspeople',
+      },
+      {
+        id: 'town_market',
+        name: 'Market',
+        baseCost: 5000,
+        baseIncome: 300,
+        costMultiplier: 1.2,
+        description: 'Bustling trade center',
+      },
+      {
+        id: 'town_forge',
+        name: 'Forge',
+        baseCost: 20000,
+        baseIncome: 800,
+        costMultiplier: 1.25,
+        description: 'Advanced metalworking facility',
+      },
+      {
+        id: 'town_guild',
+        name: 'Guild Hall',
+        baseCost: 50000,
+        baseIncome: 1500,
+        costMultiplier: 1.3,
+        description: 'Center for skilled craftsmen',
+      },
+    ],
+  },
+  {
+    type: TierType.City,
+    name: 'City',
+    unlockRequirement: 3,
+    completionThreshold: 10000,
+    buildings: [
+      {
+        id: 'city_apartment',
+        name: 'Apartment',
+        baseCost: 10000,
+        baseIncome: 1000,
+        costMultiplier: 1.15,
+        description: 'Dense urban housing',
+      },
+      {
+        id: 'city_bazaar',
+        name: 'Grand Bazaar',
+        baseCost: 50000,
+        baseIncome: 3000,
+        costMultiplier: 1.2,
+        description: 'Extensive marketplace',
+      },
+      {
+        id: 'city_university',
+        name: 'University',
+        baseCost: 200000,
+        baseIncome: 8000,
+        costMultiplier: 1.25,
+        description: 'Center of learning and research',
+      },
+      {
+        id: 'city_cathedral',
+        name: 'Cathedral',
+        baseCost: 500000,
+        baseIncome: 15000,
+        costMultiplier: 1.3,
+        description: 'Magnificent religious structure',
+      },
+    ],
+  },
+  {
+    type: TierType.County,
+    name: 'County',
+    unlockRequirement: 3,
+    completionThreshold: 100000,
+    buildings: [
+      {
+        id: 'county_manor',
+        name: 'Manor',
+        baseCost: 100000,
+        baseIncome: 10000,
+        costMultiplier: 1.15,
+        description: 'Estate for the nobility',
+      },
+      {
+        id: 'county_plantation',
+        name: 'Plantation',
+        baseCost: 500000,
+        baseIncome: 30000,
+        costMultiplier: 1.2,
+        description: 'Large agricultural operation',
+      },
+      {
+        id: 'county_fortress',
+        name: 'Fortress',
+        baseCost: 2000000,
+        baseIncome: 80000,
+        costMultiplier: 1.25,
+        description: 'Military stronghold',
+      },
+    ],
+  },
+  {
+    type: TierType.Duchy,
+    name: 'Duchy',
+    unlockRequirement: 2,
+    completionThreshold: 1000000,
+    buildings: [
+      {
+        id: 'duchy_palace',
+        name: 'Palace',
+        baseCost: 1000000,
+        baseIncome: 100000,
+        costMultiplier: 1.15,
+        description: 'Seat of ducal power',
+      },
+      {
+        id: 'duchy_port',
+        name: 'Grand Port',
+        baseCost: 5000000,
+        baseIncome: 300000,
+        costMultiplier: 1.2,
+        description: 'Major trading hub',
+      },
+      {
+        id: 'duchy_academy',
+        name: 'Royal Academy',
+        baseCost: 20000000,
+        baseIncome: 800000,
+        costMultiplier: 1.25,
+        description: 'Elite institution of knowledge',
+      },
+    ],
+  },
+  {
+    type: TierType.Realm,
+    name: 'Realm',
+    unlockRequirement: 2,
+    completionThreshold: 10000000,
+    buildings: [
+      {
+        id: 'realm_citadel',
+        name: 'Citadel',
+        baseCost: 10000000,
+        baseIncome: 1000000,
+        costMultiplier: 1.15,
+        description: 'Impregnable fortress city',
+      },
+      {
+        id: 'realm_metropolis',
+        name: 'Metropolis',
+        baseCost: 50000000,
+        baseIncome: 3000000,
+        costMultiplier: 1.2,
+        description: 'Sprawling urban center',
+      },
+      {
+        id: 'realm_wonder',
+        name: 'Wonder',
+        baseCost: 200000000,
+        baseIncome: 8000000,
+        costMultiplier: 1.25,
+        description: 'Architectural marvel',
+      },
+    ],
+  },
+  {
+    type: TierType.Kingdom,
+    name: 'Kingdom',
+    unlockRequirement: 1,
+    completionThreshold: 100000000,
+    buildings: [
+      {
+        id: 'kingdom_capital',
+        name: 'Capital',
+        baseCost: 100000000,
+        baseIncome: 10000000,
+        costMultiplier: 1.15,
+        description: 'Seat of the kingdom',
+      },
+      {
+        id: 'kingdom_empire',
+        name: 'Empire District',
+        baseCost: 500000000,
+        baseIncome: 30000000,
+        costMultiplier: 1.2,
+        description: 'Administrative heart of the realm',
+      },
+      {
+        id: 'kingdom_monument',
+        name: 'Eternal Monument',
+        baseCost: 2000000000,
+        baseIncome: 80000000,
+        costMultiplier: 1.25,
+        description: 'Legacy for the ages',
+      },
+    ],
+  },
+];
+
+export function getTierByType(type: TierType): TierDefinition | undefined {
+  return TIER_DATA.find((tier) => tier.type === type);
+}
+
+export function getNextTier(currentTier: TierType): TierDefinition | undefined {
+  const currentIndex = TIER_DATA.findIndex((tier) => tier.type === currentTier);
+  if (currentIndex === -1 || currentIndex === TIER_DATA.length - 1) {
+    return undefined;
+  }
+  return TIER_DATA[currentIndex + 1];
+}
