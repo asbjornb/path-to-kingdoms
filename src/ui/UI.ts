@@ -129,6 +129,9 @@ export class UI {
                 </div>
                 <button 
                   class="buy-btn ${!canAfford ? 'disabled' : ''}"
+                  data-settlement="${settlement.id}"
+                  data-building="${building.id}"
+                  data-cost="${cost}"
                   onclick="window.buyBuilding('${settlement.id}', '${building.id}')"
                   ${!canAfford ? 'disabled' : ''}
                 >
@@ -186,19 +189,60 @@ export class UI {
   public update(): void {
     if (!this.isInitialized) return;
 
-    // Only update the values that change frequently
+    const currentCurrency = this.game.getCurrency();
+    const state = this.game.getState();
+
+    // Update the values that change frequently
     const currencyEl = document.getElementById('currency');
     const incomeEl = document.getElementById('income');
     const researchEl = document.getElementById('research');
 
     if (currencyEl) {
-      currencyEl.textContent = formatNumber(this.game.getCurrency());
+      currencyEl.textContent = formatNumber(currentCurrency);
     }
     if (incomeEl) {
       incomeEl.textContent = formatIncome(this.game.getTotalIncome());
     }
     if (researchEl) {
-      researchEl.textContent = this.game.getState().researchPoints.toString();
+      researchEl.textContent = state.researchPoints.toString();
     }
+
+    // Update buy button states
+    const buyButtons = document.querySelectorAll('.buy-btn');
+    buyButtons.forEach((button) => {
+      if (!(button instanceof HTMLButtonElement)) return;
+      const costAttr = button.getAttribute('data-cost');
+      if (costAttr === null || costAttr === '') return;
+
+      const cost = parseFloat(costAttr);
+      const canAfford = currentCurrency >= cost;
+
+      if (canAfford && button.disabled === true) {
+        button.disabled = false;
+        button.classList.remove('disabled');
+      } else if (!canAfford && button.disabled === false) {
+        button.disabled = true;
+        button.classList.add('disabled');
+      }
+    });
+
+    // Update research button states
+    const researchButtons = document.querySelectorAll('.research-btn');
+    researchButtons.forEach((button) => {
+      if (!(button instanceof HTMLButtonElement)) return;
+      const costText = button.textContent?.match(/\((\d+)\s+points\)/);
+      if (costText && costText[1]) {
+        const cost = parseInt(costText[1]);
+        const canAfford = state.researchPoints >= cost;
+
+        if (canAfford && button.disabled === true) {
+          button.disabled = false;
+          button.classList.remove('disabled');
+        } else if (!canAfford && button.disabled === false) {
+          button.disabled = true;
+          button.classList.add('disabled');
+        }
+      }
+    });
   }
 }
