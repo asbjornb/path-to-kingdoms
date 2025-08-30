@@ -208,14 +208,14 @@ describe('GameStateManager', () => {
 
       // Test that we can purchase research when we have enough points
       const initialPoints = game.getResearchPoints(TierType.Hamlet);
-      const success = game.purchaseResearch('hamlet_autobuy_unlock');
+      const success = game.purchaseResearch('hamlet_starting_income_1');
 
       expect(success).toBe(true);
-      expect(game.getResearchPoints(TierType.Hamlet)).toBe(initialPoints - 100);
+      expect(game.getResearchPoints(TierType.Hamlet)).toBe(initialPoints - 5);
     });
 
     it('should not purchase research without enough points', () => {
-      const success = game.purchaseResearch('hamlet_autobuy_unlock');
+      const success = game.purchaseResearch('hamlet_starting_income_1');
       expect(success).toBe(false);
       expect(game.getResearchPoints(TierType.Hamlet)).toBe(0);
     });

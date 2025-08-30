@@ -3,18 +3,30 @@ import { TIER_DATA, getTierByType } from '../data/tiers';
 import { RESEARCH_DATA } from '../data/research';
 import { GoalGenerator } from '../data/goals';
 
-function createSettlement(tierType: TierType): Settlement {
+function createSettlement(tierType: TierType, gameState?: GameState): Settlement {
   const tierDef = getTierByType(tierType);
   if (!tierDef) {
     throw new Error(`Invalid tier type: ${tierType}`);
   }
 
+  // Calculate starting income bonus from research
+  let startingIncomeBonus = 0;
+  if (gameState) {
+    const startingIncomeResearch = gameState.research.filter(
+      (r) => r.purchased && r.effect.type === 'starting_income' && r.tier === tierType,
+    );
+    startingIncomeBonus = startingIncomeResearch.reduce((total, research) => {
+      return total + (research.effect.value ?? 0);
+    }, 0);
+  }
+
   const now = Date.now();
+  const baseCurrency = tierDef.buildings[0]?.baseCost ?? 10;
   const settlement: Settlement = {
     id: `${tierType}_${now}_${Math.random().toString(36).substr(2, 9)}`,
     tier: tierType,
     isComplete: false,
-    currency: tierDef.buildings[0]?.baseCost ?? 10,
+    currency: baseCurrency + startingIncomeBonus,
     totalIncome: 0,
     buildings: new Map(),
     lifetimeCurrencyEarned: 0,
@@ -46,6 +58,7 @@ export class GameStateManager {
       unlockedTiers: new Set([TierType.Hamlet]),
       completedSettlements: new Map(),
       research: RESEARCH_DATA.map((r) => ({ ...r, purchased: false })),
+      autoBuildingTimers: new Map(),
       settings: {
         autobuyEnabled: false,
         autobuyInterval: 1000,
@@ -71,7 +84,7 @@ export class GameStateManager {
       return null;
     }
 
-    const newSettlement = createSettlement(tierType);
+    const newSettlement = createSettlement(tierType, this.state);
     this.state.settlements.push(newSettlement);
     return newSettlement;
   }
@@ -187,18 +200,18 @@ export class GameStateManager {
     );
 
     if (type === 'cost_reduction') {
-      return upgrades.reduce((mult, upgrade) => mult * upgrade.effect.value, 1);
+      return upgrades.reduce((mult, upgrade) => mult * (upgrade.effect.value ?? 1), 1);
     }
     if (type === 'parallel_slots') {
       if (tier !== undefined) {
         // Return the highest parallel slots research for this tier
-        return upgrades.reduce((max, upgrade) => Math.max(max, upgrade.effect.value), 1);
+        return upgrades.reduce((max, upgrade) => Math.max(max, upgrade.effect.value ?? 0), 1);
       } else {
         // Return the highest across all tiers for general parallel slots
-        return upgrades.reduce((max, upgrade) => Math.max(max, upgrade.effect.value), 1);
+        return upgrades.reduce((max, upgrade) => Math.max(max, upgrade.effect.value ?? 0), 1);
       }
     }
-    return upgrades.reduce((sum, upgrade) => sum + upgrade.effect.value, 0);
+    return upgrades.reduce((sum, upgrade) => sum + (upgrade.effect.value ?? 0), 0);
   }
 
   private checkSettlementCompletion(settlement: Settlement): void {
@@ -291,11 +304,6 @@ export class GameStateManager {
     this.state.researchPoints.set(research.tier, tierPoints - research.cost);
     research.purchased = true;
 
-    // Handle special research effects
-    if (research.id.includes('autobuy_unlock')) {
-      this.state.settings.autobuyEnabled = true;
-    }
-
     // If this is a parallel slots research, autospawn settlements
     if (research.effect.type === 'parallel_slots') {
       this.autospawnSettlements();
@@ -324,6 +332,44 @@ export class GameStateManager {
       // Update goal progress
       this.updateGoalProgress(settlement);
     });
+
+    // Process automated building purchases
+    this.processAutoBuildingPurchases(now);
+  }
+
+  private processAutoBuildingPurchases(now: number): void {
+    // Get all purchased auto-building research
+    const autoBuildingResearch = this.state.research.filter(
+      (r) => r.purchased && r.effect.type === 'auto_building',
+    );
+
+    for (const research of autoBuildingResearch) {
+      const buildingId = research.effect.buildingId;
+      const interval = research.effect.interval;
+
+      if (buildingId === undefined || buildingId === '' || interval === undefined || interval === 0)
+        continue;
+
+      const lastPurchaseTime = this.state.autoBuildingTimers.get(research.id) ?? 0;
+
+      // Check if enough time has passed
+      if (now - lastPurchaseTime >= interval) {
+        // Find settlements of the same tier that can afford this building
+        const tierSettlements = this.state.settlements.filter((s) => s.tier === research.tier);
+
+        for (const settlement of tierSettlements) {
+          const cost = this.getBuildingCost(settlement.id, buildingId);
+          if (cost !== null && settlement.currency >= cost) {
+            // Try to buy the building
+            if (this.buyBuilding(settlement.id, buildingId)) {
+              // Update the timer for this research
+              this.state.autoBuildingTimers.set(research.id, now);
+              break; // Only buy one building per interval
+            }
+          }
+        }
+      }
+    }
   }
 
   public getBuildingCost(settlementId: string, buildingId: string): number | null {

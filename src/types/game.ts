@@ -68,8 +68,16 @@ export interface ResearchUpgrade {
   cost: number;
   tier: TierType;
   effect: {
-    type: 'autobuy_speed' | 'bulk_buy' | 'cost_reduction' | 'parallel_slots';
-    value: number;
+    type:
+      | 'autobuy_speed'
+      | 'bulk_buy'
+      | 'cost_reduction'
+      | 'parallel_slots'
+      | 'starting_income'
+      | 'auto_building';
+    value?: number;
+    buildingId?: string; // For auto_building type
+    interval?: number; // For auto_building type (in milliseconds)
   };
   purchased: boolean;
   prerequisite?: string; // ID of research that must be purchased first
@@ -81,6 +89,7 @@ export interface GameState {
   unlockedTiers: Set<TierType>;
   completedSettlements: Map<TierType, number>;
   research: ResearchUpgrade[];
+  autoBuildingTimers: Map<string, number>; // Track last auto-purchase time for each research upgrade
   settings: {
     autobuyEnabled: boolean;
     autobuyInterval: number;
