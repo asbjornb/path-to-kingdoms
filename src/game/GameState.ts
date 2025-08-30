@@ -3,6 +3,33 @@ import { TIER_DATA, getTierByType } from '../data/tiers';
 import { RESEARCH_DATA } from '../data/research';
 import { GoalGenerator } from '../data/goals';
 
+function createSettlement(tierType: TierType): Settlement {
+  const tierDef = getTierByType(tierType);
+  if (!tierDef) {
+    throw new Error(`Invalid tier type: ${tierType}`);
+  }
+
+  const now = Date.now();
+  const settlement: Settlement = {
+    id: `${tierType}_${now}_${Math.random().toString(36).substr(2, 9)}`,
+    tier: tierType,
+    isComplete: false,
+    currency: tierDef.buildings[0]?.baseCost ?? 10,
+    totalIncome: 0,
+    buildings: new Map(),
+    lifetimeCurrencyEarned: 0,
+    spawnTime: now,
+    goals: GoalGenerator.generateRandomGoals(tierType, 1),
+  };
+
+  // Initialize all buildings to 0 count
+  tierDef.buildings.forEach((building) => {
+    settlement.buildings.set(building.id, 0);
+  });
+
+  return settlement;
+}
+
 export class GameStateManager {
   private state: GameState;
   private lastUpdate: number = Date.now();
@@ -40,28 +67,11 @@ export class GameStateManager {
   }
 
   private spawnSettlement(tierType: TierType): Settlement | null {
-    const tierDef = getTierByType(tierType);
-    if (!tierDef || !this.state.unlockedTiers.has(tierType)) {
+    if (!this.state.unlockedTiers.has(tierType)) {
       return null;
     }
 
-    const now = Date.now();
-    const newSettlement: Settlement = {
-      id: `${tierType}_${now}_${Math.random().toString(36).substr(2, 9)}`,
-      tier: tierType,
-      isComplete: false,
-      currency: tierDef.buildings[0]?.baseCost ?? 10,
-      totalIncome: 0,
-      buildings: new Map(),
-      lifetimeCurrencyEarned: 0,
-      spawnTime: now,
-      goals: GoalGenerator.generateRandomGoals(tierType, 1),
-    };
-
-    tierDef.buildings.forEach((building) => {
-      newSettlement.buildings.set(building.id, 0);
-    });
-
+    const newSettlement = createSettlement(tierType);
     this.state.settlements.push(newSettlement);
     return newSettlement;
   }

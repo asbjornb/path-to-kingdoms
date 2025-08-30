@@ -291,12 +291,16 @@ export class UI {
       // Update currency and income values
       const currencyEl = settlementEl.querySelector('.settlement-stat .stat-value');
       const incomeEl = settlementEl.querySelectorAll('.settlement-stat .stat-value')[1];
+      const headerIncomeEl = settlementEl.querySelector('.settlement-header .income');
 
       if (currencyEl !== null) {
         currencyEl.textContent = formatNumber(settlement.currency);
       }
       if (incomeEl !== null) {
         incomeEl.textContent = formatIncome(settlement.totalIncome);
+      }
+      if (headerIncomeEl !== null) {
+        headerIncomeEl.textContent = formatIncome(settlement.totalIncome);
       }
 
       // Update goal progress (single goal in header)
@@ -319,15 +323,21 @@ export class UI {
         }
       }
 
-      // Update building button states
+      // Update building button states and costs
       const buildingButtons = settlementEl.querySelectorAll('.buy-btn');
       buildingButtons.forEach((button) => {
         if (!(button instanceof HTMLButtonElement)) return;
-        const costAttr = button.getAttribute('data-cost');
-        if (costAttr === null || costAttr === '') return;
+        const settlementId = button.getAttribute('data-settlement');
+        const buildingId = button.getAttribute('data-building');
+        if (settlementId === null || buildingId === null) return;
 
-        const cost = parseFloat(costAttr);
-        const canAfford = settlement.currency >= cost;
+        // Get the current cost (not cached)
+        const currentCost = this.game.getBuildingCost(settlementId, buildingId) ?? 0;
+        const canAfford = settlement.currency >= currentCost;
+
+        // Update cached cost attribute and button text
+        button.setAttribute('data-cost', currentCost.toString());
+        button.textContent = `Buy (${formatNumber(currentCost)})`;
 
         if (canAfford && button.disabled === true) {
           button.disabled = false;
