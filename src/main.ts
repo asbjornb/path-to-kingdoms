@@ -16,7 +16,9 @@ function initGame(): void {
 
   // Set up global functions for UI interactions
   window.spawnSettlement = (tierType: TierType): void => {
-    game.spawnSettlement(tierType);
+    console.log('Spawning settlement:', tierType);
+    const settlement = game.spawnSettlement(tierType);
+    console.log('Spawned:', settlement);
     ui.render();
   };
 
@@ -37,14 +39,17 @@ function initGame(): void {
     }
   };
 
-  // Game loop
+  // Game loop - less frequent updates
   setInterval(() => {
     game.update();
     ui.render();
-  }, 100);
+  }, 500);
 
   // Initial render
   ui.render();
+
+  // Debug: Check if functions are properly set
+  console.log('spawnSettlement function:', window.spawnSettlement);
 }
 
 document.addEventListener('DOMContentLoaded', initGame);
