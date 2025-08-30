@@ -254,7 +254,98 @@ export class UI {
   public update(): void {
     if (!this.isInitialized) return;
 
-    // Just re-render the entire UI since currency/income are now per-settlement
-    this.render();
+    // Update dynamic values without full re-render to prevent button flickering
+    this.updateDynamicValues();
+  }
+
+  private updateDynamicValues(): void {
+    // Update research points in header
+    const researchEl = document.getElementById('research');
+    if (researchEl) {
+      researchEl.textContent = this.game.getResearchPoints(this.selectedTier).toString();
+    }
+
+    // Update settlement-specific values
+    const settlements = this.game
+      .getState()
+      .settlements.filter((s) => s.tier === this.selectedTier);
+    settlements.forEach((settlement, index) => {
+      // Find settlement elements by data attribute or index
+      const settlementElements = document.querySelectorAll('.settlement');
+      const settlementEl = settlementElements[index] as HTMLElement;
+      if (settlementEl === null || settlementEl === undefined) return;
+
+      // Update currency and income values
+      const currencyEl = settlementEl.querySelector('.settlement-stat .stat-value');
+      const incomeEl = settlementEl.querySelectorAll('.settlement-stat .stat-value')[1];
+
+      if (currencyEl !== null) {
+        currencyEl.textContent = formatNumber(settlement.currency);
+      }
+      if (incomeEl !== null) {
+        incomeEl.textContent = formatIncome(settlement.totalIncome);
+      }
+
+      // Update goal progress
+      const goalElements = settlementEl.querySelectorAll('.goal');
+      settlement.goals.forEach((goal, goalIndex) => {
+        const goalEl = goalElements[goalIndex];
+        if (goalEl === null || goalEl === undefined) return;
+
+        const progressPercent = Math.min((goal.currentValue / goal.targetValue) * 100, 100);
+        const progressFill = goalEl.querySelector('.goal-progress-fill') as HTMLElement;
+        const progressText = goalEl.querySelector('.goal-progress-text');
+
+        if (progressFill !== null) {
+          progressFill.style.width = `${progressPercent}%`;
+        }
+        if (progressText !== null) {
+          progressText.textContent = this.formatGoalProgress(goal);
+        }
+
+        // Update completion status
+        if (goal.isCompleted && !goalEl.classList.contains('completed')) {
+          goalEl.classList.add('completed');
+        }
+      });
+
+      // Update building button states
+      const buildingButtons = settlementEl.querySelectorAll('.buy-btn');
+      buildingButtons.forEach((button) => {
+        if (!(button instanceof HTMLButtonElement)) return;
+        const costAttr = button.getAttribute('data-cost');
+        if (costAttr === null || costAttr === '') return;
+
+        const cost = parseFloat(costAttr);
+        const canAfford = settlement.currency >= cost;
+
+        if (canAfford && button.disabled === true) {
+          button.disabled = false;
+          button.classList.remove('disabled');
+        } else if (!canAfford && button.disabled === false) {
+          button.disabled = true;
+          button.classList.add('disabled');
+        }
+      });
+    });
+
+    // Update research button states
+    const researchButtons = document.querySelectorAll('.research-btn');
+    researchButtons.forEach((button) => {
+      if (!(button instanceof HTMLButtonElement)) return;
+      const costText = button.textContent?.match(/\((\d+)\s+points\)/);
+      if (costText && costText[1]) {
+        const cost = parseInt(costText[1]);
+        const canAfford = this.game.getResearchPoints(this.selectedTier) >= cost;
+
+        if (canAfford && button.disabled === true) {
+          button.disabled = false;
+          button.classList.remove('disabled');
+        } else if (!canAfford && button.disabled === false) {
+          button.disabled = true;
+          button.classList.add('disabled');
+        }
+      }
+    });
   }
 }
