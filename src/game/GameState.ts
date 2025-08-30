@@ -70,7 +70,7 @@ export class GameStateManager {
         autobuyEnabled: false,
         autobuyInterval: 1000,
         devModeEnabled: false,
-        showCompletedResearch: true, // Default to showing all research
+        showCompletedResearch: false, // Default to hiding completed research
       },
     };
   }
