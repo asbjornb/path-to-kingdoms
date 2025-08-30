@@ -10,6 +10,7 @@ export default [
   },
   {
     files: ['src/**/*.ts', 'src/**/*.tsx'],
+    ignores: ['**/*.test.ts'],
     languageOptions: {
       parser: typescriptParser,
       parserOptions: {
@@ -41,6 +42,39 @@ export default [
       '@typescript-eslint/no-non-null-assertion': 'error',
       '@typescript-eslint/strict-boolean-expressions': 'error',
       'no-console': ['warn', { allow: ['warn', 'error'] }],
+      'no-debugger': 'error',
+    },
+  },
+  {
+    files: ['**/*.test.ts'],
+    languageOptions: {
+      parser: typescriptParser,
+      parserOptions: {
+        ecmaVersion: 2022,
+        sourceType: 'module',
+        project: './tsconfig.json',
+      },
+      globals: {
+        console: 'readonly',
+      },
+    },
+    plugins: {
+      '@typescript-eslint': typescript,
+      prettier,
+    },
+    rules: {
+      ...js.configs.recommended.rules,
+      ...typescript.configs['recommended'].rules,
+      ...typescript.configs['recommended-requiring-type-checking'].rules,
+      ...typescript.configs['strict'].rules,
+      ...prettierConfig.rules,
+      'prettier/prettier': 'error',
+      '@typescript-eslint/no-unused-vars': 'error',
+      '@typescript-eslint/no-explicit-any': 'off', // Allow in tests
+      '@typescript-eslint/no-non-null-assertion': 'off', // Allow in tests
+      '@typescript-eslint/no-unsafe-member-access': 'off', // Allow in tests
+      '@typescript-eslint/strict-boolean-expressions': 'error',
+      'no-console': 'off', // Allow console in tests
       'no-debugger': 'error',
     },
   },
