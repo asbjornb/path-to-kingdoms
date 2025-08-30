@@ -9,6 +9,7 @@ export class UI {
   private selectedTier: TierType = TierType.Hamlet;
   private isInitialized: boolean = false;
   private lastSettlementCount: number = 0;
+  private lastSettlementIds: string[] = [];
 
   constructor(game: GameStateManager, container: HTMLElement) {
     this.game = game;
@@ -18,6 +19,7 @@ export class UI {
   public render(): void {
     this.isInitialized = true;
     this.lastSettlementCount = this.game.getState().settlements.length;
+    this.lastSettlementIds = this.game.getState().settlements.map((s) => s.id);
 
     this.container.innerHTML = `
       <div class="game-container">
@@ -253,10 +255,17 @@ export class UI {
   public update(): void {
     if (!this.isInitialized) return;
 
-    // Check if settlement count has changed (completion/spawning)
+    // Check if settlement count has changed or settlement IDs have changed (completion/spawning/replacement)
     const currentSettlementCount = this.game.getState().settlements.length;
-    if (currentSettlementCount !== this.lastSettlementCount) {
+    const currentSettlementIds = this.game.getState().settlements.map((s) => s.id);
+
+    const countChanged = currentSettlementCount !== this.lastSettlementCount;
+    const idsChanged =
+      JSON.stringify(currentSettlementIds) !== JSON.stringify(this.lastSettlementIds);
+
+    if (countChanged || idsChanged) {
       this.lastSettlementCount = currentSettlementCount;
+      this.lastSettlementIds = currentSettlementIds;
       this.render(); // Full re-render when settlements change
       return;
     }
