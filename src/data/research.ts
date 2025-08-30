@@ -232,4 +232,133 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     },
     purchased: false,
   },
+
+  {
+    id: 'hamlet_auto_shrine_1',
+    name: 'Automated Shrine Construction I',
+    description: 'Automatically buys 1 shrine every 120 seconds',
+    cost: 75,
+    tier: TierType.Hamlet,
+    prerequisite: 'hamlet_auto_hut_1', // Requires basic hut automation first
+    effect: {
+      type: 'auto_building',
+      buildingId: 'hamlet_shrine',
+      interval: 120000, // 120 seconds
+    },
+    purchased: false,
+  },
+  {
+    id: 'hamlet_auto_shrine_2',
+    name: 'Automated Shrine Construction II',
+    description: 'Automatically buys 1 shrine every 80 seconds',
+    cost: 150,
+    tier: TierType.Hamlet,
+    prerequisite: 'hamlet_auto_shrine_1',
+    effect: {
+      type: 'auto_building',
+      buildingId: 'hamlet_shrine',
+      interval: 80000, // 80 seconds
+    },
+    purchased: false,
+  },
+  {
+    id: 'hamlet_auto_shrine_3',
+    name: 'Automated Shrine Construction III',
+    description: 'Automatically buys 1 shrine every 40 seconds',
+    cost: 300,
+    tier: TierType.Hamlet,
+    prerequisite: 'hamlet_auto_shrine_2',
+    effect: {
+      type: 'auto_building',
+      buildingId: 'hamlet_shrine',
+      interval: 40000, // 40 seconds
+    },
+    purchased: false,
+  },
+
+  {
+    id: 'hamlet_auto_market_1',
+    name: 'Automated Market Construction I',
+    description: 'Automatically buys 1 market stall every 150 seconds',
+    cost: 100,
+    tier: TierType.Hamlet,
+    prerequisite: 'hamlet_auto_garden_1', // Requires basic garden automation first
+    effect: {
+      type: 'auto_building',
+      buildingId: 'hamlet_market',
+      interval: 150000, // 150 seconds
+    },
+    purchased: false,
+  },
+  {
+    id: 'hamlet_auto_market_2',
+    name: 'Automated Market Construction II',
+    description: 'Automatically buys 1 market stall every 100 seconds',
+    cost: 200,
+    tier: TierType.Hamlet,
+    prerequisite: 'hamlet_auto_market_1',
+    effect: {
+      type: 'auto_building',
+      buildingId: 'hamlet_market',
+      interval: 100000, // 100 seconds
+    },
+    purchased: false,
+  },
+  {
+    id: 'hamlet_auto_market_3',
+    name: 'Automated Market Construction III',
+    description: 'Automatically buys 1 market stall every 50 seconds',
+    cost: 400,
+    tier: TierType.Hamlet,
+    prerequisite: 'hamlet_auto_market_2',
+    effect: {
+      type: 'auto_building',
+      buildingId: 'hamlet_market',
+      interval: 50000, // 50 seconds
+    },
+    purchased: false,
+  },
+
+  {
+    id: 'hamlet_auto_library_1',
+    name: 'Automated Library Construction I',
+    description: 'Automatically buys 1 library every 300 seconds',
+    cost: 200,
+    tier: TierType.Hamlet,
+    prerequisite: 'hamlet_auto_workshop_1', // Requires basic workshop automation first
+    effect: {
+      type: 'auto_building',
+      buildingId: 'hamlet_library',
+      interval: 300000, // 300 seconds (5 minutes)
+    },
+    purchased: false,
+  },
+  {
+    id: 'hamlet_auto_library_2',
+    name: 'Automated Library Construction II',
+    description: 'Automatically buys 1 library every 200 seconds',
+    cost: 400,
+    tier: TierType.Hamlet,
+    prerequisite: 'hamlet_auto_library_1',
+    effect: {
+      type: 'auto_building',
+      buildingId: 'hamlet_library',
+      interval: 200000, // 200 seconds
+    },
+    purchased: false,
+  },
+  {
+    id: 'hamlet_auto_library_3',
+    name: 'Automated Library Construction III',
+    description: 'Automatically buys 1 library every 120 seconds',
+    cost: 800,
+    tier: TierType.Hamlet,
+    prerequisite: 'hamlet_auto_library_2',
+    effect: {
+      type: 'auto_building',
+      buildingId: 'hamlet_library',
+      interval: 120000, // 120 seconds (2 minutes)
+    },
+    purchased: false,
+  },
 ];
