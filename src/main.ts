@@ -1,7 +1,6 @@
 import { GameStateManager } from './game/GameState';
 import { UI } from './ui/UI';
 import { TierType } from './types/game';
-import './types/global';
 
 let game: GameStateManager;
 let ui: UI;
