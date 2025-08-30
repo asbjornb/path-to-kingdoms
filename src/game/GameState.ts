@@ -1,4 +1,11 @@
-import { GameState, Settlement, TierType, GoalType, SaveData } from '../types/game';
+import {
+  GameState,
+  Settlement,
+  TierType,
+  GoalType,
+  SaveData,
+  SerializableSettlement,
+} from '../types/game';
 import { TIER_DATA, getTierByType } from '../data/tiers';
 import { RESEARCH_DATA } from '../data/research';
 import { GoalGenerator } from '../data/goals';
@@ -494,11 +501,19 @@ export class GameStateManager {
 
   public saveGame(): boolean {
     try {
+      // Convert settlements to serializable format
+      const serializableSettlements: SerializableSettlement[] = this.state.settlements.map(
+        (settlement) => ({
+          ...settlement,
+          buildings: Array.from(settlement.buildings.entries()),
+        }),
+      );
+
       const saveData: SaveData = {
         version: this.GAME_VERSION,
         timestamp: Date.now(),
         gameState: {
-          settlements: this.state.settlements,
+          settlements: serializableSettlements,
           researchPoints: Array.from(this.state.researchPoints.entries()),
           unlockedTiers: Array.from(this.state.unlockedTiers),
           completedSettlements: Array.from(this.state.completedSettlements.entries()),
@@ -533,9 +548,17 @@ export class GameStateManager {
         // For now, we'll try to load anyway, but in the future we could add migration logic here
       }
 
+      // Convert serializable settlements back to Settlement format
+      const settlements: Settlement[] = saveData.gameState.settlements.map(
+        (serializableSettlement) => ({
+          ...serializableSettlement,
+          buildings: new Map(serializableSettlement.buildings),
+        }),
+      );
+
       // Reconstruct the state from serialized data
       this.state = {
-        settlements: saveData.gameState.settlements,
+        settlements,
         researchPoints: new Map(saveData.gameState.researchPoints),
         unlockedTiers: new Set(saveData.gameState.unlockedTiers),
         completedSettlements: new Map(saveData.gameState.completedSettlements),

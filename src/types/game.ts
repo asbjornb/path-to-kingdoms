@@ -99,11 +99,23 @@ export interface GameState {
   };
 }
 
+export interface SerializableSettlement {
+  id: string;
+  tier: TierType;
+  isComplete: boolean;
+  currency: number;
+  totalIncome: number;
+  buildings: [string, number][]; // Serialized Map
+  lifetimeCurrencyEarned: number;
+  spawnTime: number;
+  goals: Goal[];
+}
+
 export interface SaveData {
   version: string; // Game version for compatibility checking
   timestamp: number; // When the save was created
   gameState: {
-    settlements: Settlement[];
+    settlements: SerializableSettlement[]; // Settlements with serialized Maps
     researchPoints: [TierType, number][]; // Serialized Map
     unlockedTiers: TierType[]; // Serialized Set
     completedSettlements: [TierType, number][]; // Serialized Map
