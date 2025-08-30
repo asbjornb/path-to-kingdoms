@@ -10,21 +10,10 @@ import { TIER_DATA, getTierByType } from '../data/tiers';
 import { RESEARCH_DATA } from '../data/research';
 import { GoalGenerator } from '../data/goals';
 
-function createSettlement(tierType: TierType, gameState?: GameState): Settlement {
+function createSettlement(tierType: TierType): Settlement {
   const tierDef = getTierByType(tierType);
   if (!tierDef) {
     throw new Error(`Invalid tier type: ${tierType}`);
-  }
-
-  // Calculate starting income bonus from research
-  let startingIncomeBonus = 0;
-  if (gameState) {
-    const startingIncomeResearch = gameState.research.filter(
-      (r) => r.purchased && r.effect.type === 'starting_income' && r.tier === tierType,
-    );
-    startingIncomeBonus = startingIncomeResearch.reduce((total, research) => {
-      return total + (research.effect.value ?? 0);
-    }, 0);
   }
 
   const now = Date.now();
@@ -33,7 +22,7 @@ function createSettlement(tierType: TierType, gameState?: GameState): Settlement
     id: `${tierType}_${now}_${Math.random().toString(36).substr(2, 9)}`,
     tier: tierType,
     isComplete: false,
-    currency: baseCurrency + startingIncomeBonus,
+    currency: baseCurrency,
     totalIncome: 0,
     buildings: new Map(),
     lifetimeCurrencyEarned: 0,
@@ -103,7 +92,7 @@ export class GameStateManager {
       return null;
     }
 
-    const newSettlement = createSettlement(tierType, this.state);
+    const newSettlement = createSettlement(tierType);
     this.state.settlements.push(newSettlement);
     return newSettlement;
   }
@@ -210,6 +199,15 @@ export class GameStateManager {
       const count = settlement.buildings.get(building.id) ?? 0;
       baseIncome += building.baseIncome * count;
     }
+
+    // Add starting income bonus from research
+    const startingIncomeResearch = this.state.research.filter(
+      (r) => r.purchased && r.effect.type === 'starting_income' && r.tier === settlement.tier,
+    );
+    const startingIncomeBonus = startingIncomeResearch.reduce((total, research) => {
+      return total + (research.effect.value ?? 0);
+    }, 0);
+    baseIncome += startingIncomeBonus;
 
     // Apply income multiplier effects
     const incomeMultiplier = this.getBuildingEffectMultiplier(settlement, 'income_multiplier');
