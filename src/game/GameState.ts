@@ -325,10 +325,18 @@ export class GameStateManager {
     this.state.researchPoints.set(research.tier, tierPoints - research.cost);
     research.purchased = true;
 
-    // If this is a parallel slots research, autospawn settlements
+    // Handle special research effects
     if (research.effect.type === 'parallel_slots') {
       this.autospawnSettlements();
     }
+
+    // Recalculate income for all existing settlements of this tier
+    // (applies to starting_income, and potentially other income-affecting research)
+    this.state.settlements
+      .filter((settlement) => settlement.tier === research.tier)
+      .forEach((settlement) => {
+        settlement.totalIncome = this.calculateSettlementIncome(settlement);
+      });
 
     return true;
   }
