@@ -37,11 +37,11 @@ function initGame(): void {
     }
   };
 
-  // Game loop - less frequent updates
+  // Game loop - update stats frequently without re-rendering
   setInterval(() => {
     game.update();
-    ui.render();
-  }, 500);
+    ui.update();
+  }, 100);
 
   // Initial render
   ui.render();

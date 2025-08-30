@@ -7,6 +7,7 @@ export class UI {
   private game: GameStateManager;
   private container: HTMLElement;
   private selectedTier: TierType = TierType.Hamlet;
+  private isInitialized: boolean = false;
 
   constructor(game: GameStateManager, container: HTMLElement) {
     this.game = game;
@@ -14,6 +15,7 @@ export class UI {
   }
 
   public render(): void {
+    this.isInitialized = true;
     const state = this.game.getState();
 
     this.container.innerHTML = `
@@ -23,15 +25,15 @@ export class UI {
           <div class="stats">
             <div class="stat">
               <span class="stat-label">Currency:</span>
-              <span class="stat-value">${formatNumber(this.game.getCurrency())}</span>
+              <span class="stat-value" id="currency">${formatNumber(this.game.getCurrency())}</span>
             </div>
             <div class="stat">
               <span class="stat-label">Income:</span>
-              <span class="stat-value">${formatIncome(this.game.getTotalIncome())}</span>
+              <span class="stat-value" id="income">${formatIncome(this.game.getTotalIncome())}</span>
             </div>
             <div class="stat">
               <span class="stat-label">Research:</span>
-              <span class="stat-value">${state.researchPoints}</span>
+              <span class="stat-value" id="research">${state.researchPoints}</span>
             </div>
           </div>
         </header>
@@ -178,6 +180,25 @@ export class UI {
   public selectTier(tier: TierType): void {
     if (this.game.getState().unlockedTiers.has(tier)) {
       this.selectedTier = tier;
+    }
+  }
+
+  public update(): void {
+    if (!this.isInitialized) return;
+
+    // Only update the values that change frequently
+    const currencyEl = document.getElementById('currency');
+    const incomeEl = document.getElementById('income');
+    const researchEl = document.getElementById('research');
+
+    if (currencyEl) {
+      currencyEl.textContent = formatNumber(this.game.getCurrency());
+    }
+    if (incomeEl) {
+      incomeEl.textContent = formatIncome(this.game.getTotalIncome());
+    }
+    if (researchEl) {
+      researchEl.textContent = this.game.getState().researchPoints.toString();
     }
   }
 }
