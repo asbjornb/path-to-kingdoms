@@ -40,7 +40,7 @@ export interface ResearchUpgrade {
   description: string;
   cost: number;
   effect: {
-    type: 'autobuy_speed' | 'bulk_buy' | 'cost_reduction';
+    type: 'autobuy_speed' | 'bulk_buy' | 'cost_reduction' | 'parallel_slots';
     value: number;
   };
   purchased: boolean;

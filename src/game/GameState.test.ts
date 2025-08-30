@@ -13,37 +13,35 @@ describe('GameStateManager', () => {
     it('should start with correct initial values', () => {
       expect(game.getCurrency()).toBe(100);
       expect(game.getTotalIncome()).toBe(0);
-      expect(game.getState().settlements).toHaveLength(0);
+      expect(game.getState().settlements).toHaveLength(1); // Now auto-spawns 1 hamlet
       expect(game.getState().researchPoints).toBe(0);
       expect(game.getState().unlockedTiers.has(TierType.Hamlet)).toBe(true);
     });
   });
 
-  describe('Settlement spawning', () => {
-    it('should spawn a hamlet when unlocked', () => {
-      const settlement = game.spawnSettlement(TierType.Hamlet);
-
-      expect(settlement).not.toBeNull();
-      expect(settlement?.tier).toBe(TierType.Hamlet);
-      expect(settlement?.isComplete).toBe(false);
-      expect(settlement?.totalIncome).toBe(0);
+  describe('Settlement auto-spawning', () => {
+    it('should auto-spawn a hamlet at start', () => {
+      // Game should start with 1 hamlet
       expect(game.getState().settlements).toHaveLength(1);
-    });
-
-    it('should not spawn locked tiers', () => {
-      const settlement = game.spawnSettlement(TierType.Village);
-
-      expect(settlement).toBeNull();
-      expect(game.getState().settlements).toHaveLength(0);
+      expect(game.getState().settlements[0]?.tier).toBe(TierType.Hamlet);
     });
 
     it('should initialize settlement with empty buildings', () => {
-      const settlement = game.spawnSettlement(TierType.Hamlet);
+      const settlement = game.getState().settlements[0];
 
       expect(settlement?.buildings.size).toBe(3); // Hamlet has 3 buildings
       expect(settlement?.buildings.get('hamlet_hut')).toBe(0);
       expect(settlement?.buildings.get('hamlet_garden')).toBe(0);
       expect(settlement?.buildings.get('hamlet_workshop')).toBe(0);
+    });
+
+    it('should spawn more settlements when parallel research is purchased', () => {
+      // Give research points and buy parallel slots
+      (game as any).state.researchPoints = 10;
+      game.purchaseResearch('parallel_2');
+
+      // Should now have 2 hamlets
+      expect(game.getState().settlements).toHaveLength(2);
     });
   });
 
@@ -51,8 +49,8 @@ describe('GameStateManager', () => {
     let settlementId: string;
 
     beforeEach(() => {
-      const settlement = game.spawnSettlement(TierType.Hamlet);
-      settlementId = settlement!.id;
+      const settlement = game.getState().settlements[0];
+      settlementId = settlement.id;
     });
 
     it('should buy building when player has enough currency', () => {
@@ -98,40 +96,43 @@ describe('GameStateManager', () => {
   });
 
   describe('Settlement completion', () => {
-    let settlementId: string;
-
-    beforeEach(() => {
-      const settlement = game.spawnSettlement(TierType.Hamlet);
-      settlementId = settlement!.id;
-    });
-
     it('should complete settlement when income threshold is reached', () => {
+      // Create fresh game to avoid test interference
+      const freshGame = new GameStateManager();
+      const settlement = freshGame.getState().settlements[0];
+      const testSettlementId = settlement.id;
+
       // Give player more money for testing
-      (game as any).currency = 1000;
+      (freshGame as any).currency = 1000;
+      const initialResearchPoints = freshGame.getState().researchPoints;
+
+      // Ensure we have exactly 1 settlement to start
+      expect(freshGame.getState().settlements).toHaveLength(1);
 
       // Buy enough buildings to reach completion threshold (10 for hamlet)
       for (let i = 0; i < 10; i++) {
-        game.buyBuilding(settlementId, 'hamlet_hut'); // Each hut gives 1 income
+        freshGame.buyBuilding(testSettlementId, 'hamlet_hut'); // Each hut gives 1 income
       }
 
-      const settlement = game.getState().settlements[0];
-      expect(settlement.totalIncome).toBeGreaterThanOrEqual(10);
-      expect(settlement.isComplete).toBe(true);
-      expect(game.getState().researchPoints).toBe(1);
+      // Settlement should be completed and removed, replaced by new one
+      expect(freshGame.getState().settlements).toHaveLength(1); // Still have 1 settlement (new autospawned one)
+      expect(freshGame.getState().researchPoints).toBe(initialResearchPoints + 1);
+      expect(freshGame.getState().completedSettlements.get(TierType.Hamlet)).toBe(1);
     });
 
     it('should track completed settlements', () => {
       // Give player more money for testing
       (game as any).currency = 100000;
 
-      // Complete some hamlets
-      for (let i = 0; i < 2; i++) {
-        const settlement = game.spawnSettlement(TierType.Hamlet);
-        const id = settlement!.id;
+      // Purchase parallel slots research to get more settlements
+      (game as any).state.researchPoints = 10;
+      game.purchaseResearch('parallel_2');
 
-        // Complete this settlement
+      // Complete the settlements
+      const settlements = game.getState().settlements.filter((s) => s.tier === TierType.Hamlet);
+      for (const settlement of settlements) {
         for (let j = 0; j < 10; j++) {
-          game.buyBuilding(id, 'hamlet_hut');
+          game.buyBuilding(settlement.id, 'hamlet_hut');
         }
       }
 
@@ -145,11 +146,27 @@ describe('GameStateManager', () => {
       // Give player enough research points by completing settlements
       (game as any).currency = 100000; // Much more money for escalating costs
 
-      for (let i = 0; i < 5; i++) {
-        const settlement = game.spawnSettlement(TierType.Hamlet);
-        // Complete each settlement (gives 1 research point each)
-        for (let j = 0; j < 10; j++) {
-          game.buyBuilding(settlement!.id, 'hamlet_hut');
+      // Purchase parallel slots to get multiple settlements
+      (game as any).state.researchPoints = 50;
+      game.purchaseResearch('parallel_6'); // Get 6 parallel slots
+
+      // Complete settlements to get research points
+      let completedCount = 0;
+      const targetCompletions = 3;
+
+      while (completedCount < targetCompletions) {
+        const settlements = game.getState().settlements.filter((s) => s.tier === TierType.Hamlet);
+        for (const settlement of settlements) {
+          if (completedCount >= targetCompletions) break;
+
+          for (let j = 0; j < 10; j++) {
+            if (!game.buyBuilding(settlement.id, 'hamlet_hut')) break;
+          }
+
+          // Check if it completed (will be removed from settlements list)
+          if (!game.getState().settlements.find((s) => s.id === settlement.id)) {
+            completedCount++;
+          }
         }
       }
 
@@ -160,9 +177,9 @@ describe('GameStateManager', () => {
       const initialPoints = game.getState().researchPoints;
       const success = game.purchaseResearch('autobuy_unlock');
 
-      if (initialPoints >= 5) {
+      if (initialPoints >= 32) {
         expect(success).toBe(true);
-        expect(game.getState().researchPoints).toBe(initialPoints - 5);
+        expect(game.getState().researchPoints).toBe(initialPoints - 32);
       } else {
         expect(success).toBe(false);
       }
@@ -177,8 +194,8 @@ describe('GameStateManager', () => {
 
   describe('Game loop updates', () => {
     it('should generate income over time', () => {
-      const settlement = game.spawnSettlement(TierType.Hamlet);
-      game.buyBuilding(settlement!.id, 'hamlet_hut'); // 1 income/sec
+      const settlement = game.getState().settlements[0];
+      game.buyBuilding(settlement.id, 'hamlet_hut'); // 1 income/sec
 
       const initialCurrency = game.getCurrency();
 

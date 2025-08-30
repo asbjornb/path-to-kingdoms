@@ -46,9 +46,9 @@ export class UI {
           <main class="settlements-area">
             <div class="tier-header">
               <h2>${this.selectedTier.charAt(0).toUpperCase() + this.selectedTier.slice(1)}s</h2>
-              <button class="spawn-btn" onclick="window.spawnSettlement('${this.selectedTier}')">
-                Spawn New ${this.selectedTier.charAt(0).toUpperCase() + this.selectedTier.slice(1)}
-              </button>
+              <div class="tier-progress">
+                ${this.renderTierProgress()}
+              </div>
             </div>
             <div class="settlements-list">
               ${this.renderSettlements()}
@@ -92,7 +92,12 @@ export class UI {
     const settlements = state.settlements.filter((s) => s.tier === this.selectedTier);
 
     if (settlements.length === 0) {
-      return '<div class="empty-message">No settlements yet. Spawn your first one!</div>';
+      const isUnlocked = this.game.getState().unlockedTiers.has(this.selectedTier);
+      if (isUnlocked) {
+        return '<div class="empty-message">Settlements auto-spawn when you unlock parallel slots!</div>';
+      } else {
+        return '<div class="empty-message">Complete 6 of the previous tier to unlock this tier.</div>';
+      }
     }
 
     return settlements.map((settlement) => this.renderSettlement(settlement)).join('');
@@ -184,6 +189,24 @@ export class UI {
     if (this.game.getState().unlockedTiers.has(tier)) {
       this.selectedTier = tier;
     }
+  }
+
+  private renderTierProgress(): string {
+    const state = this.game.getState();
+    const completedCount = state.completedSettlements.get(this.selectedTier) ?? 0;
+    const progressToNext = completedCount % 6;
+    const nextTierUnlocks = 6 - progressToNext;
+
+    return `
+      <div class="progress-info">
+        <span class="completed-count">${completedCount} completed</span>
+        <span class="next-unlock">${nextTierUnlocks === 6 ? '' : `${nextTierUnlocks} more for next tier`}</span>
+      </div>
+      <div class="tier-progress-bar">
+        <div class="tier-progress-fill" style="width: ${(progressToNext / 6) * 100}%"></div>
+        <span class="tier-progress-text">${progressToNext} / 6</span>
+      </div>
+    `;
   }
 
   public update(): void {

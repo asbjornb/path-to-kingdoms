@@ -2,57 +2,68 @@ import { ResearchUpgrade } from '../types/game';
 
 export const RESEARCH_DATA: ResearchUpgrade[] = [
   {
+    id: 'parallel_2',
+    name: 'Dual Management',
+    description: 'Run 2 settlements in parallel',
+    cost: 1,
+    effect: {
+      type: 'parallel_slots',
+      value: 2,
+    },
+    purchased: false,
+  },
+  {
+    id: 'parallel_3',
+    name: 'Triple Management',
+    description: 'Run 3 settlements in parallel',
+    cost: 2,
+    effect: {
+      type: 'parallel_slots',
+      value: 3,
+    },
+    purchased: false,
+  },
+  {
+    id: 'parallel_4',
+    name: 'Quad Management',
+    description: 'Run 4 settlements in parallel',
+    cost: 4,
+    effect: {
+      type: 'parallel_slots',
+      value: 4,
+    },
+    purchased: false,
+  },
+  {
+    id: 'parallel_5',
+    name: 'Penta Management',
+    description: 'Run 5 settlements in parallel',
+    cost: 8,
+    effect: {
+      type: 'parallel_slots',
+      value: 5,
+    },
+    purchased: false,
+  },
+  {
+    id: 'parallel_6',
+    name: 'Hexa Management',
+    description: 'Run 6 settlements in parallel',
+    cost: 16,
+    effect: {
+      type: 'parallel_slots',
+      value: 6,
+    },
+    purchased: false,
+  },
+  {
     id: 'autobuy_unlock',
     name: 'Automated Purchasing',
     description: 'Enables automatic building purchases',
-    cost: 5,
+    cost: 32,
     effect: {
       type: 'autobuy_speed',
       value: 1,
-    },
-    purchased: false,
-  },
-  {
-    id: 'autobuy_speed_1',
-    name: 'Faster Automation',
-    description: 'Increases autobuy speed by 50%',
-    cost: 10,
-    effect: {
-      type: 'autobuy_speed',
-      value: 1.5,
-    },
-    purchased: false,
-  },
-  {
-    id: 'bulk_buy_10',
-    name: 'Bulk Construction',
-    description: 'Buy 10 buildings at once',
-    cost: 15,
-    effect: {
-      type: 'bulk_buy',
-      value: 10,
-    },
-    purchased: false,
-  },
-  {
-    id: 'cost_reduction_1',
-    name: 'Efficient Building',
-    description: 'Reduces all building costs by 10%',
-    cost: 20,
-    effect: {
-      type: 'cost_reduction',
-      value: 0.9,
-    },
-    purchased: false,
-  },
-  {
-    id: 'autobuy_speed_2',
-    name: 'Rapid Automation',
-    description: 'Doubles autobuy speed',
-    cost: 30,
-    effect: {
-      type: 'autobuy_speed',
-      value: 2,
     },
     purchased: false,
   },

@@ -15,11 +15,6 @@ function initGame(): void {
   ui = new UI(game, app);
 
   // Set up global functions for UI interactions
-  window.spawnSettlement = (tierType: TierType): void => {
-    game.spawnSettlement(tierType);
-    ui.render();
-  };
-
   window.buyBuilding = (settlementId: string, buildingId: string): void => {
     if (game.buyBuilding(settlementId, buildingId)) {
       ui.render();

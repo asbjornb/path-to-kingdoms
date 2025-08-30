@@ -10,6 +10,7 @@ export class GameStateManager {
   constructor() {
     this.state = this.initializeState();
     this.currency = 100; // Starting currency
+    this.autospawnSettlements();
   }
 
   private initializeState(): GameState {
@@ -18,7 +19,7 @@ export class GameStateManager {
       researchPoints: 0,
       unlockedTiers: new Set([TierType.Hamlet]),
       completedSettlements: new Map(),
-      research: [...RESEARCH_DATA],
+      research: RESEARCH_DATA.map((r) => ({ ...r, purchased: false })),
       settings: {
         autobuyEnabled: false,
         autobuyInterval: 1000,
@@ -38,14 +39,14 @@ export class GameStateManager {
     return this.state.settlements.reduce((total, settlement) => total + settlement.totalIncome, 0);
   }
 
-  public spawnSettlement(tierType: TierType): Settlement | null {
+  private spawnSettlement(tierType: TierType): Settlement | null {
     const tierDef = getTierByType(tierType);
     if (!tierDef || !this.state.unlockedTiers.has(tierType)) {
       return null;
     }
 
     const newSettlement: Settlement = {
-      id: `${tierType}_${Date.now()}`,
+      id: `${tierType}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       tier: tierType,
       isComplete: false,
       totalIncome: 0,
@@ -97,6 +98,10 @@ export class GameStateManager {
     if (type === 'cost_reduction') {
       return upgrades.reduce((mult, upgrade) => mult * upgrade.effect.value, 1);
     }
+    if (type === 'parallel_slots') {
+      // Return the highest parallel slots research (they don't stack)
+      return upgrades.reduce((max, upgrade) => Math.max(max, upgrade.effect.value), 1);
+    }
     return upgrades.reduce((sum, upgrade) => sum + upgrade.effect.value, 0);
   }
 
@@ -111,22 +116,44 @@ export class GameStateManager {
       const completedCount = (this.state.completedSettlements.get(settlement.tier) ?? 0) + 1;
       this.state.completedSettlements.set(settlement.tier, completedCount);
 
-      this.checkTierUnlock(settlement.tier);
+      // Remove completed settlement
+      this.state.settlements = this.state.settlements.filter((s) => s.id !== settlement.id);
+
+      // Check if we should spawn next tier settlement
+      this.checkNextTierSpawn(settlement.tier);
+
+      // Autospawn replacement in same tier
+      this.autospawnSettlements();
     }
   }
 
-  private checkTierUnlock(completedTier: TierType): void {
-    const tierIndex = TIER_DATA.findIndex((t) => t.type === completedTier);
-    if (tierIndex === -1 || tierIndex === TIER_DATA.length - 1) return;
-
-    const nextTier = TIER_DATA[tierIndex + 1];
+  private checkNextTierSpawn(completedTier: TierType): void {
     const completedCount = this.state.completedSettlements.get(completedTier) ?? 0;
 
-    if (
-      completedCount >= nextTier.unlockRequirement &&
-      !this.state.unlockedTiers.has(nextTier.type)
-    ) {
-      this.state.unlockedTiers.add(nextTier.type);
+    // Every 6 completions spawn next tier
+    if (completedCount % 6 === 0) {
+      const tierIndex = TIER_DATA.findIndex((t) => t.type === completedTier);
+      if (tierIndex !== -1 && tierIndex < TIER_DATA.length - 1) {
+        const nextTier = TIER_DATA[tierIndex + 1];
+        this.state.unlockedTiers.add(nextTier.type);
+        // The autospawn will handle creating the settlement
+      }
+    }
+  }
+
+  private autospawnSettlements(): void {
+    const maxSlots = this.getResearchEffect('parallel_slots');
+
+    // For each tier, check if we need to spawn settlements
+    for (const tierDef of TIER_DATA) {
+      if (!this.state.unlockedTiers.has(tierDef.type)) continue;
+
+      const currentCount = this.state.settlements.filter((s) => s.tier === tierDef.type).length;
+      const slotsNeeded = maxSlots - currentCount;
+
+      for (let i = 0; i < slotsNeeded; i++) {
+        this.spawnSettlement(tierDef.type);
+      }
     }
   }
 
@@ -141,6 +168,11 @@ export class GameStateManager {
 
     if (research.id === 'autobuy_unlock') {
       this.state.settings.autobuyEnabled = true;
+    }
+
+    // If this is a parallel slots research, autospawn settlements
+    if (research.effect.type === 'parallel_slots') {
+      this.autospawnSettlements();
     }
 
     return true;
@@ -167,5 +199,10 @@ export class GameStateManager {
 
     const currentCount = settlement.buildings.get(buildingId) ?? 0;
     return this.calculateBuildingCost(building.baseCost, building.costMultiplier, currentCount);
+  }
+
+  // For testing - manually trigger autospawn
+  public triggerAutospawn(): void {
+    this.autospawnSettlements();
   }
 }
