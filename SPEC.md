@@ -13,6 +13,7 @@ An idle/incremental game where the player grows from a Hamlet to a Kingdom acros
 **Core loop:** build → upgrade → complete settlements → unlock next tier.
 
 **Development philosophy:**
+
 - Keep code simple: most of the program is just data definitions for tiers, buildings, and progression rules.
 - Guardrails-first development: robust linting, formatting, tests, and pre-commit hooks from day one.
 - Deployment is lightweight: playable locally, on GitHub Pages initially, with Cloudflare as a later target.
@@ -31,6 +32,7 @@ Eight tiers (end of v1 is a completed Kingdom):
 8. **Kingdom**
 
 Each tier includes:
+
 - 3–4 buildings (flavorful but generic, e.g. Farm, Market, Cathedral)
 - Completion threshold (income/sec target)
 - Unlock rule: complete multiple of previous tier
@@ -51,11 +53,13 @@ Each tier includes:
 ## 5. Development Guardrails
 
 **Pre-commit hooks:**
+
 - Run lint (ESLint or equivalent)
 - Run formatter (Prettier or equivalent)
 - Run test suite
 
 **Tests:**
+
 - Core mechanics (income scaling, completion rules, unlocks)
 - Data validation (tiers and buildings consistent)
 
