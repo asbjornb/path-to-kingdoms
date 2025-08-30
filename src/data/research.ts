@@ -361,4 +361,84 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     },
     purchased: false,
   },
+
+  // Building Cost Reduction Research
+  {
+    id: 'hamlet_cost_reduction_1',
+    name: 'Efficient Construction I',
+    description: 'Reduces all building costs by 5%',
+    cost: 25,
+    tier: TierType.Hamlet,
+    effect: {
+      type: 'cost_reduction',
+      value: 0.95, // 5% reduction (multiply by 0.95)
+    },
+    purchased: false,
+  },
+  {
+    id: 'hamlet_cost_reduction_2',
+    name: 'Efficient Construction II',
+    description: 'Reduces all building costs by 10%',
+    cost: 75,
+    tier: TierType.Hamlet,
+    prerequisite: 'hamlet_cost_reduction_1',
+    effect: {
+      type: 'cost_reduction',
+      value: 0.9, // 10% reduction (multiply by 0.90)
+    },
+    purchased: false,
+  },
+  {
+    id: 'hamlet_cost_reduction_3',
+    name: 'Efficient Construction III',
+    description: 'Reduces all building costs by 15%',
+    cost: 225,
+    tier: TierType.Hamlet,
+    prerequisite: 'hamlet_cost_reduction_2',
+    effect: {
+      type: 'cost_reduction',
+      value: 0.85, // 15% reduction (multiply by 0.85)
+    },
+    purchased: false,
+  },
+
+  // Building Cost Scaling Reduction Research
+  {
+    id: 'hamlet_scaling_reduction_1',
+    name: 'Bulk Production I',
+    description: 'Reduces building cost scaling by improving multipliers',
+    cost: 50,
+    tier: TierType.Hamlet,
+    effect: {
+      type: 'cost_scaling_reduction',
+      value: 0.02, // Reduces multiplier by 0.02 (e.g., 1.15 becomes 1.13)
+    },
+    purchased: false,
+  },
+  {
+    id: 'hamlet_scaling_reduction_2',
+    name: 'Bulk Production II',
+    description: 'Further reduces building cost scaling multipliers',
+    cost: 150,
+    tier: TierType.Hamlet,
+    prerequisite: 'hamlet_scaling_reduction_1',
+    effect: {
+      type: 'cost_scaling_reduction',
+      value: 0.04, // Additional 0.02 reduction (total 0.04)
+    },
+    purchased: false,
+  },
+  {
+    id: 'hamlet_scaling_reduction_3',
+    name: 'Bulk Production III',
+    description: 'Maximizes bulk production efficiency for cost scaling',
+    cost: 450,
+    tier: TierType.Hamlet,
+    prerequisite: 'hamlet_scaling_reduction_2',
+    effect: {
+      type: 'cost_scaling_reduction',
+      value: 0.06, // Additional 0.02 reduction (total 0.06)
+    },
+    purchased: false,
+  },
 ];

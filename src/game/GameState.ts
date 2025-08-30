@@ -128,6 +128,10 @@ export class GameStateManager {
   ): number {
     let costReduction = this.getResearchEffect('cost_reduction');
 
+    // Apply cost scaling reduction to the multiplier
+    const scalingReduction = this.getResearchEffect('cost_scaling_reduction');
+    const adjustedMultiplier = Math.max(1.0, multiplier - scalingReduction);
+
     // Apply building-specific cost reduction effects
     if (settlementId !== undefined && settlementId !== '') {
       const settlement = this.state.settlements.find((s) => s.id === settlementId);
@@ -136,7 +140,7 @@ export class GameStateManager {
       }
     }
 
-    return Math.floor(baseCost * Math.pow(multiplier, count) * costReduction);
+    return Math.floor(baseCost * Math.pow(adjustedMultiplier, count) * costReduction);
   }
 
   private getBuildingEffectMultiplier(settlement: Settlement, effectType: string): number {

@@ -74,7 +74,8 @@ export interface ResearchUpgrade {
       | 'cost_reduction'
       | 'parallel_slots'
       | 'starting_income'
-      | 'auto_building';
+      | 'auto_building'
+      | 'cost_scaling_reduction';
     value?: number;
     buildingId?: string; // For auto_building type
     interval?: number; // For auto_building type (in milliseconds)
