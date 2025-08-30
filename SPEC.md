@@ -8,21 +8,24 @@
 - **Pre-commit Hooks**: Husky with lint-staged for automatic code quality checks
 - **Data Models**: Core game types and interfaces defined
 - **Tier Definitions**: All 8 tiers with building data implemented
-- **Research System**: 5 research upgrades defined
+- **Research System**: 5 research upgrades defined with parallel slots and cost reduction
 - **CI/CD**: GitHub Actions workflow for automatic deployment to GitHub Pages
+- **Game State Management**: Complete GameStateManager with proper state isolation
+- **Game Mechanics**: Income calculation, building purchases, cost scaling implemented
+- **Settlement System**: Per-settlement currency, random goals, completion logic
+- **UI System**: Dynamic settlement display with real-time updates
+- **Goal System**: 5 goal types (income, currency, building count, survival) with progress tracking
+- **Dev Mode**: 1000x income multiplier for testing
 
 ### 🚧 In Progress
 
-- Game state management system
-- Basic UI for settlements and buildings
+- UI polish and animations
 
 ### ⏳ Not Started
 
-- Game mechanics (income calculation, building purchases)
-- Settlement completion logic
-- Research system implementation
 - Save/load functionality
-- UI polish and animations
+- Advanced automation features
+- Achievement system
 
 ---
 
@@ -59,15 +62,17 @@ Each tier includes:
 
 ## 3. Progression Rules
 
-- **Completion condition:** Settlement completes when income target met
-- **Unlocking next tier:** Requires some number of completions of the previous tier (e.g. 4 Villages to unlock a Town)
-- **Research Points:** Awarded on completion, used for global QoL (autobuy cadence, bulk buy, cost scaling tweaks)
-- No prestige, managers, or autospawn yet
+- **Completion condition:** Settlement completes when random goal is achieved (income targets, currency accumulation, building counts, or survival time)
+- **Unlocking next tier:** Requires 6 completions of the previous tier
+- **Research Points:** 10 base points awarded on completion (plus building bonuses), used for parallel slots, cost reduction, and automation
+- **Auto-spawning:** New settlements automatically spawn when parallel research is unlocked
+- **Settlement Reset:** Completed settlements are replaced with fresh settlements with reset state
 
 ## 4. Automation
 
-- Autobuy only (unlocked by research)
-- Player spawns all new settlements manually
+- **Autobuy**: Unlocked by research (available but not yet implemented)
+- **Auto-spawning**: Settlements automatically spawn based on parallel research slots
+- **Settlement Replacement**: Completed settlements automatically replaced with fresh ones
 - Keep idle play comfortable but not fully automated in v1
 
 ## 5. Development Guardrails
@@ -97,24 +102,29 @@ Each tier includes:
 
 ## 7. Player Flow
 
-1. Start with Hamlets → buy buildings to reach first completion
-2. Unlock Villages → repeat loop
-3. Progress through tiers until the first Kingdom is built
-4. Research points smooth progression but no hard reset yet
+1. Start with 1 auto-spawned Hamlet → buy buildings to complete random goal
+2. Earn research points → unlock parallel slots → get more simultaneous Hamlets
+3. Complete 6 Hamlets → unlock Villages → repeat with next tier
+4. Progress through all 8 tiers until the first Kingdom is built
+5. Dev mode available for faster manual testing (1000x income)
 
-## 8. MVP Scope
+## 8. MVP Scope ✅
 
-- 8 tiers
-- 3–4 buildings per tier
-- Manual spawning + completion
-- Research system with ~5 upgrades
-- UI: tabbed per tier, global research/stats/options tabs
-- Early game feel: hands-on → midgame: light automation
+- ✅ 8 tiers implemented
+- ✅ 6 buildings per tier (Hamlet complete, others defined)
+- ✅ Auto-spawning + random goal completion system
+- ✅ Research system with parallel slots and cost reduction
+- ✅ UI: tier tabs, settlement display, research panel, dev mode toggle
+- ✅ Per-settlement currency and goal system
+- ✅ Early game feel: hands-on → midgame: light automation via research
 
 ## 9. Stretch Goals (Future)
 
-- Autospawn (higher tiers generate lower tiers)
-- Managers
-- Better progression system (avoid "lowest tier bottleneck")
-- Achievements
-- Prestige/reset loop
+- ✅ Auto-spawn system (implemented via research)
+- Autobuy implementation (research framework exists)
+- Cross-tier resource generation (higher tiers generate lower tiers)
+- Managers/automation upgrades
+- Save/load functionality
+- Achievements system
+- Prestige/reset mechanics
+- UI polish and animations

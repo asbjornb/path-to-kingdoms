@@ -11,10 +11,12 @@ Path to Kingdoms is an idle game where you build and manage settlements across 8
 ### Features
 
 - 🏰 **8 Tiers of Progression**: Hamlet → Village → Town → City → County → Duchy → Realm → Kingdom
-- 🏗️ **Unique Buildings**: Each tier has 3-4 distinct buildings with different costs and income
-- 🔬 **Research System**: Unlock automation and efficiency upgrades with research points
-- 📈 **Incremental Gameplay**: Watch your settlements grow and multiply
-- 🎯 **Clear Goals**: Complete settlements to unlock new tiers
+- 🏗️ **Unique Buildings**: Each tier has 6 distinct buildings with different costs, income, and effects
+- 🔬 **Research System**: Unlock parallel slots, cost reductions, and automation with research points
+- 📈 **Incremental Gameplay**: Watch your settlements grow and multiply automatically
+- 🎯 **Random Goals**: Complete varied objectives (income, currency, buildings, survival) to progress
+- 💰 **Per-Settlement Economy**: Each settlement has its own currency and goals
+- 🛠️ **Dev Mode**: Toggle 1000x income multiplier for faster testing
 
 ## Acknowledgment
 
@@ -49,6 +51,7 @@ npm run build
 
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
+- `npm test` - Run test suite (60+ tests with Vitest)
 - `npm run lint` - Run ESLint
 - `npm run format` - Format code with Prettier
 - `npm run typecheck` - Check TypeScript types
