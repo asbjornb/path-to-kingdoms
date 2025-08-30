@@ -359,13 +359,22 @@ export class UI {
         }
       }
 
-      // Update building button states and costs
+      // Update building counts and button states
       const buildingButtons = settlementEl.querySelectorAll('.buy-btn');
       buildingButtons.forEach((button) => {
         if (!(button instanceof HTMLButtonElement)) return;
         const settlementId = button.getAttribute('data-settlement');
         const buildingId = button.getAttribute('data-building');
         if (settlementId === null || buildingId === null) return;
+
+        // Update building count in the building name
+        const buildingEl = button.closest('.building');
+        const buildingNameEl = buildingEl?.querySelector('.building-name');
+        if (buildingNameEl !== null && buildingNameEl !== undefined) {
+          const currentCount = settlement.buildings.get(buildingId) ?? 0;
+          const buildingName = buildingNameEl.textContent?.split(' (')[0] ?? '';
+          buildingNameEl.textContent = `${buildingName} (${currentCount})`;
+        }
 
         // Get the current cost (not cached)
         const currentCost = this.game.getBuildingCost(settlementId, buildingId) ?? 0;

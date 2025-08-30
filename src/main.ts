@@ -17,7 +17,8 @@ function initGame(): void {
   // Set up global functions for UI interactions
   window.buyBuilding = (settlementId: string, buildingId: string): void => {
     if (game.buyBuilding(settlementId, buildingId)) {
-      ui.render();
+      // Use dynamic update instead of full render to preserve scroll position
+      ui.update();
     }
   };
 
