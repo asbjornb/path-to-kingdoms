@@ -84,5 +84,6 @@ export interface GameState {
   settings: {
     autobuyEnabled: boolean;
     autobuyInterval: number;
+    devModeEnabled: boolean;
   };
 }

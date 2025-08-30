@@ -293,4 +293,58 @@ describe('GameStateManager', () => {
       );
     });
   });
+
+  describe('Dev Mode', () => {
+    it('should be disabled by default', () => {
+      expect(game.isDevModeEnabled()).toBe(false);
+    });
+
+    it('should toggle dev mode on and off', () => {
+      expect(game.isDevModeEnabled()).toBe(false);
+
+      const enabled = game.toggleDevMode();
+      expect(enabled).toBe(true);
+      expect(game.isDevModeEnabled()).toBe(true);
+
+      const disabled = game.toggleDevMode();
+      expect(disabled).toBe(false);
+      expect(game.isDevModeEnabled()).toBe(false);
+    });
+
+    it('should apply 1000x income multiplier when dev mode is enabled', () => {
+      const settlement = game.getState().settlements[0];
+      game.buyBuilding(settlement.id, 'hamlet_hut'); // 1 income/sec
+
+      const initialCurrency = settlement.currency;
+
+      // Enable dev mode
+      game.toggleDevMode();
+
+      // Simulate 1 second passing with dev mode
+      (game as any).lastUpdate = Date.now() - 1000;
+      game.update();
+
+      const currencyGained = settlement.currency - initialCurrency;
+      // Should gain 1000x normal income (1 * 1000 = 1000)
+      expect(currencyGained).toBeCloseTo(1000, 0);
+      expect(settlement.lifetimeCurrencyEarned).toBeCloseTo(1000, 0);
+    });
+
+    it('should use normal income when dev mode is disabled', () => {
+      // Create fresh game to avoid test interference
+      const freshGame = new GameStateManager();
+      const settlement = freshGame.getState().settlements[0];
+      freshGame.buyBuilding(settlement.id, 'hamlet_hut'); // 1 income/sec
+
+      const initialCurrency = settlement.currency;
+
+      // Simulate 1 second passing without dev mode
+      (freshGame as any).lastUpdate = Date.now() - 1000;
+      freshGame.update();
+
+      const currencyGained = settlement.currency - initialCurrency;
+      // Should gain normal income (1 * 1 = 1)
+      expect(currencyGained).toBeCloseTo(1, 0);
+    });
+  });
 });

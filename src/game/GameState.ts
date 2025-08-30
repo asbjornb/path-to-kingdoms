@@ -22,6 +22,7 @@ export class GameStateManager {
       settings: {
         autobuyEnabled: false,
         autobuyInterval: 1000,
+        devModeEnabled: false,
       },
     };
   }
@@ -300,7 +301,13 @@ export class GameStateManager {
 
     // Update currency for each settlement based on its income
     this.state.settlements.forEach((settlement) => {
-      const currencyGained = settlement.totalIncome * deltaTime;
+      let currencyGained = settlement.totalIncome * deltaTime;
+
+      // Apply dev mode 1000x income multiplier
+      if (this.state.settings.devModeEnabled) {
+        currencyGained *= 1000;
+      }
+
       settlement.currency += currencyGained;
       settlement.lifetimeCurrencyEarned += currencyGained;
 
@@ -374,6 +381,15 @@ export class GameStateManager {
 
     // Check if all goals are completed after updating all goals
     this.checkSettlementCompletion(settlement);
+  }
+
+  public toggleDevMode(): boolean {
+    this.state.settings.devModeEnabled = !this.state.settings.devModeEnabled;
+    return this.state.settings.devModeEnabled;
+  }
+
+  public isDevModeEnabled(): boolean {
+    return this.state.settings.devModeEnabled;
   }
 
   // For testing - manually trigger autospawn

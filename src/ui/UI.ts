@@ -26,6 +26,17 @@ export class UI {
               <span class="stat-label">${this.selectedTier.charAt(0).toUpperCase() + this.selectedTier.slice(1)} Research:</span>
               <span class="stat-value" id="research">${this.game.getResearchPoints(this.selectedTier)}</span>
             </div>
+            <div class="dev-mode-toggle">
+              <label>
+                <input 
+                  type="checkbox" 
+                  id="dev-mode" 
+                  ${this.game.isDevModeEnabled() ? 'checked' : ''}
+                  onchange="window.toggleDevMode()"
+                >
+                <span class="dev-mode-label">Dev Mode (1000x income)</span>
+              </label>
+            </div>
           </div>
         </header>
         
@@ -263,6 +274,12 @@ export class UI {
     const researchEl = document.getElementById('research');
     if (researchEl) {
       researchEl.textContent = this.game.getResearchPoints(this.selectedTier).toString();
+    }
+
+    // Update dev mode checkbox state
+    const devModeCheckbox = document.getElementById('dev-mode') as HTMLInputElement;
+    if (devModeCheckbox !== null) {
+      devModeCheckbox.checked = this.game.isDevModeEnabled();
     }
 
     // Update settlement-specific values

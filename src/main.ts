@@ -32,6 +32,14 @@ function initGame(): void {
     }
   };
 
+  window.toggleDevMode = (): void => {
+    const devModeEnabled = game.toggleDevMode();
+    console.warn(
+      `Dev Mode ${devModeEnabled ? 'enabled' : 'disabled'} - Income multiplier: ${devModeEnabled ? '1000x' : '1x'}`,
+    );
+    ui.render(); // Re-render to update checkbox state
+  };
+
   // Game loop - update stats frequently without re-rendering
   setInterval(() => {
     game.update();
