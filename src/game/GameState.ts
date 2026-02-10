@@ -42,10 +42,10 @@ function createSettlement(tierType: TierType): Settlement {
 // Cross-tier contribution: 0.1% of higher-tier total income, halved per tier of distance
 const CROSS_TIER_RATE = 0.001;
 
-// Mastery: permanent bonuses from repeated tier completions
-const MASTERY_INCOME_PER_COMPLETION = 0.02; // +2% income per completion
-const MASTERY_STARTING_CURRENCY_FACTOR = 0.5; // completions * baseCurrency * this
-const MASTERY_AUTOBUILD_SPEED_PER_COMPLETION = 0.005; // 0.5% faster per completion
+// Mastery: permanent bonuses from repeated tier completions (intentionally slow)
+const MASTERY_INCOME_PER_COMPLETION = 0.005; // +0.5% income per completion
+const MASTERY_STARTING_CURRENCY_FACTOR = 0.1; // completions * baseCurrency * this
+const MASTERY_AUTOBUILD_SPEED_PER_COMPLETION = 0.001; // 0.1% faster per completion
 const MASTERY_AUTOBUILD_SPEED_CAP = 0.5; // Max 50% faster
 
 export class GameStateManager {
@@ -351,8 +351,8 @@ export class GameStateManager {
 
   /**
    * Get the income multiplier from mastery for a tier.
-   * Formula: 1 + (completions * 0.02)
-   * 50 completions = 2x, 100 = 3x, 500 = 11x
+   * Formula: 1 + (completions * 0.005)
+   * 200 completions = 2x, 400 = 3x, 1000 = 6x
    */
   public getMasteryIncomeMultiplier(tier: TierType): number {
     const completions = this.getMasteryLevel(tier);
