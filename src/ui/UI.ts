@@ -63,6 +63,7 @@ export class UI {
           <main class="settlements-area">
             <div class="tier-header">
               <h2>${this.selectedTier.charAt(0).toUpperCase() + this.selectedTier.slice(1)}s</h2>
+              ${this.renderMastery()}
               <div class="tier-progress">
                 ${this.renderTierProgress()}
               </div>
@@ -296,6 +297,33 @@ export class UI {
     }
   }
 
+  private renderMastery(): string {
+    const level = this.game.getMasteryLevel(this.selectedTier);
+    if (level === 0) return '';
+
+    const incomeMultiplier = this.game.getMasteryIncomeMultiplier(this.selectedTier);
+    const startingCurrency = this.game.getMasteryStartingCurrency(this.selectedTier);
+    const autoBuildSpeed = this.game.getMasteryAutoBuildSpeed(this.selectedTier);
+
+    const bonuses: string[] = [];
+    bonuses.push(`<span class="mastery-bonus">${incomeMultiplier.toFixed(2)}x income</span>`);
+    if (startingCurrency > 0) {
+      bonuses.push(`<span class="mastery-bonus">+${formatNumber(startingCurrency)} start</span>`);
+    }
+    if (autoBuildSpeed > 0) {
+      bonuses.push(
+        `<span class="mastery-bonus">${(autoBuildSpeed * 100).toFixed(1)}% faster builds</span>`,
+      );
+    }
+
+    return `
+      <div class="mastery-display" id="mastery-display">
+        <span class="mastery-level">Mastery ${level}</span>
+        <div class="mastery-bonuses">${bonuses.join('<span class="mastery-sep"> | </span>')}</div>
+      </div>
+    `;
+  }
+
   private renderTierProgress(): string {
     const state = this.game.getState();
     const completedCount = state.completedSettlements.get(this.selectedTier) ?? 0;
@@ -365,6 +393,21 @@ export class UI {
     ) as HTMLInputElement;
     if (showCompletedCheckbox !== null) {
       showCompletedCheckbox.checked = this.game.isShowCompletedResearchEnabled();
+    }
+
+    // Update mastery display
+    const masteryEl = document.getElementById('mastery-display');
+    if (masteryEl !== null) {
+      const level = this.game.getMasteryLevel(this.selectedTier);
+      const incomeMultiplier = this.game.getMasteryIncomeMultiplier(this.selectedTier);
+      const levelEl = masteryEl.querySelector('.mastery-level');
+      if (levelEl !== null) {
+        levelEl.textContent = `Mastery ${level}`;
+      }
+      const bonusEls = masteryEl.querySelectorAll('.mastery-bonus');
+      if (bonusEls[0] !== undefined) {
+        bonusEls[0].textContent = `${incomeMultiplier.toFixed(2)}x income`;
+      }
     }
 
     // Update settlement-specific values

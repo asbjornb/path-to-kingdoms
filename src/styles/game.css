@@ -108,6 +108,41 @@
   margin-bottom: 0.5rem;
 }
 
+.mastery-display {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.4rem 0.75rem;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+}
+
+.mastery-level {
+  color: #fbbf24;
+  font-weight: bold;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.mastery-bonuses {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.mastery-bonus {
+  color: #d4a017;
+  font-size: 0.8rem;
+}
+
+.mastery-sep {
+  color: #555;
+  font-size: 0.75rem;
+}
+
 .tier-progress {
   display: flex;
   flex-direction: column;
@@ -464,6 +499,20 @@
     display: inline-block;
     margin-left: 4px;
     vertical-align: middle;
+  }
+
+  .mastery-display {
+    flex-wrap: wrap;
+    gap: 0.25rem 0.5rem;
+    padding: 0.3rem 0.5rem;
+  }
+
+  .mastery-level {
+    font-size: 0.85rem;
+  }
+
+  .mastery-bonus {
+    font-size: 0.75rem;
   }
 
   .settlements-area {

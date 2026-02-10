@@ -314,7 +314,7 @@ describe('GameStateManager', () => {
       // Should have a new settlement with different ID and fresh state
       const newSettlement = game.getState().settlements[0];
       expect(newSettlement.id).not.toBe(originalId);
-      expect(newSettlement.currency).toBe(10); // Fresh starting currency
+      expect(newSettlement.currency).toBe(11); // Fresh starting currency (10 base + 1 mastery bonus from 1 completion)
       expect(newSettlement.totalIncome).toBe(0); // No buildings yet
       expect(newSettlement.buildings.get('hamlet_hut')).toBe(0);
       expect(newSettlement.buildings.get('hamlet_garden')).toBe(0);

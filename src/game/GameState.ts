@@ -42,6 +42,11 @@ function createSettlement(tierType: TierType): Settlement {
 // Cross-tier contribution: 0.1% of higher-tier total income, halved per tier of distance
 const CROSS_TIER_RATE = 0.001;
 
+// Mastery: permanent bonuses from repeated tier completions (intentionally slow)
+const MASTERY_INCOME_PER_COMPLETION = 0.005; // +0.5% income per completion
+const MASTERY_STARTING_CURRENCY_FACTOR = 0.1; // completions * baseCurrency * this
+const MASTERY_AUTOBUILD_HALFPOINT = 500; // completions at which auto-build speed reaches 50%
+
 export class GameStateManager {
   private state: GameState;
   private lastUpdate: number = Date.now();
@@ -98,6 +103,13 @@ export class GameStateManager {
     }
 
     const newSettlement = createSettlement(tierType);
+
+    // Apply mastery starting currency bonus
+    const masteryBonus = this.getMasteryStartingCurrency(tierType);
+    if (masteryBonus > 0) {
+      newSettlement.currency += masteryBonus;
+    }
+
     this.state.settlements.push(newSettlement);
     return newSettlement;
   }
@@ -288,7 +300,10 @@ export class GameStateManager {
     // Apply income multiplier effects
     const incomeMultiplier = this.getBuildingEffectMultiplier(settlement, 'income_multiplier');
 
-    return baseIncome * incomeMultiplier;
+    // Apply mastery income multiplier
+    const masteryMultiplier = this.getMasteryIncomeMultiplier(settlement.tier);
+
+    return baseIncome * incomeMultiplier * masteryMultiplier;
   }
 
   /**
@@ -324,6 +339,46 @@ export class GameStateManager {
     const settlement = this.state.settlements.find((s) => s.id === settlementId);
     if (!settlement) return 0;
     return this.calculateCrossTierBonus(settlement);
+  }
+
+  /**
+   * Get the mastery level for a tier (= total completions for that tier).
+   */
+  public getMasteryLevel(tier: TierType): number {
+    return this.state.completedSettlements.get(tier) ?? 0;
+  }
+
+  /**
+   * Get the income multiplier from mastery for a tier.
+   * Formula: 1 + (completions * 0.005)
+   * 200 completions = 2x, 400 = 3x, 1000 = 6x
+   */
+  public getMasteryIncomeMultiplier(tier: TierType): number {
+    const completions = this.getMasteryLevel(tier);
+    return 1 + completions * MASTERY_INCOME_PER_COMPLETION;
+  }
+
+  /**
+   * Get the starting currency bonus from mastery for a tier.
+   */
+  public getMasteryStartingCurrency(tier: TierType): number {
+    const completions = this.getMasteryLevel(tier);
+    const tierDef = getTierByType(tier);
+    if (!tierDef) return 0;
+    const baseCurrency = tierDef.buildings[0]?.baseCost ?? 10;
+    return Math.floor(completions * baseCurrency * MASTERY_STARTING_CURRENCY_FACTOR);
+  }
+
+  /**
+   * Get the auto-build speed bonus from mastery.
+   * Uses hyperbolic curve: completions / (completions + 500)
+   * Linear-feeling early, sub-linear after ~500, asymptotically approaches 1.
+   * Applied as: interval * (1 - speedBonus)
+   */
+  public getMasteryAutoBuildSpeed(tier: TierType): number {
+    const completions = this.getMasteryLevel(tier);
+    if (completions === 0) return 0;
+    return completions / (completions + MASTERY_AUTOBUILD_HALFPOINT);
   }
 
   private getResearchEffect(type: string, tier?: TierType): number {
@@ -486,10 +541,19 @@ export class GameStateManager {
 
     for (const research of autoBuildingResearch) {
       const buildingId = research.effect.buildingId;
-      const interval = research.effect.interval;
+      const baseInterval = research.effect.interval;
 
-      if (buildingId === undefined || buildingId === '' || interval === undefined || interval === 0)
+      if (
+        buildingId === undefined ||
+        buildingId === '' ||
+        baseInterval === undefined ||
+        baseInterval === 0
+      )
         continue;
+
+      // Apply mastery auto-build speed bonus
+      const speedBonus = this.getMasteryAutoBuildSpeed(research.tier);
+      const interval = Math.round(baseInterval * (1 - speedBonus));
 
       const lastPurchaseTime = this.state.autoBuildingTimers.get(research.id) ?? 0;
 
