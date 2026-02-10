@@ -5,6 +5,7 @@ import {
   GoalType,
   SaveData,
   SerializableSettlement,
+  BuyAmount,
 } from '../types/game';
 import { TIER_DATA, getTierByType } from '../data/tiers';
 import { RESEARCH_DATA } from '../data/research';
@@ -71,6 +72,7 @@ export class GameStateManager {
         autobuyInterval: 1000,
         devModeEnabled: false,
         showCompletedResearch: false, // Default to hiding completed research
+        buyAmount: 1,
       },
     };
   }
@@ -125,6 +127,77 @@ export class GameStateManager {
 
     this.checkSettlementCompletion(settlement);
     return true;
+  }
+
+  public getBulkBuyCost(settlementId: string, buildingId: string, count: number): number | null {
+    const settlement = this.state.settlements.find((s) => s.id === settlementId);
+    if (!settlement) return null;
+
+    const tierDef = getTierByType(settlement.tier);
+    if (!tierDef) return null;
+
+    const building = tierDef.buildings.find((b) => b.id === buildingId);
+    if (!building) return null;
+
+    const currentCount = settlement.buildings.get(buildingId) ?? 0;
+    let total = 0;
+    for (let i = 0; i < count; i++) {
+      total += this.calculateBuildingCost(
+        building.baseCost,
+        building.costMultiplier,
+        currentCount + i,
+        settlementId,
+      );
+    }
+    return total;
+  }
+
+  public getMaxAffordable(settlementId: string, buildingId: string): number {
+    const settlement = this.state.settlements.find((s) => s.id === settlementId);
+    if (!settlement) return 0;
+
+    const tierDef = getTierByType(settlement.tier);
+    if (!tierDef) return 0;
+
+    const building = tierDef.buildings.find((b) => b.id === buildingId);
+    if (!building) return 0;
+
+    const currentCount = settlement.buildings.get(buildingId) ?? 0;
+    let total = 0;
+    let count = 0;
+    while (true) {
+      const nextCost = this.calculateBuildingCost(
+        building.baseCost,
+        building.costMultiplier,
+        currentCount + count,
+        settlementId,
+      );
+      if (total + nextCost > settlement.currency) break;
+      total += nextCost;
+      count++;
+    }
+    return count;
+  }
+
+  public buyMultipleBuildings(
+    settlementId: string,
+    buildingId: string,
+    requestedCount: number,
+  ): number {
+    let bought = 0;
+    for (let i = 0; i < requestedCount; i++) {
+      if (!this.buyBuilding(settlementId, buildingId)) break;
+      bought++;
+    }
+    return bought;
+  }
+
+  public setBuyAmount(amount: BuyAmount): void {
+    this.state.settings.buyAmount = amount;
+  }
+
+  public getBuyAmount(): BuyAmount {
+    return this.state.settings.buyAmount;
   }
 
   private calculateBuildingCost(
@@ -563,6 +636,11 @@ export class GameStateManager {
       );
 
       // Reconstruct the state from serialized data
+      const settings = saveData.gameState.settings;
+      if (settings.buyAmount === undefined) {
+        settings.buyAmount = 1;
+      }
+
       this.state = {
         settlements,
         researchPoints: new Map(saveData.gameState.researchPoints),
@@ -570,7 +648,7 @@ export class GameStateManager {
         completedSettlements: new Map(saveData.gameState.completedSettlements),
         research: saveData.gameState.research,
         autoBuildingTimers: new Map(saveData.gameState.autoBuildingTimers),
-        settings: saveData.gameState.settings,
+        settings,
       };
 
       console.warn(

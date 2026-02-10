@@ -324,6 +324,70 @@ describe('GameStateManager', () => {
     });
   });
 
+  describe('Bulk buy', () => {
+    let settlementId: string;
+
+    beforeEach(() => {
+      settlementId = game.getState().settlements[0].id;
+      game.getState().settlements[0].currency = 100000;
+    });
+
+    it('should default buy amount to 1', () => {
+      expect(game.getBuyAmount()).toBe(1);
+    });
+
+    it('should set and get buy amount', () => {
+      game.setBuyAmount(5);
+      expect(game.getBuyAmount()).toBe(5);
+      game.setBuyAmount('max');
+      expect(game.getBuyAmount()).toBe('max');
+      game.setBuyAmount(1);
+      expect(game.getBuyAmount()).toBe(1);
+    });
+
+    it('should calculate bulk buy cost for multiple buildings', () => {
+      const cost1 = game.getBuildingCost(settlementId, 'hamlet_hut')!;
+      const bulkCost = game.getBulkBuyCost(settlementId, 'hamlet_hut', 3)!;
+
+      // Cost should be sum of 3 sequential purchases (10, 11, 12 approximately)
+      expect(bulkCost).toBeGreaterThan(cost1);
+      expect(bulkCost).toBeGreaterThan(cost1 * 2);
+    });
+
+    it('should return null for bulk cost with invalid settlement', () => {
+      expect(game.getBulkBuyCost('fake', 'hamlet_hut', 3)).toBeNull();
+    });
+
+    it('should calculate max affordable buildings', () => {
+      game.getState().settlements[0].currency = 25;
+      const max = game.getMaxAffordable(settlementId, 'hamlet_hut');
+      // Hut costs 10, then ~11.5, then ~13.2 → 10+11+13=34 > 25, so max should be 2
+      expect(max).toBe(2);
+    });
+
+    it('should return 0 max affordable when cannot afford any', () => {
+      game.getState().settlements[0].currency = 0;
+      expect(game.getMaxAffordable(settlementId, 'hamlet_hut')).toBe(0);
+    });
+
+    it('should return 0 max affordable for invalid settlement', () => {
+      expect(game.getMaxAffordable('fake', 'hamlet_hut')).toBe(0);
+    });
+
+    it('should buy multiple buildings at once', () => {
+      const bought = game.buyMultipleBuildings(settlementId, 'hamlet_hut', 3);
+      expect(bought).toBe(3);
+      expect(game.getState().settlements[0].buildings.get('hamlet_hut')).toBe(3);
+    });
+
+    it('should stop buying when currency runs out', () => {
+      game.getState().settlements[0].currency = 25;
+      const bought = game.buyMultipleBuildings(settlementId, 'hamlet_hut', 10);
+      expect(bought).toBe(2);
+      expect(game.getState().settlements[0].buildings.get('hamlet_hut')).toBe(2);
+    });
+  });
+
   describe('Dev Mode', () => {
     it('should be disabled by default', () => {
       expect(game.isDevModeEnabled()).toBe(false);
