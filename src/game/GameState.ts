@@ -45,8 +45,7 @@ const CROSS_TIER_RATE = 0.001;
 // Mastery: permanent bonuses from repeated tier completions (intentionally slow)
 const MASTERY_INCOME_PER_COMPLETION = 0.005; // +0.5% income per completion
 const MASTERY_STARTING_CURRENCY_FACTOR = 0.1; // completions * baseCurrency * this
-const MASTERY_AUTOBUILD_SPEED_PER_COMPLETION = 0.001; // 0.1% faster per completion
-const MASTERY_AUTOBUILD_SPEED_CAP = 0.5; // Max 50% faster
+const MASTERY_AUTOBUILD_HALFPOINT = 500; // completions at which auto-build speed reaches 50%
 
 export class GameStateManager {
   private state: GameState;
@@ -371,15 +370,15 @@ export class GameStateManager {
   }
 
   /**
-   * Get the auto-build speed multiplier from mastery (0 to 0.5).
+   * Get the auto-build speed bonus from mastery.
+   * Uses hyperbolic curve: completions / (completions + 500)
+   * Linear-feeling early, sub-linear after ~500, asymptotically approaches 1.
    * Applied as: interval * (1 - speedBonus)
    */
   public getMasteryAutoBuildSpeed(tier: TierType): number {
     const completions = this.getMasteryLevel(tier);
-    return Math.min(
-      completions * MASTERY_AUTOBUILD_SPEED_PER_COMPLETION,
-      MASTERY_AUTOBUILD_SPEED_CAP,
-    );
+    if (completions === 0) return 0;
+    return completions / (completions + MASTERY_AUTOBUILD_HALFPOINT);
   }
 
   private getResearchEffect(type: string, tier?: TierType): number {
