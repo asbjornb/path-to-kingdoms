@@ -388,6 +388,92 @@ describe('GameStateManager', () => {
     });
   });
 
+  describe('Cross-tier resource generation', () => {
+    it('should return zero bonus when no higher-tier settlements exist', () => {
+      const settlement = game.getState().settlements[0];
+      expect(game.getCrossTierBonus(settlement.id)).toBe(0);
+    });
+
+    it('should return zero bonus for non-existent settlement', () => {
+      expect(game.getCrossTierBonus('fake-id')).toBe(0);
+    });
+
+    it('should provide bonus from higher-tier settlements', () => {
+      // Unlock village tier and spawn a village with income
+      game.getState().unlockedTiers.add(TierType.Village);
+      game.getState().researchPoints.set(TierType.Village, 0);
+      game.triggerAutospawn();
+
+      const villageSettlement = game
+        .getState()
+        .settlements.find((s) => s.tier === TierType.Village);
+      expect(villageSettlement).toBeDefined();
+
+      // Give village some income by buying buildings
+      villageSettlement!.currency = 100000;
+      game.buyBuilding(villageSettlement!.id, 'village_cottage'); // 10 income
+      expect(villageSettlement!.totalIncome).toBe(10);
+
+      // Hamlet should now get a cross-tier bonus
+      const hamletSettlement = game.getState().settlements.find((s) => s.tier === TierType.Hamlet);
+      const bonus = game.getCrossTierBonus(hamletSettlement!.id);
+
+      // Village is 1 tier above hamlet: 10 * 0.001 / 2^1 = 0.005
+      expect(bonus).toBeCloseTo(0.005, 4);
+    });
+
+    it('should decay bonus with tier distance', () => {
+      // Unlock village and town tiers
+      game.getState().unlockedTiers.add(TierType.Village);
+      game.getState().unlockedTiers.add(TierType.Town);
+      game.getState().researchPoints.set(TierType.Village, 0);
+      game.getState().researchPoints.set(TierType.Town, 0);
+      game.triggerAutospawn();
+
+      const villageSettlement = game
+        .getState()
+        .settlements.find((s) => s.tier === TierType.Village);
+      const townSettlement = game.getState().settlements.find((s) => s.tier === TierType.Town);
+
+      // Give both settlements equal income
+      villageSettlement!.currency = 100000;
+      townSettlement!.currency = 100000;
+      game.buyBuilding(villageSettlement!.id, 'village_cottage'); // 10 income
+      game.buyBuilding(townSettlement!.id, 'town_house'); // 100 income
+
+      const hamletSettlement = game.getState().settlements.find((s) => s.tier === TierType.Hamlet);
+      const bonus = game.getCrossTierBonus(hamletSettlement!.id);
+
+      // Village (distance 1): 10 * 0.001 / 2 = 0.005
+      // Town (distance 2): 100 * 0.001 / 4 = 0.025
+      expect(bonus).toBeCloseTo(0.03, 4);
+    });
+
+    it('should apply cross-tier bonus to currency in update loop', () => {
+      // Unlock village and give it income
+      game.getState().unlockedTiers.add(TierType.Village);
+      game.getState().researchPoints.set(TierType.Village, 0);
+      game.triggerAutospawn();
+
+      const villageSettlement = game
+        .getState()
+        .settlements.find((s) => s.tier === TierType.Village);
+      villageSettlement!.currency = 100000;
+      game.buyBuilding(villageSettlement!.id, 'village_cottage'); // 10 income
+
+      const hamletSettlement = game.getState().settlements.find((s) => s.tier === TierType.Hamlet);
+      const initialCurrency = hamletSettlement!.currency;
+
+      // Simulate 1 second passing
+      (game as any).lastUpdate = Date.now() - 1000;
+      game.update();
+
+      // Hamlet should have gained currency from cross-tier bonus even with 0 own income
+      // Bonus: 10 * 0.001 / 2 = 0.005/s, over 1 second = 0.005
+      expect(hamletSettlement!.currency).toBeGreaterThan(initialCurrency);
+    });
+  });
+
   describe('Dev Mode', () => {
     it('should be disabled by default', () => {
       expect(game.isDevModeEnabled()).toBe(false);

@@ -357,6 +357,15 @@
   font-weight: bold;
 }
 
+.cross-tier-stat .stat-label {
+  color: #c084fc;
+}
+
+.cross-tier-value {
+  color: #c084fc !important;
+  font-size: 0.9rem;
+}
+
 .buy-amount-toggle {
   display: flex;
   align-items: center;

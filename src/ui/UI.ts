@@ -138,7 +138,7 @@ export class UI {
           </div>`
               : ''
           }
-          <span class="income">${formatIncome(settlement.totalIncome)}</span>
+          <span class="income">${formatIncome(settlement.totalIncome + this.game.getCrossTierBonus(settlement.id))}</span>
         </div>
         <div class="settlement-stats">
           <div class="settlement-stat">
@@ -149,6 +149,15 @@ export class UI {
             <span class="stat-label">Income:</span>
             <span class="stat-value">${formatIncome(settlement.totalIncome)}</span>
           </div>
+          ${((): string => {
+            const crossBonus = this.game.getCrossTierBonus(settlement.id);
+            return crossBonus > 0.01
+              ? `<div class="settlement-stat cross-tier-stat">
+                <span class="stat-label">Tribute:</span>
+                <span class="stat-value cross-tier-value">+${formatIncome(crossBonus)}</span>
+              </div>`
+              : '';
+          })()}
         </div>
         <div class="buildings">
           ${tierDef.buildings
@@ -372,6 +381,7 @@ export class UI {
       const currencyEl = settlementEl.querySelector('.settlement-stat .stat-value');
       const incomeEl = settlementEl.querySelectorAll('.settlement-stat .stat-value')[1];
       const headerIncomeEl = settlementEl.querySelector('.settlement-header .income');
+      const crossTierBonus = this.game.getCrossTierBonus(settlement.id);
 
       if (currencyEl !== null) {
         currencyEl.textContent = formatNumber(settlement.currency);
@@ -380,7 +390,13 @@ export class UI {
         incomeEl.textContent = formatIncome(settlement.totalIncome);
       }
       if (headerIncomeEl !== null) {
-        headerIncomeEl.textContent = formatIncome(settlement.totalIncome);
+        headerIncomeEl.textContent = formatIncome(settlement.totalIncome + crossTierBonus);
+      }
+
+      // Update cross-tier tribute display
+      const crossTierEl = settlementEl.querySelector('.cross-tier-value');
+      if (crossTierEl !== null) {
+        crossTierEl.textContent = `+${formatIncome(crossTierBonus)}`;
       }
 
       // Update goal progress (single goal in header)
