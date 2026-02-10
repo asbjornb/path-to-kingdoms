@@ -39,6 +39,9 @@ function createSettlement(tierType: TierType): Settlement {
   return settlement;
 }
 
+// Cross-tier contribution: 0.1% of higher-tier total income, halved per tier of distance
+const CROSS_TIER_RATE = 0.001;
+
 export class GameStateManager {
   private state: GameState;
   private lastUpdate: number = Date.now();
@@ -288,6 +291,41 @@ export class GameStateManager {
     return baseIncome * incomeMultiplier;
   }
 
+  /**
+   * Calculate the cross-tier income bonus for a settlement.
+   * Higher-tier settlements contribute a small fraction of their income
+   * to all lower-tier settlements, decaying with tier distance.
+   */
+  private calculateCrossTierBonus(settlement: Settlement): number {
+    const settlementTierIndex = TIER_DATA.findIndex((t) => t.type === settlement.tier);
+    if (settlementTierIndex === -1) return 0;
+
+    let bonus = 0;
+
+    // Sum contributions from each higher tier
+    for (let i = settlementTierIndex + 1; i < TIER_DATA.length; i++) {
+      const higherTier = TIER_DATA[i];
+      const distance = i - settlementTierIndex;
+
+      // Sum total income of all active settlements in this higher tier
+      const higherTierIncome = this.state.settlements
+        .filter((s) => s.tier === higherTier.type && !s.isComplete)
+        .reduce((sum, s) => sum + s.totalIncome, 0);
+
+      if (higherTierIncome > 0) {
+        bonus += (higherTierIncome * CROSS_TIER_RATE) / Math.pow(2, distance);
+      }
+    }
+
+    return bonus;
+  }
+
+  public getCrossTierBonus(settlementId: string): number {
+    const settlement = this.state.settlements.find((s) => s.id === settlementId);
+    if (!settlement) return 0;
+    return this.calculateCrossTierBonus(settlement);
+  }
+
   private getResearchEffect(type: string, tier?: TierType): number {
     const upgrades = this.state.research.filter(
       (r) => r.purchased && r.effect.type === type && (tier !== undefined ? r.tier === tier : true),
@@ -421,7 +459,8 @@ export class GameStateManager {
 
     // Update currency for each settlement based on its income
     this.state.settlements.forEach((settlement) => {
-      let currencyGained = settlement.totalIncome * deltaTime;
+      const crossTierBonus = this.calculateCrossTierBonus(settlement);
+      let currencyGained = (settlement.totalIncome + crossTierBonus) * deltaTime;
 
       // Apply dev mode 1000x income multiplier
       if (this.state.settings.devModeEnabled) {
