@@ -1,5 +1,5 @@
 import { GameStateManager } from '../game/GameState';
-import { TierType, Settlement, Goal, GoalType } from '../types/game';
+import { TierType, Settlement, Goal, GoalType, BuyAmount } from '../types/game';
 import { TIER_DATA, getTierByType } from '../data/tiers';
 import { formatNumber, formatIncome } from '../utils/format';
 
@@ -30,11 +30,15 @@ export class UI {
               <span class="stat-label">${this.selectedTier.charAt(0).toUpperCase() + this.selectedTier.slice(1)} Research:</span>
               <span class="stat-value" id="research">${this.game.getResearchPoints(this.selectedTier)}</span>
             </div>
+            <div class="buy-amount-toggle">
+              <span class="toggle-label">Buy:</span>
+              ${this.renderBuyAmountButtons()}
+            </div>
             <div class="dev-mode-toggle">
               <label>
-                <input 
-                  type="checkbox" 
-                  id="dev-mode" 
+                <input
+                  type="checkbox"
+                  id="dev-mode"
                   ${this.game.isDevModeEnabled() ? 'checked' : ''}
                   onchange="window.toggleDevMode()"
                 >
@@ -150,8 +154,12 @@ export class UI {
           ${tierDef.buildings
             .map((building) => {
               const count = settlement.buildings.get(building.id) ?? 0;
-              const cost = this.game.getBuildingCost(settlement.id, building.id) ?? 0;
-              const canAfford = settlement.currency >= cost;
+              const buyAmount = this.game.getBuyAmount();
+              const { cost, qty } = this.getDisplayCostAndQty(settlement, building.id, buyAmount);
+              const canAfford = qty > 0 && settlement.currency >= cost;
+
+              const label =
+                buyAmount === 'max' ? `Buy Max (${qty})` : buyAmount > 1 ? `Buy ${qty}x` : 'Buy';
 
               return `
               <div class="building">
@@ -160,7 +168,7 @@ export class UI {
                   <span class="building-income">+${formatIncome(building.baseIncome)}</span>
                   ${building.effect ? `<span class="building-effect">${building.effect.description}</span>` : ''}
                 </div>
-                <button 
+                <button
                   class="buy-btn ${!canAfford ? 'disabled' : ''}"
                   data-settlement="${settlement.id}"
                   data-building="${building.id}"
@@ -168,7 +176,7 @@ export class UI {
                   onclick="window.buyBuilding('${settlement.id}', '${building.id}')"
                   ${!canAfford ? 'disabled' : ''}
                 >
-                  Buy (${formatNumber(cost)})
+                  ${label} (${formatNumber(cost)})
                 </button>
               </div>
             `;
@@ -242,6 +250,35 @@ export class UI {
           .join('')}
       </div>
     `;
+  }
+
+  private getDisplayCostAndQty(
+    settlement: Settlement,
+    buildingId: string,
+    buyAmount: BuyAmount,
+  ): { cost: number; qty: number } {
+    if (buyAmount === 'max') {
+      const qty = this.game.getMaxAffordable(settlement.id, buildingId);
+      const cost =
+        qty > 0
+          ? (this.game.getBulkBuyCost(settlement.id, buildingId, qty) ?? 0)
+          : (this.game.getBuildingCost(settlement.id, buildingId) ?? 0);
+      return { cost, qty };
+    }
+    const cost = this.game.getBulkBuyCost(settlement.id, buildingId, buyAmount) ?? 0;
+    return { cost, qty: buyAmount };
+  }
+
+  private renderBuyAmountButtons(): string {
+    const current = this.game.getBuyAmount();
+    const options: BuyAmount[] = [1, 5, 'max'];
+    return options
+      .map((amount) => {
+        const label = amount === 'max' ? 'Max' : `${amount}x`;
+        const isActive = current === amount;
+        return `<button class="buy-amount-btn ${isActive ? 'active' : ''}" onclick="window.setBuyAmount(${amount === 'max' ? "'max'" : amount})">${label}</button>`;
+      })
+      .join('');
   }
 
   public selectTier(tier: TierType): void {
@@ -367,6 +404,7 @@ export class UI {
       }
 
       // Update building counts and button states
+      const buyAmount = this.game.getBuyAmount();
       const buildingButtons = settlementEl.querySelectorAll('.buy-btn');
       buildingButtons.forEach((button) => {
         if (!(button instanceof HTMLButtonElement)) return;
@@ -383,13 +421,16 @@ export class UI {
           buildingNameEl.textContent = `${buildingName} (${currentCount})`;
         }
 
-        // Get the current cost (not cached)
-        const currentCost = this.game.getBuildingCost(settlementId, buildingId) ?? 0;
-        const canAfford = settlement.currency >= currentCost;
+        // Calculate cost and quantity based on buy amount
+        const { cost, qty } = this.getDisplayCostAndQty(settlement, buildingId, buyAmount);
+        const canAfford = qty > 0 && settlement.currency >= cost;
+
+        const label =
+          buyAmount === 'max' ? `Buy Max (${qty})` : buyAmount > 1 ? `Buy ${qty}x` : 'Buy';
 
         // Update cached cost attribute and button text
-        button.setAttribute('data-cost', currentCost.toString());
-        button.textContent = `Buy (${formatNumber(currentCost)})`;
+        button.setAttribute('data-cost', cost.toString());
+        button.textContent = `${label} (${formatNumber(cost)})`;
 
         if (canAfford && button.disabled === true) {
           button.disabled = false;

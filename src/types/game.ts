@@ -1,3 +1,5 @@
+export type BuyAmount = 1 | 5 | 'max';
+
 export enum TierType {
   Hamlet = 'hamlet',
   Village = 'village',
@@ -96,6 +98,7 @@ export interface GameState {
     autobuyInterval: number;
     devModeEnabled: boolean;
     showCompletedResearch: boolean;
+    buyAmount: BuyAmount;
   };
 }
 
@@ -126,6 +129,7 @@ export interface SaveData {
       autobuyInterval: number;
       devModeEnabled: boolean;
       showCompletedResearch: boolean;
+      buyAmount: BuyAmount;
     };
   };
 }

@@ -1,4 +1,4 @@
-import { TierType } from './game';
+import { TierType, BuyAmount } from './game';
 
 declare global {
   interface Window {
@@ -7,6 +7,7 @@ declare global {
     purchaseResearch: (researchId: string) => void;
     toggleDevMode: () => void;
     toggleShowCompletedResearch: () => void;
+    setBuyAmount: (amount: BuyAmount) => void;
     saveGame: () => void;
     deleteSave: () => void;
     exportSave: () => void;

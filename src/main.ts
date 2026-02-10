@@ -1,6 +1,6 @@
 import { GameStateManager } from './game/GameState';
 import { UI } from './ui/UI';
-import { TierType } from './types/game';
+import { TierType, BuyAmount } from './types/game';
 
 let game: GameStateManager;
 let ui: UI;
@@ -16,10 +16,23 @@ function initGame(): void {
 
   // Set up global functions for UI interactions
   window.buyBuilding = (settlementId: string, buildingId: string): void => {
-    if (game.buyBuilding(settlementId, buildingId)) {
-      // Use dynamic update instead of full render to preserve scroll position
-      ui.update();
+    const buyAmount = game.getBuyAmount();
+    if (buyAmount === 1) {
+      if (game.buyBuilding(settlementId, buildingId)) {
+        ui.update();
+      }
+    } else {
+      const count =
+        buyAmount === 'max' ? game.getMaxAffordable(settlementId, buildingId) : buyAmount;
+      if (count > 0 && game.buyMultipleBuildings(settlementId, buildingId, count) > 0) {
+        ui.update();
+      }
     }
+  };
+
+  window.setBuyAmount = (amount: BuyAmount): void => {
+    game.setBuyAmount(amount);
+    ui.render();
   };
 
   window.selectTier = (tierType: TierType): void => {
