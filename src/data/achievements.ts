@@ -109,6 +109,18 @@ export const ACHIEVEMENTS_DATA: Achievement[] = [
     unlocked: false,
   },
   {
+    id: 'ach_total_250',
+    name: 'Rapid Dominion',
+    description: 'Complete 250 total settlements',
+    condition: { type: 'total_completions', value: 250 },
+    bonus: {
+      type: 'tier_requirement_reduction',
+      value: 1,
+      description: '-1 completions needed to advance tiers',
+    },
+    unlocked: false,
+  },
+  {
     id: 'ach_prestige_1',
     name: 'Rebirth',
     description: 'Prestige for the first time',

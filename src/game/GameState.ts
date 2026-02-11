@@ -300,8 +300,11 @@ export class GameStateManager {
     // Apply achievement cost reduction (multiplicative)
     const achievementCostReduction = this.getAchievementEffect('cost_reduction');
 
-    // Apply prestige flat cost: first N buildings of each type use flat cost (no scaling)
-    const flatCostCount = this.getPrestigeEffect('prestige_flat_cost_count');
+    // Apply flat cost: first N buildings of each type use flat cost (no scaling)
+    // Combines research flat_cost_count and prestige flat_cost_count
+    const researchFlatCost = this.getResearchEffect('flat_cost_count');
+    const prestigeFlatCost = this.getPrestigeEffect('prestige_flat_cost_count');
+    const flatCostCount = researchFlatCost + prestigeFlatCost;
     const effectiveCount = Math.max(0, count - flatCostCount);
 
     return Math.floor(
@@ -600,6 +603,9 @@ export class GameStateManager {
       case 'prestige_grant_building':
         // Handled per-building in spawnSettlement, not aggregated here
         return 0;
+      case 'prestige_tier_requirement_reduction':
+        // Additive sum (reduces tier advancement requirement)
+        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
       default:
         return 0;
     }
@@ -634,6 +640,8 @@ export class GameStateManager {
       case 'research_bonus':
         return achievements.reduce((sum, a) => sum + a.bonus.value, 0);
       case 'starting_currency':
+        return achievements.reduce((sum, a) => sum + a.bonus.value, 0);
+      case 'tier_requirement_reduction':
         return achievements.reduce((sum, a) => sum + a.bonus.value, 0);
       default:
         return 0;
@@ -909,7 +917,7 @@ export class GameStateManager {
       // Remove completed settlement
       this.state.settlements = this.state.settlements.filter((s) => s.id !== settlement.id);
 
-      // Check if we should spawn next tier settlement (every 6 completions)
+      // Check if we should spawn next tier settlement
       this.checkNextTierSpawn(settlement.tier);
 
       // Only auto-replace hamlets (the base tier). Higher tier settlements
@@ -920,11 +928,23 @@ export class GameStateManager {
     }
   }
 
+  /**
+   * Get the current tier advancement requirement (completions needed to spawn next tier).
+   * Base is 6, reduced by research, prestige, and achievements. Minimum 2.
+   */
+  public getTierRequirement(): number {
+    const researchReduction = this.getResearchEffect('tier_requirement_reduction');
+    const prestigeReduction = this.getPrestigeEffect('prestige_tier_requirement_reduction');
+    const achievementReduction = this.getAchievementEffect('tier_requirement_reduction');
+    const totalReduction = researchReduction + prestigeReduction + achievementReduction;
+    return Math.max(2, 6 - totalReduction);
+  }
+
   private checkNextTierSpawn(completedTier: TierType): void {
     const completedCount = this.state.completedSettlements.get(completedTier) ?? 0;
 
-    // Every 6 completions of a tier spawns 1 settlement of the next tier
-    if (completedCount % 6 === 0) {
+    const requirement = this.getTierRequirement();
+    if (completedCount % requirement === 0) {
       const tierIndex = TIER_DATA.findIndex((t) => t.type === completedTier);
       if (tierIndex !== -1 && tierIndex < TIER_DATA.length - 1) {
         const nextTier = TIER_DATA[tierIndex + 1];
@@ -943,7 +963,7 @@ export class GameStateManager {
 
   private autospawnSettlements(): void {
     // Only auto-spawn for Hamlet (the base tier).
-    // Higher tiers are earned by completing 6 of the tier below, not auto-spawned.
+    // Higher tiers are earned by completing N of the tier below, not auto-spawned.
     if (!this.state.unlockedTiers.has(TierType.Hamlet)) return;
 
     const maxSlots = this.getResearchEffect('parallel_slots', TierType.Hamlet);

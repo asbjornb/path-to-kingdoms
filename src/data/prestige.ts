@@ -906,6 +906,30 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     effect: { type: 'prestige_grant_building', value: 1, targetBuilding: 'city_trade_guild' },
     purchased: false,
   },
+
+  // ===== Tier requirement reduction =====
+
+  // City currency → Reduce completions needed to advance tiers
+  {
+    id: 'prestige_swift_expansion_1',
+    name: 'Swift Expansion I',
+    description: 'Reduces completions needed to advance tiers by 1',
+    cost: 5,
+    tier: TierType.City,
+    effect: { type: 'prestige_tier_requirement_reduction', value: 1 },
+    purchased: false,
+  },
+  // Kingdom currency → Final tier requirement reduction (3→2, very expensive)
+  {
+    id: 'prestige_swift_expansion_2',
+    name: 'Swift Expansion II',
+    description: 'Reduces completions needed to advance tiers by 1 (minimum 2)',
+    cost: 5,
+    tier: TierType.Kingdom,
+    effect: { type: 'prestige_tier_requirement_reduction', value: 1 },
+    purchased: false,
+    prerequisite: 'prestige_swift_expansion_1',
+  },
 ];
 
 /**

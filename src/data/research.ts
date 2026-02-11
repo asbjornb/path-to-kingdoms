@@ -640,4 +640,36 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     },
     purchased: false,
   },
+
+  // ===== TIER REQUIREMENT REDUCTION =====
+
+  // Hamlet Research → Reduce completions needed to spawn next tier
+  {
+    id: 'hamlet_expansion_efficiency_1',
+    name: 'Expansion Efficiency',
+    description: 'Reduces completions needed to advance tiers by 1 (6→5)',
+    cost: 500,
+    tier: TierType.Hamlet,
+    effect: {
+      type: 'tier_requirement_reduction',
+      value: 1,
+    },
+    purchased: false,
+  },
+
+  // ===== FLAT COST COUNT (RESEARCH) =====
+
+  // Village Research → First building of each type doesn't count for scaling
+  {
+    id: 'village_foundation_planning_1',
+    name: 'Foundation Planning',
+    description: 'First building of each type has no cost scaling',
+    cost: 200,
+    tier: TierType.Village,
+    effect: {
+      type: 'flat_cost_count',
+      value: 1,
+    },
+    purchased: false,
+  },
 ];
