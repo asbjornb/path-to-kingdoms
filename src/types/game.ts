@@ -84,6 +84,8 @@ export interface ResearchUpgrade {
   };
   purchased: boolean;
   prerequisite?: string; // ID of research that must be purchased first
+  repeatable?: boolean; // If true, purchasing generates a more expensive next level
+  level?: number; // Current level for repeatable research
 }
 
 export interface GameState {
