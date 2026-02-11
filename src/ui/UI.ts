@@ -181,19 +181,22 @@ export class UI {
     return TIER_DATA.map((tier) => {
       const isUnlocked = state.unlockedTiers.has(tier.type);
       const isSelected = tier.type === this.selectedTier;
+      const activeCount = state.settlements.filter((s) => s.tier === tier.type).length;
       const completedCount = state.completedSettlements.get(tier.type) ?? 0;
 
       if (!isUnlocked) {
         return `<button class="tier-tab locked" disabled>???</button>`;
       }
 
+      const showBadge = activeCount > 0 || completedCount > 0;
+
       return `
-        <button 
-          class="tier-tab ${isSelected ? 'active' : ''}" 
+        <button
+          class="tier-tab ${isSelected ? 'active' : ''}"
           onclick="window.selectTier('${tier.type}')"
         >
           ${tier.name}
-          ${completedCount > 0 ? `<span class="badge">${completedCount}</span>` : ''}
+          ${showBadge ? `<span class="badge">${activeCount} / ${completedCount}</span>` : ''}
         </button>
       `;
     }).join('');
