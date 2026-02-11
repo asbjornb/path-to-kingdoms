@@ -162,6 +162,14 @@ export interface Achievement {
   unlocked: boolean;
 }
 
+export interface GameNotification {
+  id: string;
+  type: 'goal_complete' | 'achievement_unlocked' | 'tier_unlocked';
+  message: string;
+  tier?: TierType;
+  timestamp: number;
+}
+
 export interface GameState {
   settlements: Settlement[];
   researchPoints: Map<TierType, number>; // Tier-specific research points
@@ -179,6 +187,7 @@ export interface GameState {
     showCompletedResearch: boolean;
     buyAmount: BuyAmount;
     compactView: boolean;
+    goalNotificationsByTier: Partial<Record<TierType, boolean>>;
   };
 }
 
@@ -214,6 +223,7 @@ export interface SaveData {
       showCompletedResearch: boolean;
       buyAmount: BuyAmount;
       compactView: boolean;
+      goalNotificationsByTier?: Partial<Record<TierType, boolean>>;
     };
   };
 }

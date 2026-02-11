@@ -1,5 +1,5 @@
 import { GameStateManager } from '../game/GameState';
-import { TierType, Settlement, Goal, GoalType, BuyAmount } from '../types/game';
+import { TierType, GameNotification, Settlement, Goal, GoalType, BuyAmount } from '../types/game';
 import { TIER_DATA, getTierByType } from '../data/tiers';
 import { formatNumber, formatIncome } from '../utils/format';
 
@@ -13,10 +13,23 @@ export class UI {
   private showAchievements: boolean = false;
   private prestigeShopOpen: boolean = false;
   private selectedPrestigeUpgrades: Set<string> = new Set();
+  private notificationContainer: HTMLElement;
+  private activeNotificationIds: Set<string> = new Set();
 
   constructor(game: GameStateManager, container: HTMLElement) {
     this.game = game;
     this.container = container;
+    this.notificationContainer = this.createNotificationContainer();
+  }
+
+  private createNotificationContainer(): HTMLElement {
+    const existing = document.getElementById('notification-container');
+    if (existing) return existing;
+    const el = document.createElement('div');
+    el.id = 'notification-container';
+    el.className = 'notification-container';
+    document.body.appendChild(el);
+    return el;
   }
 
   public isPrestigeShopOpen(): boolean {
@@ -130,7 +143,18 @@ export class UI {
           
           <main class="settlements-area">
             <div class="tier-header">
-              <h2>${this.selectedTier.charAt(0).toUpperCase() + this.selectedTier.slice(1)}s</h2>
+              <div class="tier-header-top">
+                <h2>${this.selectedTier.charAt(0).toUpperCase() + this.selectedTier.slice(1)}s</h2>
+                <label class="goal-notification-toggle">
+                  <input
+                    type="checkbox"
+                    id="goal-notification-toggle"
+                    ${this.game.isGoalNotificationEnabled(this.selectedTier) ? 'checked' : ''}
+                    onchange="window.toggleGoalNotification('${this.selectedTier}')"
+                  >
+                  <span class="toggle-label">Goal alerts</span>
+                </label>
+              </div>
               ${this.renderMastery()}
               <div class="tier-progress">
                 ${this.renderTierProgress()}
@@ -659,6 +683,53 @@ export class UI {
     `;
   }
 
+  public processNotifications(): void {
+    const notifications = this.game.getAndClearNotifications();
+    for (const notification of notifications) {
+      this.showNotification(notification);
+    }
+  }
+
+  private showNotification(notification: GameNotification): void {
+    if (this.activeNotificationIds.size >= 5) return;
+
+    this.activeNotificationIds.add(notification.id);
+
+    const el = document.createElement('div');
+    el.className = `notification notification-${notification.type}`;
+    el.setAttribute('data-notification-id', notification.id);
+
+    const messageSpan = document.createElement('span');
+    messageSpan.className = 'notification-message';
+    messageSpan.textContent = notification.message;
+
+    const dismissBtn = document.createElement('button');
+    dismissBtn.className = 'notification-dismiss';
+    dismissBtn.textContent = '\u00d7';
+    dismissBtn.addEventListener('click', () => {
+      this.removeNotification(notification.id);
+    });
+
+    el.appendChild(messageSpan);
+    el.appendChild(dismissBtn);
+    this.notificationContainer.appendChild(el);
+
+    window.setTimeout(() => {
+      el.classList.add('notification-fade-out');
+      window.setTimeout(() => {
+        this.removeNotification(notification.id);
+      }, 500);
+    }, 4500);
+  }
+
+  public removeNotification(id: string): void {
+    this.activeNotificationIds.delete(id);
+    const el = this.notificationContainer.querySelector(`[data-notification-id="${id}"]`);
+    if (el) {
+      el.remove();
+    }
+  }
+
   public selectTier(tier: TierType): void {
     if (this.game.getState().unlockedTiers.has(tier)) {
       this.selectedTier = tier;
@@ -728,6 +799,8 @@ export class UI {
 
   public update(): void {
     if (!this.isInitialized) return;
+
+    this.processNotifications();
 
     // Check if settlement count has changed or settlement IDs have changed (completion/spawning/replacement)
     const currentSettlementCount = this.game.getState().settlements.length;
