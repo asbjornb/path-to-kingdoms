@@ -27,45 +27,8 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     },
     purchased: false,
   },
-  {
-    id: 'hamlet_parallel_4',
-    name: 'Quad Hamlet Management',
-    description: 'Run 4 hamlets in parallel',
-    cost: 800,
-    tier: TierType.Hamlet,
-    prerequisite: 'hamlet_parallel_3',
-    effect: {
-      type: 'parallel_slots',
-      value: 4,
-    },
-    purchased: false,
-  },
-  {
-    id: 'hamlet_parallel_5',
-    name: 'Penta Hamlet Management',
-    description: 'Run 5 hamlets in parallel',
-    cost: 3200,
-    tier: TierType.Hamlet,
-    prerequisite: 'hamlet_parallel_4',
-    effect: {
-      type: 'parallel_slots',
-      value: 5,
-    },
-    purchased: false,
-  },
-  {
-    id: 'hamlet_parallel_6',
-    name: 'Hexa Hamlet Management',
-    description: 'Run 6 hamlets in parallel',
-    cost: 12800,
-    tier: TierType.Hamlet,
-    prerequisite: 'hamlet_parallel_5',
-    effect: {
-      type: 'parallel_slots',
-      value: 6,
-    },
-    purchased: false,
-  },
+  // hamlet_parallel_4 and hamlet_parallel_5 are in Village and Town research sections
+  // hamlet_parallel_6 is a prestige upgrade
   // Starting Income Research
   {
     id: 'hamlet_starting_income_1',
@@ -527,6 +490,21 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     purchased: false,
   },
 
+  // Village → Hamlet parallel slot upgrade
+  {
+    id: 'hamlet_parallel_4',
+    name: 'Quad Hamlet Management',
+    description: 'Run 4 hamlets in parallel',
+    cost: 250,
+    tier: TierType.Village,
+    prerequisite: 'hamlet_parallel_3',
+    effect: {
+      type: 'parallel_slots',
+      value: 4,
+    },
+    purchased: false,
+  },
+
   // ===== TOWN RESEARCH =====
 
   // Town Starting Income
@@ -597,6 +575,21 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     purchased: false,
   },
 
+  // Town → Hamlet parallel slot upgrade
+  {
+    id: 'hamlet_parallel_5',
+    name: 'Penta Hamlet Management',
+    description: 'Run 5 hamlets in parallel',
+    cost: 500,
+    tier: TierType.Town,
+    prerequisite: 'hamlet_parallel_4',
+    effect: {
+      type: 'parallel_slots',
+      value: 5,
+    },
+    purchased: false,
+  },
+
   // ===== CITY RESEARCH =====
 
   // City Starting Income
@@ -657,9 +650,20 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     purchased: false,
   },
 
-  // ===== FLAT COST COUNT (RESEARCH) =====
+  // ===== FOUNDATION PLANNING (per-tier, tier-scoped) =====
 
-  // Village Research → First building of each type doesn't count for scaling
+  {
+    id: 'hamlet_foundation_planning_1',
+    name: 'Foundation Planning',
+    description: 'First building of each type has no cost scaling',
+    cost: 50,
+    tier: TierType.Hamlet,
+    effect: {
+      type: 'flat_cost_count',
+      value: 1,
+    },
+    purchased: false,
+  },
   {
     id: 'village_foundation_planning_1',
     name: 'Foundation Planning',
@@ -669,6 +673,198 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     effect: {
       type: 'flat_cost_count',
       value: 1,
+    },
+    purchased: false,
+  },
+  {
+    id: 'town_foundation_planning_1',
+    name: 'Foundation Planning',
+    description: 'First building of each type has no cost scaling',
+    cost: 500,
+    tier: TierType.Town,
+    effect: {
+      type: 'flat_cost_count',
+      value: 1,
+    },
+    purchased: false,
+  },
+  {
+    id: 'city_foundation_planning_1',
+    name: 'Foundation Planning',
+    description: 'First building of each type has no cost scaling',
+    cost: 1200,
+    tier: TierType.City,
+    effect: {
+      type: 'flat_cost_count',
+      value: 1,
+    },
+    purchased: false,
+  },
+  {
+    id: 'county_foundation_planning_1',
+    name: 'Foundation Planning',
+    description: 'First building of each type has no cost scaling',
+    cost: 3000,
+    tier: TierType.County,
+    effect: {
+      type: 'flat_cost_count',
+      value: 1,
+    },
+    purchased: false,
+  },
+  {
+    id: 'duchy_foundation_planning_1',
+    name: 'Foundation Planning',
+    description: 'First building of each type has no cost scaling',
+    cost: 7000,
+    tier: TierType.Duchy,
+    effect: {
+      type: 'flat_cost_count',
+      value: 1,
+    },
+    purchased: false,
+  },
+  {
+    id: 'realm_foundation_planning_1',
+    name: 'Foundation Planning',
+    description: 'First building of each type has no cost scaling',
+    cost: 15000,
+    tier: TierType.Realm,
+    effect: {
+      type: 'flat_cost_count',
+      value: 1,
+    },
+    purchased: false,
+  },
+  {
+    id: 'kingdom_foundation_planning_1',
+    name: 'Foundation Planning',
+    description: 'First building of each type has no cost scaling',
+    cost: 35000,
+    tier: TierType.Kingdom,
+    effect: {
+      type: 'flat_cost_count',
+      value: 1,
+    },
+    purchased: false,
+  },
+
+  // ===== ADDITIONAL TIER RESEARCH (cost reduction & scaling) =====
+
+  // Village Cost Scaling Reduction
+  {
+    id: 'village_scaling_reduction_1',
+    name: 'Village Bulk Production I',
+    description: 'Reduces village building cost scaling',
+    cost: 150,
+    tier: TierType.Village,
+    effect: {
+      type: 'cost_scaling_reduction',
+      value: 0.02,
+    },
+    purchased: false,
+  },
+
+  // County Research
+  {
+    id: 'county_cost_reduction_1',
+    name: 'County Construction Efficiency I',
+    description: 'Reduces all county building costs by 15%',
+    cost: 1500,
+    tier: TierType.County,
+    effect: {
+      type: 'cost_reduction',
+      value: 0.85,
+    },
+    purchased: false,
+  },
+  {
+    id: 'county_scaling_reduction_1',
+    name: 'County Mass Production I',
+    description: 'Reduces county building cost scaling',
+    cost: 2000,
+    tier: TierType.County,
+    effect: {
+      type: 'cost_scaling_reduction',
+      value: 0.05,
+    },
+    purchased: false,
+  },
+
+  // Duchy Research
+  {
+    id: 'duchy_cost_reduction_1',
+    name: 'Ducal Engineering I',
+    description: 'Reduces all duchy building costs by 18%',
+    cost: 3500,
+    tier: TierType.Duchy,
+    effect: {
+      type: 'cost_reduction',
+      value: 0.82,
+    },
+    purchased: false,
+  },
+  {
+    id: 'duchy_scaling_reduction_1',
+    name: 'Ducal Mass Production I',
+    description: 'Reduces duchy building cost scaling',
+    cost: 5000,
+    tier: TierType.Duchy,
+    effect: {
+      type: 'cost_scaling_reduction',
+      value: 0.06,
+    },
+    purchased: false,
+  },
+
+  // Realm Research
+  {
+    id: 'realm_cost_reduction_1',
+    name: 'Realm Engineering I',
+    description: 'Reduces all realm building costs by 20%',
+    cost: 8000,
+    tier: TierType.Realm,
+    effect: {
+      type: 'cost_reduction',
+      value: 0.8,
+    },
+    purchased: false,
+  },
+  {
+    id: 'realm_scaling_reduction_1',
+    name: 'Realm Mass Production I',
+    description: 'Reduces realm building cost scaling',
+    cost: 12000,
+    tier: TierType.Realm,
+    effect: {
+      type: 'cost_scaling_reduction',
+      value: 0.07,
+    },
+    purchased: false,
+  },
+
+  // Kingdom Research
+  {
+    id: 'kingdom_cost_reduction_1',
+    name: 'Royal Engineering I',
+    description: 'Reduces all kingdom building costs by 22%',
+    cost: 20000,
+    tier: TierType.Kingdom,
+    effect: {
+      type: 'cost_reduction',
+      value: 0.78,
+    },
+    purchased: false,
+  },
+  {
+    id: 'kingdom_scaling_reduction_1',
+    name: 'Royal Mass Production I',
+    description: 'Reduces kingdom building cost scaling',
+    cost: 30000,
+    tier: TierType.Kingdom,
+    effect: {
+      type: 'cost_scaling_reduction',
+      value: 0.08,
     },
     purchased: false,
   },

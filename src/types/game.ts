@@ -121,7 +121,8 @@ export interface PrestigeUpgrade {
       | 'prestige_production_boost_amplifier'
       | 'prestige_grant_building'
       | 'prestige_tier_requirement_reduction'
-      | 'prestige_building_synergy';
+      | 'prestige_building_synergy'
+      | 'prestige_parallel_slots';
     value: number;
     targetBuilding?: string; // For prestige_building_income_boost / prestige_grant_building / prestige_building_synergy
     sourceBuilding?: string; // For prestige_building_synergy - source building providing the bonus
