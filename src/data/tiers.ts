@@ -12,7 +12,7 @@ export const TIER_DATA: TierDefinition[] = [
         name: 'Hut',
         baseCost: 10,
         baseIncome: 1,
-        costMultiplier: 1.15,
+        costMultiplier: 1.17,
         description: 'A simple dwelling for a small family',
       },
       {
@@ -20,7 +20,7 @@ export const TIER_DATA: TierDefinition[] = [
         name: 'Garden',
         baseCost: 50,
         baseIncome: 3,
-        costMultiplier: 1.2,
+        costMultiplier: 1.24,
         description: 'Grows vegetables for the community',
       },
       {
@@ -28,7 +28,7 @@ export const TIER_DATA: TierDefinition[] = [
         name: 'Workshop',
         baseCost: 200,
         baseIncome: 8,
-        costMultiplier: 1.25,
+        costMultiplier: 1.3,
         description: 'Basic tools and crafts are made here',
       },
       {
@@ -36,7 +36,7 @@ export const TIER_DATA: TierDefinition[] = [
         name: 'Shrine',
         baseCost: 100,
         baseIncome: 2,
-        costMultiplier: 1.3,
+        costMultiplier: 1.35,
         description: 'A small sacred place that inspires the villagers',
         effect: {
           type: 'income_multiplier',
@@ -49,7 +49,7 @@ export const TIER_DATA: TierDefinition[] = [
         name: 'Market Stall',
         baseCost: 150,
         baseIncome: 4,
-        costMultiplier: 1.2,
+        costMultiplier: 1.24,
         description: 'Trades goods with passing travelers',
         effect: {
           type: 'cost_reduction',
@@ -62,7 +62,7 @@ export const TIER_DATA: TierDefinition[] = [
         name: 'Small Library',
         baseCost: 500,
         baseIncome: 5,
-        costMultiplier: 1.4,
+        costMultiplier: 1.48,
         description: 'Stores knowledge and speeds learning',
         effect: {
           type: 'completion_bonus',
