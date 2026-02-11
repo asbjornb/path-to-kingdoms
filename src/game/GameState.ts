@@ -309,7 +309,7 @@ export class GameStateManager {
     // Apply achievement cost reduction (multiplicative)
     const achievementCostReduction = this.getAchievementEffect('cost_reduction');
 
-    // Apply flat cost: first N buildings of each type use flat cost (no scaling)
+    // Apply flat cost: N buildings of each type don't count toward cost scaling
     // Research flat_cost_count is tier-scoped; prestige flat_cost_count is global
     const researchFlatCost = this.getResearchEffect('flat_cost_count', settlementTier);
     const prestigeFlatCost = this.getPrestigeEffect('prestige_flat_cost_count');
