@@ -260,16 +260,23 @@
 
 .building {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
   padding: 0.5rem;
   background: #1a1a1a;
   border-radius: 4px;
+  gap: 0.15rem;
 }
 
-.building-info {
+.building-header {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.building-details {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .building-name {
@@ -936,36 +943,32 @@
 
 .settlement.compact .building {
   padding: 0.15rem 0.3rem;
-  flex-wrap: nowrap;
+  gap: 0.05rem;
 }
 
-.settlement.compact .building-info {
-  flex-direction: row;
-  align-items: center;
-  gap: 0.4rem;
-  flex: 1;
-  min-width: 0;
+.settlement.compact .building-details {
+  gap: 0.3rem;
 }
 
 .settlement.compact .building-name {
   font-size: 0.8rem;
-  white-space: nowrap;
-  flex-shrink: 0;
+}
+
+.settlement.compact .building-income {
+  font-size: 0.7rem;
 }
 
 .settlement.compact .building-effect {
   font-size: 0.7rem;
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
   min-width: 0;
 }
 
 .settlement.compact .buy-btn {
   padding: 0.1rem 0.4rem;
   font-size: 0.75rem;
-  white-space: nowrap;
-  flex-shrink: 0;
 }
 
 /* ===== Mobile Responsive ===== */
@@ -1077,8 +1080,6 @@
   }
 
   .building {
-    flex-wrap: wrap;
-    gap: 0.4rem;
     padding: 0.5rem;
   }
 
@@ -1110,16 +1111,12 @@
   }
 
   .settlement.compact .settlement-header {
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
   }
 
   .settlement.compact .goal-display {
-    width: auto;
-  }
-
-  .settlement.compact .building {
-    flex-wrap: nowrap;
-    padding: 0.15rem 0.3rem;
+    flex: 1 1 auto;
+    min-width: 40%;
   }
 
   .settlement.compact .buy-btn {
@@ -1141,16 +1138,10 @@
     font-size: 0.8rem;
   }
 
-  .building {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
   .buy-btn {
-    width: 100%;
-    text-align: center;
-    padding: 0.5rem;
-    min-height: 40px;
+    padding: 0.4rem 0.5rem;
+    font-size: 0.8rem;
+    min-height: 36px;
   }
 
   .settlement-stats {
@@ -1179,13 +1170,7 @@
     gap: 0.2rem;
   }
 
-  .settlement.compact .building {
-    flex-direction: row;
-    align-items: center;
-  }
-
   .settlement.compact .buy-btn {
-    width: auto;
     min-height: auto;
     padding: 0.1rem 0.4rem;
   }

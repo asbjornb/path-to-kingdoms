@@ -254,21 +254,23 @@ export class UI {
 
               return `
               <div class="building">
-                <div class="building-info">
+                <div class="building-header">
                   <span class="building-name">${building.name} (${count})</span>
-                  ${!compact ? `<span class="building-income">+${formatIncome(building.baseIncome)}</span>` : ''}
+                  <button
+                    class="buy-btn ${!canAfford ? 'disabled' : ''}"
+                    data-settlement="${settlement.id}"
+                    data-building="${building.id}"
+                    data-cost="${cost}"
+                    onclick="window.buyBuilding('${settlement.id}', '${building.id}')"
+                    ${!canAfford ? 'disabled' : ''}
+                  >
+                    ${label} (${formatNumber(cost)})
+                  </button>
+                </div>
+                <div class="building-details">
+                  <span class="building-income">+${formatIncome(building.baseIncome)}</span>
                   ${building.effect ? `<span class="building-effect">${building.effect.description}</span>` : ''}
                 </div>
-                <button
-                  class="buy-btn ${!canAfford ? 'disabled' : ''}"
-                  data-settlement="${settlement.id}"
-                  data-building="${building.id}"
-                  data-cost="${cost}"
-                  onclick="window.buyBuilding('${settlement.id}', '${building.id}')"
-                  ${!canAfford ? 'disabled' : ''}
-                >
-                  ${label} (${formatNumber(cost)})
-                </button>
               </div>
             `;
             })
