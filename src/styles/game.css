@@ -279,6 +279,13 @@
   cursor: pointer;
   font-size: 0.85rem;
   transition: background 0.2s;
+  font-variant-numeric: tabular-nums;
+}
+
+.buy-qty {
+  display: inline-block;
+  min-width: 3ch;
+  text-align: right;
 }
 
 .buy-btn:hover:not(.disabled) {

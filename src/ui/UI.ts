@@ -277,7 +277,11 @@ export class UI {
               const canAfford = qty > 0 && settlement.currency >= cost;
 
               const label =
-                buyAmount === 'max' ? `Buy Max (${qty})` : buyAmount > 1 ? `Buy ${qty}x` : 'Buy';
+                buyAmount === 'max'
+                  ? `Buy Max (<span class="buy-qty">${qty}</span>)`
+                  : buyAmount > 1
+                    ? `Buy ${qty}x`
+                    : 'Buy';
 
               return `
               <div class="building">
@@ -941,11 +945,15 @@ export class UI {
         const canAfford = qty > 0 && settlement.currency >= cost;
 
         const label =
-          buyAmount === 'max' ? `Buy Max (${qty})` : buyAmount > 1 ? `Buy ${qty}x` : 'Buy';
+          buyAmount === 'max'
+            ? `Buy Max (<span class="buy-qty">${qty}</span>)`
+            : buyAmount > 1
+              ? `Buy ${qty}x`
+              : 'Buy';
 
         // Update cached cost attribute and button text
         button.setAttribute('data-cost', cost.toString());
-        button.textContent = `${label} (${formatNumber(cost)})`;
+        button.innerHTML = `${label} (${formatNumber(cost)})`;
 
         if (canAfford && button.disabled === true) {
           button.disabled = false;
