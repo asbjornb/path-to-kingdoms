@@ -510,11 +510,3 @@ export const TIER_DATA: TierDefinition[] = [
 export function getTierByType(type: TierType): TierDefinition | undefined {
   return TIER_DATA.find((tier) => tier.type === type);
 }
-
-export function getNextTier(currentTier: TierType): TierDefinition | undefined {
-  const currentIndex = TIER_DATA.findIndex((tier) => tier.type === currentTier);
-  if (currentIndex === -1 || currentIndex === TIER_DATA.length - 1) {
-    return undefined;
-  }
-  return TIER_DATA[currentIndex + 1];
-}

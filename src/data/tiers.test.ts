@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { TIER_DATA, getTierByType, getNextTier } from './tiers';
+import { TIER_DATA, getTierByType } from './tiers';
 import { TierType } from '../types/game';
 
 describe('Tier data', () => {
@@ -66,24 +66,6 @@ describe('Tier data', () => {
     it('should return undefined for invalid tier type', () => {
       const invalid = getTierByType('invalid' as TierType);
       expect(invalid).toBeUndefined();
-    });
-  });
-
-  describe('getNextTier', () => {
-    it('should return next tier in sequence', () => {
-      const nextTier = getNextTier(TierType.Hamlet);
-      expect(nextTier).toBeDefined();
-      expect(nextTier?.type).toBe(TierType.Village);
-    });
-
-    it('should return undefined for last tier', () => {
-      const nextTier = getNextTier(TierType.Kingdom);
-      expect(nextTier).toBeUndefined();
-    });
-
-    it('should return undefined for invalid tier', () => {
-      const nextTier = getNextTier('invalid' as TierType);
-      expect(nextTier).toBeUndefined();
     });
   });
 });
