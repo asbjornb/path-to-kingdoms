@@ -82,7 +82,9 @@ export interface ResearchUpgrade {
       | 'parallel_slots'
       | 'starting_income'
       | 'auto_building'
-      | 'cost_scaling_reduction';
+      | 'cost_scaling_reduction'
+      | 'tier_requirement_reduction'
+      | 'flat_cost_count';
     value?: number;
     buildingId?: string; // For auto_building type
     interval?: number; // For auto_building type (in milliseconds)
@@ -117,7 +119,8 @@ export interface PrestigeUpgrade {
       | 'prestige_currency_boost'
       | 'prestige_mastery_boost'
       | 'prestige_production_boost_amplifier'
-      | 'prestige_grant_building';
+      | 'prestige_grant_building'
+      | 'prestige_tier_requirement_reduction';
     value: number;
     targetBuilding?: string; // For prestige_building_income_boost / prestige_grant_building
   };
@@ -147,7 +150,12 @@ export interface Achievement {
     value: number;
   };
   bonus: {
-    type: 'income_multiplier' | 'cost_reduction' | 'research_bonus' | 'starting_currency';
+    type:
+      | 'income_multiplier'
+      | 'cost_reduction'
+      | 'research_bonus'
+      | 'starting_currency'
+      | 'tier_requirement_reduction';
     value: number;
     description: string;
   };
