@@ -279,10 +279,19 @@ export class GameStateManager {
     count: number,
     settlementId?: string,
   ): number {
-    let costReduction = this.getResearchEffect('cost_reduction');
+    // Look up settlement tier for tier-scoped research effects
+    let settlement: Settlement | undefined;
+    if (settlementId !== undefined && settlementId !== '') {
+      settlement = this.state.settlements.find((s) => s.id === settlementId);
+    }
+    const settlementTier = settlement?.tier;
+
+    // Research cost_reduction, cost_scaling_reduction, and flat_cost_count
+    // are tier-scoped: each tier's research only affects that tier's buildings
+    let costReduction = this.getResearchEffect('cost_reduction', settlementTier);
 
     // Apply cost scaling reduction to the multiplier (research + prestige)
-    const scalingReduction = this.getResearchEffect('cost_scaling_reduction');
+    const scalingReduction = this.getResearchEffect('cost_scaling_reduction', settlementTier);
     const prestigeScalingReduction = this.getPrestigeEffect('prestige_cost_scaling_reduction');
     const adjustedMultiplier = Math.max(
       1.0,
@@ -290,11 +299,8 @@ export class GameStateManager {
     );
 
     // Apply building-specific cost reduction effects
-    if (settlementId !== undefined && settlementId !== '') {
-      const settlement = this.state.settlements.find((s) => s.id === settlementId);
-      if (settlement) {
-        costReduction *= this.getBuildingEffectMultiplier(settlement, 'cost_reduction');
-      }
+    if (settlement) {
+      costReduction *= this.getBuildingEffectMultiplier(settlement, 'cost_reduction');
     }
 
     // Apply prestige cost reduction (multiplicative)
@@ -304,8 +310,8 @@ export class GameStateManager {
     const achievementCostReduction = this.getAchievementEffect('cost_reduction');
 
     // Apply flat cost: first N buildings of each type use flat cost (no scaling)
-    // Combines research flat_cost_count and prestige flat_cost_count
-    const researchFlatCost = this.getResearchEffect('flat_cost_count');
+    // Research flat_cost_count is tier-scoped; prestige flat_cost_count is global
+    const researchFlatCost = this.getResearchEffect('flat_cost_count', settlementTier);
     const prestigeFlatCost = this.getPrestigeEffect('prestige_flat_cost_count');
     const flatCostCount = researchFlatCost + prestigeFlatCost;
     const effectiveCount = Math.max(0, count - flatCostCount);
@@ -609,6 +615,9 @@ export class GameStateManager {
       case 'prestige_tier_requirement_reduction':
         // Additive sum (reduces tier advancement requirement)
         return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+      case 'prestige_parallel_slots':
+        // Return the highest parallel slots value (absolute, not additive)
+        return upgrades.reduce((max, u) => Math.max(max, u.effect.value), 0);
       default:
         return 0;
     }
@@ -765,6 +774,11 @@ export class GameStateManager {
     // Purchase
     this.state.prestigeCurrency.set(upgrade.tier, currency - upgrade.cost);
     upgrade.purchased = true;
+
+    // If parallel slots prestige was purchased, spawn new hamlets
+    if (upgrade.effect.type === 'prestige_parallel_slots') {
+      this.autospawnSettlements();
+    }
 
     // Recalculate income for all settlements
     this.state.settlements.forEach((settlement) => {
@@ -984,7 +998,11 @@ export class GameStateManager {
     // Higher tiers are earned by completing N of the tier below, not auto-spawned.
     if (!this.state.unlockedTiers.has(TierType.Hamlet)) return;
 
-    const maxSlots = this.getResearchEffect('parallel_slots', TierType.Hamlet);
+    // Parallel slots come from research across multiple tiers (Hamlet, Village, Town)
+    // and from prestige upgrades — take the highest value
+    const researchSlots = this.getResearchEffect('parallel_slots');
+    const prestigeSlots = this.getPrestigeEffect('prestige_parallel_slots');
+    const maxSlots = Math.max(researchSlots, prestigeSlots);
     const currentCount = this.state.settlements.filter((s) => s.tier === TierType.Hamlet).length;
     const slotsNeeded = maxSlots - currentCount;
 
