@@ -67,6 +67,8 @@ describe('UI', () => {
     });
 
     it('should render buildings with correct structure', () => {
+      // Disable compact mode to see all building details
+      game.toggleCompactView();
       ui.render();
 
       const buildings = container.querySelectorAll('.building');
@@ -116,6 +118,8 @@ describe('UI', () => {
     });
 
     it('should display settlement currency and income', () => {
+      // Disable compact mode to see full settlement stats
+      game.toggleCompactView();
       ui.render();
 
       // Each settlement should show its own currency and income
@@ -149,6 +153,8 @@ describe('UI', () => {
 
   describe('Building Effects Display', () => {
     it('should display building effects when present', () => {
+      // Disable compact mode to see building effects
+      game.toggleCompactView();
       ui.render();
 
       // Look for buildings with effects (shrine, market, library)
