@@ -1430,6 +1430,23 @@ export class GameStateManager {
         return saved ? { ...def, purchased: saved.purchased } : { ...def, purchased: false };
       });
 
+      // Load research, merging saved state with current definitions
+      // This ensures newly added research appears in existing saves
+      const savedResearch = saveData.gameState.research;
+      const canonicalIds = new Set(RESEARCH_DATA.map((r) => r.id));
+      const research = RESEARCH_DATA.map((def) => {
+        const saved = savedResearch.find((r: ResearchUpgrade) => r.id === def.id);
+        return saved
+          ? { ...def, purchased: saved.purchased, level: saved.level }
+          : { ...def, purchased: false };
+      });
+      // Also include dynamically generated repeatable research not in canonical data
+      for (const saved of savedResearch) {
+        if (!canonicalIds.has(saved.id)) {
+          research.push(saved);
+        }
+      }
+
       // Load achievements, merging saved state with current definitions
       const savedAchievements = saveData.gameState.achievements ?? [];
       const achievements = ACHIEVEMENTS_DATA.map((def) => {
@@ -1442,7 +1459,7 @@ export class GameStateManager {
         researchPoints: new Map(saveData.gameState.researchPoints),
         unlockedTiers: new Set(saveData.gameState.unlockedTiers),
         completedSettlements: new Map(saveData.gameState.completedSettlements),
-        research: saveData.gameState.research,
+        research,
         autoBuildingTimers: new Map(saveData.gameState.autoBuildingTimers),
         prestigeCurrency: new Map(saveData.gameState.prestigeCurrency ?? []),
         prestigeCount: saveData.gameState.prestigeCount ?? 0,
