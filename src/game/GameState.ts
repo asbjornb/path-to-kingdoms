@@ -1,5 +1,6 @@
 import {
   GameState,
+  GameNotification,
   Settlement,
   TierType,
   GoalType,
@@ -61,6 +62,7 @@ export class GameStateManager {
   private readonly GAME_VERSION = '0.1.0';
   private readonly SAVE_KEY = 'path-to-kingdoms-save';
   private autoSaveInterval: number | null = null;
+  private pendingNotifications: GameNotification[] = [];
 
   constructor() {
     // Initialize state first
@@ -93,6 +95,7 @@ export class GameStateManager {
         showCompletedResearch: false,
         buyAmount: 1,
         compactView: true,
+        goalNotificationsByTier: {},
       },
     };
   }
@@ -852,6 +855,7 @@ export class GameStateManager {
       }
 
       if (conditionMet) {
+        this.addNotification('achievement_unlocked', `Achievement: ${achievement.name}`);
         achievement.unlocked = true;
       }
     }
@@ -903,6 +907,15 @@ export class GameStateManager {
       const currentPoints = this.state.researchPoints.get(settlement.tier) ?? 0;
       this.state.researchPoints.set(settlement.tier, currentPoints + researchBonus);
 
+      if (this.isGoalNotificationEnabled(settlement.tier)) {
+        const tierName = settlement.tier.charAt(0).toUpperCase() + settlement.tier.slice(1);
+        this.addNotification(
+          'goal_complete',
+          `${tierName} completed! +${researchBonus} research`,
+          settlement.tier,
+        );
+      }
+
       const completedCount = (this.state.completedSettlements.get(settlement.tier) ?? 0) + 1;
       this.state.completedSettlements.set(settlement.tier, completedCount);
 
@@ -948,7 +961,12 @@ export class GameStateManager {
       const tierIndex = TIER_DATA.findIndex((t) => t.type === completedTier);
       if (tierIndex !== -1 && tierIndex < TIER_DATA.length - 1) {
         const nextTier = TIER_DATA[tierIndex + 1];
+        const wasUnlocked = this.state.unlockedTiers.has(nextTier.type);
         this.state.unlockedTiers.add(nextTier.type);
+
+        if (!wasUnlocked) {
+          this.addNotification('tier_unlocked', `${nextTier.name} tier unlocked!`, nextTier.type);
+        }
 
         // Initialize research points for the new tier
         if (!this.state.researchPoints.has(nextTier.type)) {
@@ -1328,6 +1346,35 @@ export class GameStateManager {
     return this.state.settings.compactView;
   }
 
+  public isGoalNotificationEnabled(tier: TierType): boolean {
+    return this.state.settings.goalNotificationsByTier[tier] !== false;
+  }
+
+  public toggleGoalNotification(tier: TierType): boolean {
+    const current = this.isGoalNotificationEnabled(tier);
+    this.state.settings.goalNotificationsByTier[tier] = !current;
+    return !current;
+  }
+
+  public getAndClearNotifications(): GameNotification[] {
+    const notifications = this.pendingNotifications;
+    this.pendingNotifications = [];
+    return notifications;
+  }
+
+  private addNotification(type: GameNotification['type'], message: string, tier?: TierType): void {
+    this.pendingNotifications.push({
+      id: `notif_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+      type,
+      message,
+      tier,
+      timestamp: Date.now(),
+    });
+    if (this.pendingNotifications.length > 10) {
+      this.pendingNotifications = this.pendingNotifications.slice(-10);
+    }
+  }
+
   // For testing - manually trigger autospawn
   public triggerAutospawn(): void {
     this.autospawnSettlements();
@@ -1415,13 +1462,14 @@ export class GameStateManager {
       );
 
       // Reconstruct the state from serialized data
-      const settings = saveData.gameState.settings;
-      if (settings.buyAmount === undefined) {
-        settings.buyAmount = 1;
-      }
-      if (settings.compactView === undefined) {
-        settings.compactView = true;
-      }
+      const savedSettings = saveData.gameState.settings;
+      const settings: GameState['settings'] = {
+        devModeEnabled: savedSettings.devModeEnabled,
+        showCompletedResearch: savedSettings.showCompletedResearch,
+        buyAmount: savedSettings.buyAmount ?? 1,
+        compactView: savedSettings.compactView ?? true,
+        goalNotificationsByTier: savedSettings.goalNotificationsByTier ?? {},
+      };
 
       // Load prestige upgrades, merging saved state with current definitions
       const savedPrestigeUpgrades = saveData.gameState.prestigeUpgrades ?? [];

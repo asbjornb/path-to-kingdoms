@@ -116,6 +116,15 @@ function initGame(): void {
     ui.render();
   };
 
+  window.toggleGoalNotification = (tier: TierType): void => {
+    game.toggleGoalNotification(tier);
+    ui.render();
+  };
+
+  window.dismissNotification = (id: string): void => {
+    ui.removeNotification(id);
+  };
+
   window.saveGame = (): void => {
     if (game.saveGame()) {
       alert('Game saved successfully!');

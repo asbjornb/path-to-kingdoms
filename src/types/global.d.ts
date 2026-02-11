@@ -19,6 +19,8 @@ declare global {
     purchasePrestigeUpgrade: (upgradeId: string) => void;
     toggleAchievements: () => void;
     toggleCompactView: () => void;
+    toggleGoalNotification: (tier: TierType) => void;
+    dismissNotification: (id: string) => void;
   }
 }
 
