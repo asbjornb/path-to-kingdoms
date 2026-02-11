@@ -397,13 +397,13 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     purchased: false,
   },
 
-  // ===== Flat cost for first N buildings =====
+  // ===== Flat cost buildings (no scaling) =====
 
-  // Town currency → First buildings don't scale
+  // Town currency → Some buildings don't count toward scaling
   {
     id: 'prestige_foundation_1',
     name: 'Foundation Stone I',
-    description: 'First 2 of each building have flat cost (no scaling)',
+    description: '2 of each building have flat cost (no scaling)',
     cost: 2,
     tier: TierType.Town,
     effect: { type: 'prestige_flat_cost_count', value: 2 },
