@@ -456,6 +456,9 @@ export class UI {
       upgrades = upgrades.filter((u) => !u.purchased);
     }
 
+    // Sort by cost ascending so cheapest upgrades appear first
+    upgrades.sort((a, b) => a.cost - b.cost);
+
     if (upgrades.length === 0 && !showCompleted) return '';
 
     // Show prestige currencies summary
@@ -533,14 +536,16 @@ export class UI {
 
     // Show all prestige upgrades (filtering by prerequisites as before, but also
     // considering selected upgrades as "virtually purchased" for prerequisite checks)
-    const upgrades = state.prestigeUpgrades.filter((upgrade) => {
-      if (upgrade.purchased) return false;
-      if (upgrade.prerequisite === undefined || upgrade.prerequisite === '') return true;
-      const prereq = state.prestigeUpgrades.find((u) => u.id === upgrade.prerequisite);
-      return (
-        prereq !== undefined && (prereq.purchased || this.selectedPrestigeUpgrades.has(prereq.id))
-      );
-    });
+    const upgrades = state.prestigeUpgrades
+      .filter((upgrade) => {
+        if (upgrade.purchased) return false;
+        if (upgrade.prerequisite === undefined || upgrade.prerequisite === '') return true;
+        const prereq = state.prestigeUpgrades.find((u) => u.id === upgrade.prerequisite);
+        return (
+          prereq !== undefined && (prereq.purchased || this.selectedPrestigeUpgrades.has(prereq.id))
+        );
+      })
+      .sort((a, b) => a.cost - b.cost);
 
     // Also show already-purchased upgrades for context
     const purchasedUpgrades = state.prestigeUpgrades.filter((u) => u.purchased);
