@@ -257,7 +257,7 @@ export class UI {
                 <div class="building-info">
                   <span class="building-name">${building.name} (${count})</span>
                   ${!compact ? `<span class="building-income">+${formatIncome(building.baseIncome)}</span>` : ''}
-                  ${!compact && building.effect ? `<span class="building-effect">${building.effect.description}</span>` : ''}
+                  ${building.effect ? `<span class="building-effect">${building.effect.description}</span>` : ''}
                 </div>
                 <button
                   class="buy-btn ${!canAfford ? 'disabled' : ''}"

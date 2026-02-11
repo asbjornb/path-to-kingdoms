@@ -153,11 +153,9 @@ describe('UI', () => {
 
   describe('Building Effects Display', () => {
     it('should display building effects when present', () => {
-      // Disable compact mode to see building effects
-      game.toggleCompactView();
       ui.render();
 
-      // Look for buildings with effects (shrine, market, library)
+      // Building effects should be visible in both compact and expanded modes
       const buildingEffects = container.querySelectorAll('.building-effect');
       expect(buildingEffects.length).toBeGreaterThan(0);
 
