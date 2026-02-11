@@ -655,7 +655,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
   {
     id: 'hamlet_foundation_planning_1',
     name: 'Foundation Planning',
-    description: 'First building of each type has no cost scaling',
+    description: '1 of each building type has flat cost (no scaling)',
     cost: 50,
     tier: TierType.Hamlet,
     effect: {
@@ -667,7 +667,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
   {
     id: 'village_foundation_planning_1',
     name: 'Foundation Planning',
-    description: 'First building of each type has no cost scaling',
+    description: '1 of each building type has flat cost (no scaling)',
     cost: 200,
     tier: TierType.Village,
     effect: {
@@ -679,7 +679,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
   {
     id: 'town_foundation_planning_1',
     name: 'Foundation Planning',
-    description: 'First building of each type has no cost scaling',
+    description: '1 of each building type has flat cost (no scaling)',
     cost: 500,
     tier: TierType.Town,
     effect: {
@@ -691,7 +691,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
   {
     id: 'city_foundation_planning_1',
     name: 'Foundation Planning',
-    description: 'First building of each type has no cost scaling',
+    description: '1 of each building type has flat cost (no scaling)',
     cost: 1200,
     tier: TierType.City,
     effect: {
@@ -703,7 +703,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
   {
     id: 'county_foundation_planning_1',
     name: 'Foundation Planning',
-    description: 'First building of each type has no cost scaling',
+    description: '1 of each building type has flat cost (no scaling)',
     cost: 3000,
     tier: TierType.County,
     effect: {
@@ -715,7 +715,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
   {
     id: 'duchy_foundation_planning_1',
     name: 'Foundation Planning',
-    description: 'First building of each type has no cost scaling',
+    description: '1 of each building type has flat cost (no scaling)',
     cost: 7000,
     tier: TierType.Duchy,
     effect: {
@@ -727,7 +727,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
   {
     id: 'realm_foundation_planning_1',
     name: 'Foundation Planning',
-    description: 'First building of each type has no cost scaling',
+    description: '1 of each building type has flat cost (no scaling)',
     cost: 15000,
     tier: TierType.Realm,
     effect: {
@@ -739,7 +739,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
   {
     id: 'kingdom_foundation_planning_1',
     name: 'Foundation Planning',
-    description: 'First building of each type has no cost scaling',
+    description: '1 of each building type has flat cost (no scaling)',
     cost: 35000,
     tier: TierType.Kingdom,
     effect: {
