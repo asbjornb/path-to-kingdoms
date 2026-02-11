@@ -118,9 +118,10 @@ export interface PrestigeUpgrade {
       | 'prestige_free_buildings'
       | 'prestige_currency_boost'
       | 'prestige_mastery_boost'
-      | 'prestige_production_boost_amplifier';
+      | 'prestige_production_boost_amplifier'
+      | 'prestige_grant_building';
     value: number;
-    targetBuilding?: string; // For prestige_building_income_boost - which building ID to boost
+    targetBuilding?: string; // For prestige_building_income_boost / prestige_grant_building
   };
   purchased: boolean;
   prerequisite?: string;

@@ -144,8 +144,28 @@ export class GameStateManager {
         const cheapestBuilding = tierDef.buildings[0]; // buildings are ordered by cost
         const currentCount = newSettlement.buildings.get(cheapestBuilding.id) ?? 0;
         newSettlement.buildings.set(cheapestBuilding.id, currentCount + freeBuildings);
-        newSettlement.totalIncome = this.calculateSettlementIncome(newSettlement);
       }
+    }
+
+    // Apply prestige grant building: add specific buildings to matching-tier settlements
+    const grantUpgrades = this.state.prestigeUpgrades.filter(
+      (u) =>
+        u.purchased &&
+        u.effect.type === 'prestige_grant_building' &&
+        u.effect.targetBuilding !== undefined,
+    );
+    for (const upgrade of grantUpgrades) {
+      const buildingId = upgrade.effect.targetBuilding ?? '';
+      // Check if this building belongs to the settlement's tier
+      if (buildingId !== '' && newSettlement.buildings.has(buildingId)) {
+        const currentCount = newSettlement.buildings.get(buildingId) ?? 0;
+        newSettlement.buildings.set(buildingId, currentCount + upgrade.effect.value);
+      }
+    }
+
+    // Recalculate income if any buildings were granted
+    if (freeBuildings > 0 || grantUpgrades.length > 0) {
+      newSettlement.totalIncome = this.calculateSettlementIncome(newSettlement);
     }
 
     this.state.settlements.push(newSettlement);
@@ -580,6 +600,9 @@ export class GameStateManager {
       case 'prestige_production_boost_amplifier':
         // Additive sum (e.g., 0.4 + 0.6 = 1.0 → production boosts are 100% stronger)
         return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+      case 'prestige_grant_building':
+        // Handled per-building in spawnSettlement, not aggregated here
+        return 0;
       default:
         return 0;
     }
