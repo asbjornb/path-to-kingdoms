@@ -515,6 +515,277 @@
   background: #f59e0b !important;
 }
 
+/* ===== Prestige Shop Overlay ===== */
+
+.prestige-shop-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.prestige-shop-modal {
+  background: #1a1a1a;
+  border: 2px solid #f59e0b;
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 650px;
+  width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 0 40px rgba(245, 158, 11, 0.2);
+}
+
+.prestige-shop-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #333;
+}
+
+.prestige-shop-header h2 {
+  margin: 0;
+  color: #f59e0b;
+  font-size: 1.5rem;
+}
+
+.prestige-shop-close-btn {
+  padding: 0.3rem 0.75rem;
+  background: #333;
+  color: #ccc;
+  border: 1px solid #555;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.prestige-shop-close-btn:hover {
+  background: #444;
+  color: #fff;
+}
+
+.prestige-shop-description {
+  margin-bottom: 1rem;
+  color: #999;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.prestige-shop-description p {
+  margin: 0 0 0.25rem 0;
+}
+
+.prestige-shop-currencies {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #2a2a2a;
+  border-radius: 8px;
+  border: 1px solid #333;
+}
+
+.prestige-shop-currencies h3 {
+  margin: 0 0 0.5rem 0;
+  color: #f59e0b;
+  font-size: 1rem;
+}
+
+.prestige-shop-currency-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.3rem 0;
+}
+
+.prestige-shop-tier-name {
+  color: #d97706;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.prestige-shop-currency-detail {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.currency-current {
+  color: #888;
+}
+
+.currency-earned {
+  color: #4ade80;
+  font-weight: bold;
+}
+
+.currency-total {
+  color: #f59e0b;
+  font-weight: bold;
+}
+
+.prestige-shop-no-earnings {
+  color: #666;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.prestige-shop-upgrades {
+  margin-bottom: 1rem;
+}
+
+.prestige-shop-upgrades h3 {
+  margin: 0 0 0.5rem 0;
+  color: #f59e0b;
+  font-size: 1rem;
+}
+
+.prestige-shop-purchased,
+.prestige-shop-available {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.prestige-shop-purchased {
+  margin-bottom: 0.5rem;
+  opacity: 0.6;
+}
+
+.prestige-shop-upgrade {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0.75rem;
+  background: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.prestige-shop-upgrade:hover:not(.purchased):not(.unaffordable) {
+  border-color: #f59e0b;
+  background: #333;
+}
+
+.prestige-shop-upgrade.selected {
+  border-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.15);
+}
+
+.prestige-shop-upgrade.purchased {
+  cursor: default;
+  opacity: 0.8;
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.prestige-shop-upgrade.unaffordable {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.prestige-shop-upgrade-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.prestige-shop-upgrade-name {
+  color: #fff;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.prestige-shop-upgrade-desc {
+  color: #888;
+  font-size: 0.8rem;
+}
+
+.prestige-shop-upgrade-cost {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+  white-space: nowrap;
+}
+
+.prestige-shop-cost-amount {
+  color: #d97706;
+  font-size: 0.8rem;
+}
+
+.prestige-shop-purchased-label {
+  color: #4ade80;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.prestige-shop-selected-badge {
+  color: #f59e0b;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 0.1rem 0.4rem;
+  background: rgba(245, 158, 11, 0.2);
+  border-radius: 3px;
+}
+
+.prestige-shop-empty {
+  color: #666;
+  font-size: 0.85rem;
+  padding: 0.5rem 0;
+  margin: 0;
+}
+
+.prestige-shop-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid #333;
+}
+
+.prestige-shop-cancel-btn {
+  padding: 0.5rem 1.25rem;
+  background: #333;
+  color: #ccc;
+  border: 1px solid #555;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.prestige-shop-cancel-btn:hover {
+  background: #444;
+  color: #fff;
+}
+
+.prestige-shop-confirm-btn {
+  padding: 0.5rem 1.25rem;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #000;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.prestige-shop-confirm-btn:hover {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  transform: scale(1.03);
+}
+
 /* ===== Achievements ===== */
 
 .achievements-section {
@@ -779,5 +1050,27 @@
 
   .settlement-stats {
     font-size: 0.85rem;
+  }
+
+  .prestige-shop-modal {
+    padding: 1rem;
+  }
+
+  .prestige-shop-upgrade {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.4rem;
+  }
+
+  .prestige-shop-upgrade-cost {
+    align-items: flex-start;
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+
+  .prestige-shop-currency-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
   }
 }

@@ -69,26 +69,36 @@ function initGame(): void {
   };
 
   window.performPrestige = (): void => {
-    const preview = game.getPrestigePreview();
-    if (preview.size === 0) {
+    if (!game.canPrestige()) {
       alert('You need at least 1 non-Hamlet tier completion to prestige.');
       return;
     }
+    ui.openPrestigeShop();
+    ui.render();
+  };
 
-    let previewText = 'Prestige will reset your settlements, research, and mastery progress.\n\n';
-    previewText += 'You will earn:\n';
-    for (const [tier, amount] of preview.entries()) {
-      const tierName = tier.charAt(0).toUpperCase() + tier.slice(1);
-      previewText += `  ${amount} ${tierName} Crown${amount !== 1 ? 's' : ''}\n`;
-    }
-    previewText += '\nSpend Crowns on permanent prestige upgrades in the research panel.';
-    previewText += '\n\nAre you sure you want to prestige?';
+  window.closePrestigeShop = (): void => {
+    ui.closePrestigeShop();
+    ui.render();
+  };
 
-    if (confirm(previewText)) {
-      game.performPrestige();
-      ui.selectTier(TierType.Hamlet);
-      ui.render();
+  window.togglePrestigeShopUpgrade = (upgradeId: string): void => {
+    ui.togglePrestigeUpgradeSelection(upgradeId);
+    ui.render();
+  };
+
+  window.confirmPrestige = (): void => {
+    const selectedUpgrades = ui.getSelectedPrestigeUpgrades();
+    game.performPrestige();
+
+    // Purchase selected upgrades (currency was just awarded by performPrestige)
+    for (const upgradeId of selectedUpgrades) {
+      game.purchasePrestigeUpgrade(upgradeId);
     }
+
+    ui.closePrestigeShop();
+    ui.selectTier(TierType.Hamlet);
+    ui.render();
   };
 
   window.purchasePrestigeUpgrade = (upgradeId: string): void => {
