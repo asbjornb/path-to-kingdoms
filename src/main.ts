@@ -12,6 +12,18 @@ function initGame(): void {
   }
 
   game = new GameStateManager();
+
+  // Check for URL parameter to toggle income multiplier
+  const params = new URLSearchParams(window.location.search);
+  if (params.has('t')) {
+    game.toggleDevMode();
+    // Strip the parameter from the URL so it doesn't linger
+    params.delete('t');
+    const cleanUrl =
+      window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+    window.history.replaceState({}, '', cleanUrl);
+  }
+
   ui = new UI(game, app);
 
   // Set up global functions for UI interactions
@@ -47,11 +59,8 @@ function initGame(): void {
   };
 
   window.toggleDevMode = (): void => {
-    const devModeEnabled = game.toggleDevMode();
-    console.warn(
-      `Dev Mode ${devModeEnabled ? 'enabled' : 'disabled'} - Income multiplier: ${devModeEnabled ? '1000x' : '1x'}`,
-    );
-    ui.render(); // Re-render to update checkbox state
+    game.toggleDevMode();
+    ui.render();
   };
 
   window.toggleShowCompletedResearch = (): void => {
