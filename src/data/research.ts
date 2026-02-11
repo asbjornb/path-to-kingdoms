@@ -412,7 +412,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'village_starting_income_1',
     name: 'Village Foundation Funds',
     description: '+50 starting income for new villages',
-    cost: 50,
+    cost: 10,
     tier: TierType.Village,
     effect: {
       type: 'starting_income',
@@ -424,7 +424,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'village_starting_income_2',
     name: 'Enhanced Village Resources',
     description: '+150 starting income for new villages',
-    cost: 150,
+    cost: 30,
     tier: TierType.Village,
     prerequisite: 'village_starting_income_1',
     effect: {
@@ -439,7 +439,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'village_cost_reduction_1',
     name: 'Village Construction Efficiency',
     description: 'Reduces all village building costs by 8%',
-    cost: 100,
+    cost: 25,
     tier: TierType.Village,
     effect: {
       type: 'cost_reduction',
@@ -451,7 +451,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'village_cost_reduction_2',
     name: 'Advanced Village Engineering',
     description: 'Reduces all village building costs by 16%',
-    cost: 300,
+    cost: 75,
     tier: TierType.Village,
     prerequisite: 'village_cost_reduction_1',
     effect: {
@@ -466,7 +466,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'village_auto_cottage_1',
     name: 'Automated Cottage Construction',
     description: 'Automatically buys 1 cottage every 45 seconds',
-    cost: 75,
+    cost: 15,
     tier: TierType.Village,
     effect: {
       type: 'auto_building',
@@ -479,7 +479,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'village_auto_farm_1',
     name: 'Automated Farm Development',
     description: 'Automatically buys 1 farm every 90 seconds',
-    cost: 150,
+    cost: 30,
     tier: TierType.Village,
     prerequisite: 'village_auto_cottage_1',
     effect: {
@@ -493,7 +493,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'village_auto_mill_1',
     name: 'Automated Mill Operation',
     description: 'Automatically buys 1 mill every 60 seconds',
-    cost: 200,
+    cost: 45,
     tier: TierType.Village,
     prerequisite: 'village_auto_farm_1',
     effect: {
@@ -507,7 +507,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'village_auto_chapel_1',
     name: 'Automated Chapel Construction',
     description: 'Automatically buys 1 chapel every 90 seconds',
-    cost: 250,
+    cost: 75,
     tier: TierType.Village,
     prerequisite: 'village_auto_cottage_1',
     effect: {
@@ -521,7 +521,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'village_auto_well_1',
     name: 'Automated Well Digging',
     description: 'Automatically buys 1 village well every 120 seconds',
-    cost: 350,
+    cost: 100,
     tier: TierType.Village,
     prerequisite: 'village_auto_mill_1',
     effect: {
@@ -535,7 +535,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'village_auto_herbalist_1',
     name: 'Automated Herbalist Setup',
     description: 'Automatically buys 1 herbalist every 150 seconds',
-    cost: 500,
+    cost: 150,
     tier: TierType.Village,
     prerequisite: 'village_auto_chapel_1',
     effect: {
@@ -551,7 +551,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'hamlet_parallel_4',
     name: 'Quad Hamlet Management',
     description: 'Run 4 hamlets in parallel',
-    cost: 250,
+    cost: 100,
     tier: TierType.Village,
     prerequisite: 'hamlet_parallel_3',
     effect: {
@@ -568,7 +568,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'town_starting_income_1',
     name: 'Town Development Fund',
     description: '+500 starting income for new towns',
-    cost: 150,
+    cost: 10,
     tier: TierType.Town,
     effect: {
       type: 'starting_income',
@@ -580,7 +580,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'town_starting_income_2',
     name: 'Major Town Investment',
     description: '+1500 starting income for new towns',
-    cost: 450,
+    cost: 30,
     tier: TierType.Town,
     prerequisite: 'town_starting_income_1',
     effect: {
@@ -595,7 +595,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'town_cost_reduction_1',
     name: 'Town Planning Expertise',
     description: 'Reduces all town building costs by 10%',
-    cost: 250,
+    cost: 25,
     tier: TierType.Town,
     effect: {
       type: 'cost_reduction',
@@ -607,7 +607,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'town_cost_reduction_2',
     name: 'Master Town Engineering',
     description: 'Reduces all town building costs by 20%',
-    cost: 750,
+    cost: 75,
     tier: TierType.Town,
     prerequisite: 'town_cost_reduction_1',
     effect: {
@@ -622,7 +622,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'town_scaling_reduction_1',
     name: 'Town Mass Production',
     description: 'Reduces town building cost scaling',
-    cost: 300,
+    cost: 75,
     tier: TierType.Town,
     effect: {
       type: 'cost_scaling_reduction',
@@ -636,7 +636,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'town_auto_house_1',
     name: 'Automated House Construction',
     description: 'Automatically buys 1 town house every 45 seconds',
-    cost: 200,
+    cost: 15,
     tier: TierType.Town,
     effect: {
       type: 'auto_building',
@@ -649,7 +649,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'town_auto_market_1',
     name: 'Automated Market Construction',
     description: 'Automatically buys 1 market every 60 seconds',
-    cost: 350,
+    cost: 30,
     tier: TierType.Town,
     prerequisite: 'town_auto_house_1',
     effect: {
@@ -663,7 +663,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'town_auto_forge_1',
     name: 'Automated Forge Construction',
     description: 'Automatically buys 1 forge every 90 seconds',
-    cost: 500,
+    cost: 45,
     tier: TierType.Town,
     prerequisite: 'town_auto_house_1',
     effect: {
@@ -677,7 +677,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'town_auto_guild_1',
     name: 'Automated Guild Construction',
     description: 'Automatically buys 1 guild hall every 120 seconds',
-    cost: 700,
+    cost: 75,
     tier: TierType.Town,
     prerequisite: 'town_auto_market_1',
     effect: {
@@ -691,7 +691,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'town_auto_watchtower_1',
     name: 'Automated Watchtower Construction',
     description: 'Automatically buys 1 watchtower every 150 seconds',
-    cost: 900,
+    cost: 100,
     tier: TierType.Town,
     prerequisite: 'town_auto_forge_1',
     effect: {
@@ -705,7 +705,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'town_auto_granary_1',
     name: 'Automated Granary Construction',
     description: 'Automatically buys 1 granary every 180 seconds',
-    cost: 1200,
+    cost: 150,
     tier: TierType.Town,
     prerequisite: 'town_auto_guild_1',
     effect: {
@@ -721,7 +721,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'hamlet_parallel_5',
     name: 'Penta Hamlet Management',
     description: 'Run 5 hamlets in parallel',
-    cost: 500,
+    cost: 150,
     tier: TierType.Town,
     prerequisite: 'hamlet_parallel_4',
     effect: {
@@ -738,7 +738,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'city_starting_income_1',
     name: 'City Development Grant',
     description: '+5000 starting income for new cities',
-    cost: 400,
+    cost: 15,
     tier: TierType.City,
     effect: {
       type: 'starting_income',
@@ -752,7 +752,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'city_cost_reduction_1',
     name: 'Metropolitan Efficiency',
     description: 'Reduces all city building costs by 12%',
-    cost: 600,
+    cost: 50,
     tier: TierType.City,
     effect: {
       type: 'cost_reduction',
@@ -766,7 +766,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'city_scaling_reduction_1',
     name: 'Urban Industrial Complex',
     description: 'Reduces city building cost scaling',
-    cost: 800,
+    cost: 75,
     tier: TierType.City,
     effect: {
       type: 'cost_scaling_reduction',
@@ -780,7 +780,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'city_auto_apartment_1',
     name: 'Automated Apartment Construction',
     description: 'Automatically buys 1 apartment every 45 seconds',
-    cost: 500,
+    cost: 15,
     tier: TierType.City,
     effect: {
       type: 'auto_building',
@@ -793,7 +793,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'city_auto_bazaar_1',
     name: 'Automated Bazaar Construction',
     description: 'Automatically buys 1 grand bazaar every 60 seconds',
-    cost: 800,
+    cost: 30,
     tier: TierType.City,
     prerequisite: 'city_auto_apartment_1',
     effect: {
@@ -807,7 +807,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'city_auto_university_1',
     name: 'Automated University Construction',
     description: 'Automatically buys 1 university every 90 seconds',
-    cost: 1200,
+    cost: 45,
     tier: TierType.City,
     prerequisite: 'city_auto_apartment_1',
     effect: {
@@ -821,7 +821,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'city_auto_cathedral_1',
     name: 'Automated Cathedral Construction',
     description: 'Automatically buys 1 cathedral every 120 seconds',
-    cost: 1600,
+    cost: 75,
     tier: TierType.City,
     prerequisite: 'city_auto_bazaar_1',
     effect: {
@@ -835,7 +835,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'city_auto_observatory_1',
     name: 'Automated Observatory Construction',
     description: 'Automatically buys 1 observatory every 150 seconds',
-    cost: 2000,
+    cost: 100,
     tier: TierType.City,
     prerequisite: 'city_auto_university_1',
     effect: {
@@ -849,7 +849,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'city_auto_trade_guild_1',
     name: 'Automated Trade Guild Construction',
     description: 'Automatically buys 1 trade guild every 180 seconds',
-    cost: 2500,
+    cost: 150,
     tier: TierType.City,
     prerequisite: 'city_auto_cathedral_1',
     effect: {
@@ -894,7 +894,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'village_foundation_planning_1',
     name: 'Foundation Planning',
     description: '1 of each building type has flat cost (no scaling)',
-    cost: 200,
+    cost: 50,
     tier: TierType.Village,
     effect: {
       type: 'flat_cost_count',
@@ -906,7 +906,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'town_foundation_planning_1',
     name: 'Foundation Planning',
     description: '1 of each building type has flat cost (no scaling)',
-    cost: 500,
+    cost: 50,
     tier: TierType.Town,
     effect: {
       type: 'flat_cost_count',
@@ -918,7 +918,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'city_foundation_planning_1',
     name: 'Foundation Planning',
     description: '1 of each building type has flat cost (no scaling)',
-    cost: 1200,
+    cost: 50,
     tier: TierType.City,
     effect: {
       type: 'flat_cost_count',
@@ -930,7 +930,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'county_foundation_planning_1',
     name: 'Foundation Planning',
     description: '1 of each building type has flat cost (no scaling)',
-    cost: 3000,
+    cost: 50,
     tier: TierType.County,
     effect: {
       type: 'flat_cost_count',
@@ -942,7 +942,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'duchy_foundation_planning_1',
     name: 'Foundation Planning',
     description: '1 of each building type has flat cost (no scaling)',
-    cost: 7000,
+    cost: 50,
     tier: TierType.Duchy,
     effect: {
       type: 'flat_cost_count',
@@ -954,7 +954,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'realm_foundation_planning_1',
     name: 'Foundation Planning',
     description: '1 of each building type has flat cost (no scaling)',
-    cost: 15000,
+    cost: 50,
     tier: TierType.Realm,
     effect: {
       type: 'flat_cost_count',
@@ -966,7 +966,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'kingdom_foundation_planning_1',
     name: 'Foundation Planning',
     description: '1 of each building type has flat cost (no scaling)',
-    cost: 35000,
+    cost: 50,
     tier: TierType.Kingdom,
     effect: {
       type: 'flat_cost_count',
@@ -982,7 +982,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'village_scaling_reduction_1',
     name: 'Village Bulk Production I',
     description: 'Reduces village building cost scaling',
-    cost: 150,
+    cost: 50,
     tier: TierType.Village,
     effect: {
       type: 'cost_scaling_reduction',
@@ -996,7 +996,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'county_cost_reduction_1',
     name: 'County Construction Efficiency I',
     description: 'Reduces all county building costs by 15%',
-    cost: 1500,
+    cost: 50,
     tier: TierType.County,
     effect: {
       type: 'cost_reduction',
@@ -1008,7 +1008,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'county_scaling_reduction_1',
     name: 'County Mass Production I',
     description: 'Reduces county building cost scaling',
-    cost: 2000,
+    cost: 75,
     tier: TierType.County,
     effect: {
       type: 'cost_scaling_reduction',
@@ -1022,7 +1022,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'county_auto_manor_1',
     name: 'Automated Manor Construction',
     description: 'Automatically buys 1 manor every 45 seconds',
-    cost: 1500,
+    cost: 15,
     tier: TierType.County,
     effect: {
       type: 'auto_building',
@@ -1035,7 +1035,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'county_auto_plantation_1',
     name: 'Automated Plantation Development',
     description: 'Automatically buys 1 plantation every 60 seconds',
-    cost: 2500,
+    cost: 30,
     tier: TierType.County,
     prerequisite: 'county_auto_manor_1',
     effect: {
@@ -1049,7 +1049,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'county_auto_fortress_1',
     name: 'Automated Fortress Construction',
     description: 'Automatically buys 1 fortress every 90 seconds',
-    cost: 3500,
+    cost: 45,
     tier: TierType.County,
     prerequisite: 'county_auto_manor_1',
     effect: {
@@ -1063,7 +1063,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'county_auto_courthouse_1',
     name: 'Automated Courthouse Construction',
     description: 'Automatically buys 1 courthouse every 120 seconds',
-    cost: 5000,
+    cost: 75,
     tier: TierType.County,
     prerequisite: 'county_auto_plantation_1',
     effect: {
@@ -1077,7 +1077,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'county_auto_tax_office_1',
     name: 'Automated Tax Office Construction',
     description: 'Automatically buys 1 tax office every 150 seconds',
-    cost: 7000,
+    cost: 100,
     tier: TierType.County,
     prerequisite: 'county_auto_fortress_1',
     effect: {
@@ -1093,7 +1093,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'duchy_cost_reduction_1',
     name: 'Ducal Engineering I',
     description: 'Reduces all duchy building costs by 18%',
-    cost: 3500,
+    cost: 50,
     tier: TierType.Duchy,
     effect: {
       type: 'cost_reduction',
@@ -1105,7 +1105,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'duchy_scaling_reduction_1',
     name: 'Ducal Mass Production I',
     description: 'Reduces duchy building cost scaling',
-    cost: 5000,
+    cost: 100,
     tier: TierType.Duchy,
     effect: {
       type: 'cost_scaling_reduction',
@@ -1119,7 +1119,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'duchy_auto_palace_1',
     name: 'Automated Palace Construction',
     description: 'Automatically buys 1 palace every 45 seconds',
-    cost: 4000,
+    cost: 15,
     tier: TierType.Duchy,
     effect: {
       type: 'auto_building',
@@ -1132,7 +1132,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'duchy_auto_port_1',
     name: 'Automated Port Construction',
     description: 'Automatically buys 1 grand port every 60 seconds',
-    cost: 6000,
+    cost: 30,
     tier: TierType.Duchy,
     prerequisite: 'duchy_auto_palace_1',
     effect: {
@@ -1146,7 +1146,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'duchy_auto_academy_1',
     name: 'Automated Academy Construction',
     description: 'Automatically buys 1 royal academy every 90 seconds',
-    cost: 9000,
+    cost: 45,
     tier: TierType.Duchy,
     prerequisite: 'duchy_auto_palace_1',
     effect: {
@@ -1160,7 +1160,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'duchy_auto_mint_1',
     name: 'Automated Mint Construction',
     description: 'Automatically buys 1 mint every 120 seconds',
-    cost: 12000,
+    cost: 75,
     tier: TierType.Duchy,
     prerequisite: 'duchy_auto_port_1',
     effect: {
@@ -1174,7 +1174,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'duchy_auto_fleet_1',
     name: 'Automated Fleet Construction',
     description: 'Automatically buys 1 merchant fleet every 150 seconds',
-    cost: 16000,
+    cost: 100,
     tier: TierType.Duchy,
     prerequisite: 'duchy_auto_academy_1',
     effect: {
@@ -1190,7 +1190,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'realm_cost_reduction_1',
     name: 'Realm Engineering I',
     description: 'Reduces all realm building costs by 20%',
-    cost: 8000,
+    cost: 75,
     tier: TierType.Realm,
     effect: {
       type: 'cost_reduction',
@@ -1202,7 +1202,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'realm_scaling_reduction_1',
     name: 'Realm Mass Production I',
     description: 'Reduces realm building cost scaling',
-    cost: 12000,
+    cost: 100,
     tier: TierType.Realm,
     effect: {
       type: 'cost_scaling_reduction',
@@ -1216,7 +1216,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'realm_auto_citadel_1',
     name: 'Automated Citadel Construction',
     description: 'Automatically buys 1 citadel every 45 seconds',
-    cost: 10000,
+    cost: 15,
     tier: TierType.Realm,
     effect: {
       type: 'auto_building',
@@ -1229,7 +1229,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'realm_auto_metropolis_1',
     name: 'Automated Metropolis Construction',
     description: 'Automatically buys 1 metropolis every 60 seconds',
-    cost: 15000,
+    cost: 30,
     tier: TierType.Realm,
     prerequisite: 'realm_auto_citadel_1',
     effect: {
@@ -1243,7 +1243,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'realm_auto_wonder_1',
     name: 'Automated Wonder Construction',
     description: 'Automatically buys 1 wonder every 90 seconds',
-    cost: 22000,
+    cost: 45,
     tier: TierType.Realm,
     prerequisite: 'realm_auto_citadel_1',
     effect: {
@@ -1257,7 +1257,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'realm_auto_oracle_1',
     name: 'Automated Oracle Construction',
     description: 'Automatically buys 1 oracle every 120 seconds',
-    cost: 30000,
+    cost: 75,
     tier: TierType.Realm,
     prerequisite: 'realm_auto_metropolis_1',
     effect: {
@@ -1271,7 +1271,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'realm_auto_exchange_1',
     name: 'Automated Exchange Construction',
     description: 'Automatically buys 1 grand exchange every 150 seconds',
-    cost: 40000,
+    cost: 100,
     tier: TierType.Realm,
     prerequisite: 'realm_auto_wonder_1',
     effect: {
@@ -1287,7 +1287,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'kingdom_cost_reduction_1',
     name: 'Royal Engineering I',
     description: 'Reduces all kingdom building costs by 22%',
-    cost: 20000,
+    cost: 75,
     tier: TierType.Kingdom,
     effect: {
       type: 'cost_reduction',
@@ -1299,7 +1299,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'kingdom_scaling_reduction_1',
     name: 'Royal Mass Production I',
     description: 'Reduces kingdom building cost scaling',
-    cost: 30000,
+    cost: 125,
     tier: TierType.Kingdom,
     effect: {
       type: 'cost_scaling_reduction',
@@ -1313,7 +1313,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'kingdom_auto_capital_1',
     name: 'Automated Capital Construction',
     description: 'Automatically buys 1 capital every 45 seconds',
-    cost: 25000,
+    cost: 15,
     tier: TierType.Kingdom,
     effect: {
       type: 'auto_building',
@@ -1326,7 +1326,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'kingdom_auto_empire_1',
     name: 'Automated Empire District Construction',
     description: 'Automatically buys 1 empire district every 60 seconds',
-    cost: 40000,
+    cost: 30,
     tier: TierType.Kingdom,
     prerequisite: 'kingdom_auto_capital_1',
     effect: {
@@ -1340,7 +1340,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'kingdom_auto_monument_1',
     name: 'Automated Monument Construction',
     description: 'Automatically buys 1 eternal monument every 90 seconds',
-    cost: 55000,
+    cost: 45,
     tier: TierType.Kingdom,
     prerequisite: 'kingdom_auto_capital_1',
     effect: {
@@ -1354,7 +1354,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'kingdom_auto_treasury_1',
     name: 'Automated Treasury Construction',
     description: 'Automatically buys 1 royal treasury every 120 seconds',
-    cost: 75000,
+    cost: 75,
     tier: TierType.Kingdom,
     prerequisite: 'kingdom_auto_empire_1',
     effect: {
@@ -1368,7 +1368,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'kingdom_auto_records_1',
     name: 'Automated Records Construction',
     description: 'Automatically buys 1 hall of records every 150 seconds',
-    cost: 100000,
+    cost: 100,
     tier: TierType.Kingdom,
     prerequisite: 'kingdom_auto_monument_1',
     effect: {
