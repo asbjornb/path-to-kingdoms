@@ -11,10 +11,72 @@ export class UI {
   private lastSettlementCount: number = 0;
   private lastSettlementIds: string[] = [];
   private showAchievements: boolean = false;
+  private prestigeShopOpen: boolean = false;
+  private selectedPrestigeUpgrades: Set<string> = new Set();
 
   constructor(game: GameStateManager, container: HTMLElement) {
     this.game = game;
     this.container = container;
+  }
+
+  public isPrestigeShopOpen(): boolean {
+    return this.prestigeShopOpen;
+  }
+
+  public openPrestigeShop(): void {
+    this.prestigeShopOpen = true;
+    this.selectedPrestigeUpgrades = new Set();
+  }
+
+  public closePrestigeShop(): void {
+    this.prestigeShopOpen = false;
+    this.selectedPrestigeUpgrades = new Set();
+  }
+
+  public getSelectedPrestigeUpgrades(): Set<string> {
+    return this.selectedPrestigeUpgrades;
+  }
+
+  public togglePrestigeUpgradeSelection(upgradeId: string): void {
+    if (this.selectedPrestigeUpgrades.has(upgradeId)) {
+      this.selectedPrestigeUpgrades.delete(upgradeId);
+    } else {
+      // Validate selection is affordable with remaining budget
+      if (this.canSelectPrestigeUpgrade(upgradeId)) {
+        this.selectedPrestigeUpgrades.add(upgradeId);
+      }
+    }
+  }
+
+  private canSelectPrestigeUpgrade(upgradeId: string): boolean {
+    const state = this.game.getState();
+    const preview = this.game.getPrestigePreview();
+    const upgrade = state.prestigeUpgrades.find((u) => u.id === upgradeId);
+    if (!upgrade || upgrade.purchased) return false;
+
+    // Check prerequisite: must be already purchased OR selected
+    if (upgrade.prerequisite !== undefined && upgrade.prerequisite !== '') {
+      const prereq = state.prestigeUpgrades.find((u) => u.id === upgrade.prerequisite);
+      if (!prereq || (!prereq.purchased && !this.selectedPrestigeUpgrades.has(prereq.id))) {
+        return false;
+      }
+    }
+
+    // Calculate available budget for this tier: current + preview earnings - already selected costs
+    const currentCurrency = state.prestigeCurrency.get(upgrade.tier) ?? 0;
+    const earnedCurrency = preview.get(upgrade.tier) ?? 0;
+    const totalBudget = currentCurrency + earnedCurrency;
+
+    // Sum costs of already selected upgrades for same tier
+    let selectedCost = 0;
+    for (const selectedId of this.selectedPrestigeUpgrades) {
+      const sel = state.prestigeUpgrades.find((u) => u.id === selectedId);
+      if (sel && sel.tier === upgrade.tier) {
+        selectedCost += sel.cost;
+      }
+    }
+
+    return totalBudget - selectedCost >= upgrade.cost;
   }
 
   public toggleAchievements(): void {
@@ -86,6 +148,7 @@ export class UI {
           </aside>
         </div>
       </div>
+      ${this.renderPrestigeShopOverlay()}
     `;
   }
 
@@ -402,6 +465,151 @@ export class UI {
             `;
             })
             .join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  private renderPrestigeShopOverlay(): string {
+    if (!this.prestigeShopOpen) return '';
+
+    const state = this.game.getState();
+    const preview = this.game.getPrestigePreview();
+
+    // Build currency summary: current + earned = total per tier
+    const currencyRows: string[] = [];
+    for (const tier of TIER_DATA) {
+      if (tier.type === TierType.Hamlet) continue;
+      const current = state.prestigeCurrency.get(tier.type) ?? 0;
+      const earned = preview.get(tier.type) ?? 0;
+      if (current > 0 || earned > 0) {
+        currencyRows.push(`
+          <div class="prestige-shop-currency-row">
+            <span class="prestige-shop-tier-name">${tier.name} Crowns</span>
+            <span class="prestige-shop-currency-detail">
+              ${current > 0 ? `<span class="currency-current">${current} held</span>` : ''}
+              ${earned > 0 ? `<span class="currency-earned">+${earned} earned</span>` : ''}
+              <span class="currency-total">= ${current + earned} total</span>
+            </span>
+          </div>
+        `);
+      }
+    }
+
+    // Show all prestige upgrades (filtering by prerequisites as before, but also
+    // considering selected upgrades as "virtually purchased" for prerequisite checks)
+    const upgrades = state.prestigeUpgrades.filter((upgrade) => {
+      if (upgrade.purchased) return false;
+      if (upgrade.prerequisite === undefined || upgrade.prerequisite === '') return true;
+      const prereq = state.prestigeUpgrades.find((u) => u.id === upgrade.prerequisite);
+      return (
+        prereq !== undefined && (prereq.purchased || this.selectedPrestigeUpgrades.has(prereq.id))
+      );
+    });
+
+    // Also show already-purchased upgrades for context
+    const purchasedUpgrades = state.prestigeUpgrades.filter((u) => u.purchased);
+
+    // Calculate remaining budget per tier
+    const budgetByTier = new Map<TierType, number>();
+    for (const tier of TIER_DATA) {
+      if (tier.type === TierType.Hamlet) continue;
+      const current = state.prestigeCurrency.get(tier.type) ?? 0;
+      const earned = preview.get(tier.type) ?? 0;
+      let selectedCost = 0;
+      for (const selectedId of this.selectedPrestigeUpgrades) {
+        const sel = state.prestigeUpgrades.find((u) => u.id === selectedId);
+        if (sel && sel.tier === tier.type) {
+          selectedCost += sel.cost;
+        }
+      }
+      budgetByTier.set(tier.type, current + earned - selectedCost);
+    }
+
+    return `
+      <div class="prestige-shop-overlay" id="prestige-shop-overlay">
+        <div class="prestige-shop-modal">
+          <div class="prestige-shop-header">
+            <h2>Prestige Shop</h2>
+            <button class="prestige-shop-close-btn" onclick="window.closePrestigeShop()">Close</button>
+          </div>
+
+          <div class="prestige-shop-description">
+            <p>Prestige will reset your settlements, research, and mastery progress.</p>
+            <p>Select upgrades below to purchase when you prestige, or prestige without buying anything.</p>
+          </div>
+
+          ${
+            currencyRows.length > 0
+              ? `
+            <div class="prestige-shop-currencies">
+              <h3>Crown Earnings</h3>
+              ${currencyRows.join('')}
+            </div>
+          `
+              : '<div class="prestige-shop-currencies"><p class="prestige-shop-no-earnings">No crowns will be earned. You need non-Hamlet tier completions.</p></div>'
+          }
+
+          <div class="prestige-shop-upgrades">
+            <h3>Available Upgrades</h3>
+            ${
+              purchasedUpgrades.length > 0
+                ? `
+              <div class="prestige-shop-purchased">
+                ${purchasedUpgrades
+                  .map((upgrade) => {
+                    return `
+                    <div class="prestige-shop-upgrade purchased">
+                      <div class="prestige-shop-upgrade-info">
+                        <span class="prestige-shop-upgrade-name">${upgrade.name}</span>
+                        <span class="prestige-shop-upgrade-desc">${upgrade.description}</span>
+                      </div>
+                      <span class="prestige-shop-purchased-label">Owned</span>
+                    </div>
+                  `;
+                  })
+                  .join('')}
+              </div>
+            `
+                : ''
+            }
+            <div class="prestige-shop-available">
+              ${
+                upgrades.length > 0
+                  ? upgrades
+                      .map((upgrade) => {
+                        const tierName =
+                          upgrade.tier.charAt(0).toUpperCase() + upgrade.tier.slice(1);
+                        const isSelected = this.selectedPrestigeUpgrades.has(upgrade.id);
+                        const remaining = budgetByTier.get(upgrade.tier) ?? 0;
+                        const canAfford = isSelected || remaining >= upgrade.cost;
+
+                        return `
+                  <div class="prestige-shop-upgrade ${isSelected ? 'selected' : ''} ${!canAfford ? 'unaffordable' : ''}"
+                       onclick="window.togglePrestigeShopUpgrade('${upgrade.id}')">
+                    <div class="prestige-shop-upgrade-info">
+                      <span class="prestige-shop-upgrade-name">${upgrade.name}</span>
+                      <span class="prestige-shop-upgrade-desc">${upgrade.description}</span>
+                    </div>
+                    <div class="prestige-shop-upgrade-cost">
+                      <span class="prestige-shop-cost-amount">${upgrade.cost} ${tierName} Crown${upgrade.cost !== 1 ? 's' : ''}</span>
+                      ${isSelected ? '<span class="prestige-shop-selected-badge">Selected</span>' : ''}
+                    </div>
+                  </div>
+                `;
+                      })
+                      .join('')
+                  : '<p class="prestige-shop-empty">No upgrades available yet. Earn crowns from higher-tier completions to unlock upgrades.</p>'
+              }
+            </div>
+          </div>
+
+          <div class="prestige-shop-actions">
+            <button class="prestige-shop-cancel-btn" onclick="window.closePrestigeShop()">Cancel</button>
+            <button class="prestige-shop-confirm-btn" onclick="window.confirmPrestige()">
+              Prestige${this.selectedPrestigeUpgrades.size > 0 ? ` (${this.selectedPrestigeUpgrades.size} upgrade${this.selectedPrestigeUpgrades.size !== 1 ? 's' : ''})` : ''}
+            </button>
+          </div>
         </div>
       </div>
     `;
