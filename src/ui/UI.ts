@@ -129,7 +129,7 @@ export class UI {
     if (!tierDef) return '';
 
     const goal = settlement.goals[0]; // Single goal per settlement
-    const goalProgress = goal !== undefined ? `${this.formatGoalProgress(goal)}` : '';
+    const goalProgress = goal !== undefined ? `${this.formatGoalProgress(goal, settlement)}` : '';
 
     return `
       <div class="settlement ${settlement.isComplete ? 'complete' : ''}">
@@ -346,14 +346,20 @@ export class UI {
     `;
   }
 
-  private formatGoalProgress(goal: Goal): string {
+  private formatGoalProgress(goal: Goal, settlement: Settlement): string {
+    const reductionFactor = this.game.getGoalReductionFactor(settlement);
+    const effectiveTarget =
+      goal.type === GoalType.BuildingCount
+        ? Math.ceil(goal.targetValue * reductionFactor)
+        : goal.targetValue * reductionFactor;
+
     if (goal.type === GoalType.Survival) {
       const currentMinutes = Math.floor(goal.currentValue / 60);
-      const targetMinutes = Math.floor(goal.targetValue / 60);
+      const targetMinutes = Math.floor(effectiveTarget / 60);
       return `${currentMinutes}/${targetMinutes} min`;
     }
 
-    return `${formatNumber(goal.currentValue)}/${formatNumber(goal.targetValue)}`;
+    return `${formatNumber(goal.currentValue)}/${formatNumber(effectiveTarget)}`;
   }
 
   public update(): void {
@@ -453,7 +459,7 @@ export class UI {
         const goalProgressText = settlementEl.querySelector('.goal-progress');
 
         if (goalProgressText !== null) {
-          goalProgressText.textContent = this.formatGoalProgress(goal);
+          goalProgressText.textContent = this.formatGoalProgress(goal, settlement);
         }
 
         // Update completion status
