@@ -50,9 +50,10 @@ describe('GoalGenerator', () => {
     goals.forEach((goal) => {
       expect(goal.description).toMatch(/\d+/); // Should contain numbers
 
-      // Survival goals should show minutes
+      // Prosperity goals should show minutes
       if (goal.type === GoalType.Survival) {
         expect(goal.description).toContain('minutes');
+        expect(goal.description).toContain('Prosper');
       }
     });
   });
