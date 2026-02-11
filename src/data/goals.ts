@@ -62,69 +62,69 @@ export const GoalGenerator = {
       // Income goals (scaled by tier income level and difficulty)
       {
         type: GoalType.ReachIncome,
-        baseValue: Math.round(50 * incomeScale * difficulty),
-        description: 'Reach {value} income per second',
-      },
-      {
-        type: GoalType.ReachIncome,
         baseValue: Math.round(100 * incomeScale * difficulty),
         description: 'Reach {value} income per second',
       },
       {
         type: GoalType.ReachIncome,
-        baseValue: Math.round(200 * incomeScale * difficulty),
+        baseValue: Math.round(250 * incomeScale * difficulty),
+        description: 'Reach {value} income per second',
+      },
+      {
+        type: GoalType.ReachIncome,
+        baseValue: Math.round(500 * incomeScale * difficulty),
         description: 'Reach {value} income per second',
       },
 
       // Lifetime currency goals (scaled by tier cost level and difficulty)
       {
         type: GoalType.AccumulateCurrency,
-        baseValue: Math.round(5000 * costScale * difficulty),
+        baseValue: Math.round(12000 * costScale * difficulty),
         description: 'Earn {value} total currency',
       },
       {
         type: GoalType.AccumulateCurrency,
-        baseValue: Math.round(15000 * costScale * difficulty),
+        baseValue: Math.round(40000 * costScale * difficulty),
         description: 'Earn {value} total currency',
       },
       {
         type: GoalType.AccumulateCurrency,
-        baseValue: Math.round(50000 * costScale * difficulty),
+        baseValue: Math.round(120000 * costScale * difficulty),
         description: 'Earn {value} total currency',
       },
 
       // Current currency goals (scaled by tier cost level and difficulty)
       {
         type: GoalType.CurrentCurrency,
-        baseValue: Math.round(1000 * costScale * difficulty),
+        baseValue: Math.round(3000 * costScale * difficulty),
         description: 'Have {value} currency at once',
       },
       {
         type: GoalType.CurrentCurrency,
-        baseValue: Math.round(2500 * costScale * difficulty),
+        baseValue: Math.round(7500 * costScale * difficulty),
         description: 'Have {value} currency at once',
       },
       {
         type: GoalType.CurrentCurrency,
-        baseValue: Math.round(5000 * costScale * difficulty),
+        baseValue: Math.round(15000 * costScale * difficulty),
         description: 'Have {value} currency at once',
       },
 
-      // Survival goals (slightly longer per tier)
+      // Prosperity goals (time-based, accelerated by income)
       {
         type: GoalType.Survival,
         baseValue: Math.round(300 * difficulty),
-        description: 'Survive for {minutes} minutes',
+        description: 'Prosper for {minutes} minutes',
       },
       {
         type: GoalType.Survival,
         baseValue: Math.round(600 * difficulty),
-        description: 'Survive for {minutes} minutes',
+        description: 'Prosper for {minutes} minutes',
       },
       {
         type: GoalType.Survival,
         baseValue: Math.round(900 * difficulty),
-        description: 'Survive for {minutes} minutes',
+        description: 'Prosper for {minutes} minutes',
       },
     ];
 
@@ -133,7 +133,7 @@ export const GoalGenerator = {
     tierDef.buildings.forEach((building, i) => {
       // Cheaper buildings get higher targets, expensive buildings get lower targets
       const positionFactor = 1 - (i / buildingIndex) * 0.6; // 1.0 down to 0.4
-      const targetCount = Math.round(40 * positionFactor * difficulty);
+      const targetCount = Math.round(30 * positionFactor * difficulty);
 
       goalTemplates.push({
         type: GoalType.BuildingCount,

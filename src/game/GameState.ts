@@ -1087,10 +1087,19 @@ export class GameStateManager {
           }
           break;
 
-        case GoalType.Survival:
-          newValue = Math.floor((now - settlement.spawnTime) / 1000); // seconds
+        case GoalType.Survival: {
+          // Income accelerates prosperity: higher income means faster progress
+          const elapsedSeconds = (now - settlement.spawnTime) / 1000;
+          const tierDef = getTierByType(settlement.tier);
+          const avgBaseIncome = tierDef
+            ? tierDef.buildings.reduce((sum, b) => sum + b.baseIncome, 0) / tierDef.buildings.length
+            : 1;
+          const incomeThreshold = avgBaseIncome * 10;
+          const timeMultiplier = 1 + settlement.totalIncome / incomeThreshold;
+          newValue = Math.floor(elapsedSeconds * timeMultiplier);
           completed = newValue >= effectiveTarget;
           break;
+        }
       }
 
       goal.currentValue = newValue;
