@@ -416,6 +416,44 @@ export class GameStateManager {
       }
     }
 
+    // Add synergy bonuses from unlocked achievements
+    for (const achievement of this.state.achievements) {
+      if (
+        achievement.unlocked &&
+        achievement.bonus.type === 'building_synergy' &&
+        achievement.bonus.sourceBuildingId !== undefined &&
+        achievement.bonus.targetBuildingId !== undefined
+      ) {
+        const sourceCount = settlement.buildings.get(achievement.bonus.sourceBuildingId) ?? 0;
+        if (sourceCount > 0) {
+          const currentBoost = productionBoosts.get(achievement.bonus.targetBuildingId) ?? 0;
+          productionBoosts.set(
+            achievement.bonus.targetBuildingId,
+            currentBoost + achievement.bonus.value * sourceCount,
+          );
+        }
+      }
+    }
+
+    // Add synergy bonuses from purchased prestige upgrades
+    for (const upgrade of this.state.prestigeUpgrades) {
+      if (
+        upgrade.purchased &&
+        upgrade.effect.type === 'prestige_building_synergy' &&
+        upgrade.effect.sourceBuilding !== undefined &&
+        upgrade.effect.targetBuilding !== undefined
+      ) {
+        const sourceCount = settlement.buildings.get(upgrade.effect.sourceBuilding) ?? 0;
+        if (sourceCount > 0) {
+          const currentBoost = productionBoosts.get(upgrade.effect.targetBuilding) ?? 0;
+          productionBoosts.set(
+            upgrade.effect.targetBuilding,
+            currentBoost + upgrade.effect.value * sourceCount,
+          );
+        }
+      }
+    }
+
     let baseIncome = 0;
 
     // Calculate base income from all buildings, applying production_boost and prestige building boosts
@@ -615,6 +653,9 @@ export class GameStateManager {
       case 'prestige_tier_requirement_reduction':
         // Additive sum (reduces tier advancement requirement)
         return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+      case 'prestige_building_synergy':
+        // Handled per-building in calculateSettlementIncome, not aggregated here
+        return 0;
       case 'prestige_parallel_slots':
         // Return the highest parallel slots value (absolute, not additive)
         return upgrades.reduce((max, u) => Math.max(max, u.effect.value), 0);
@@ -655,6 +696,9 @@ export class GameStateManager {
         return achievements.reduce((sum, a) => sum + a.bonus.value, 0);
       case 'tier_requirement_reduction':
         return achievements.reduce((sum, a) => sum + a.bonus.value, 0);
+      case 'building_synergy':
+        // Handled per-building in calculateSettlementIncome, not aggregated here
+        return 0;
       default:
         return 0;
     }

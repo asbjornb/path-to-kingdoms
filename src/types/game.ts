@@ -121,9 +121,11 @@ export interface PrestigeUpgrade {
       | 'prestige_production_boost_amplifier'
       | 'prestige_grant_building'
       | 'prestige_tier_requirement_reduction'
+      | 'prestige_building_synergy'
       | 'prestige_parallel_slots';
     value: number;
-    targetBuilding?: string; // For prestige_building_income_boost / prestige_grant_building
+    targetBuilding?: string; // For prestige_building_income_boost / prestige_grant_building / prestige_building_synergy
+    sourceBuilding?: string; // For prestige_building_synergy - source building providing the bonus
   };
   purchased: boolean;
   prerequisite?: string;
@@ -156,9 +158,12 @@ export interface Achievement {
       | 'cost_reduction'
       | 'research_bonus'
       | 'starting_currency'
-      | 'tier_requirement_reduction';
+      | 'tier_requirement_reduction'
+      | 'building_synergy';
     value: number;
     description: string;
+    sourceBuildingId?: string; // For building_synergy - source building providing the bonus
+    targetBuildingId?: string; // For building_synergy - target building receiving the bonus
   };
   unlocked: boolean;
 }

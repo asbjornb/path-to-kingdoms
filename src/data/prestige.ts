@@ -943,6 +943,104 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     purchased: false,
     prerequisite: 'prestige_swift_expansion_1',
   },
+
+  // ===== Building synergy boosts =====
+
+  // Town currency → Cottages boost Mills
+  {
+    id: 'prestige_cottage_industry_1',
+    name: 'Cottage Industry',
+    description: 'Each Cottage gives +1% income to Mills',
+    cost: 4,
+    tier: TierType.Town,
+    effect: {
+      type: 'prestige_building_synergy',
+      value: 0.01,
+      sourceBuilding: 'village_cottage',
+      targetBuilding: 'village_mill',
+    },
+    purchased: false,
+  },
+
+  // City currency → Universities boost Grand Bazaars
+  {
+    id: 'prestige_academic_commerce_1',
+    name: 'Academic Commerce',
+    description: 'Each University gives +1.5% income to Grand Bazaars',
+    cost: 4,
+    tier: TierType.City,
+    effect: {
+      type: 'prestige_building_synergy',
+      value: 0.015,
+      sourceBuilding: 'city_university',
+      targetBuilding: 'city_bazaar',
+    },
+    purchased: false,
+  },
+
+  // County currency → Fortresses boost Plantations
+  {
+    id: 'prestige_fortress_economy_1',
+    name: 'Fortress Economy',
+    description: 'Each Fortress gives +2% income to Plantations',
+    cost: 4,
+    tier: TierType.County,
+    effect: {
+      type: 'prestige_building_synergy',
+      value: 0.02,
+      sourceBuilding: 'county_fortress',
+      targetBuilding: 'county_plantation',
+    },
+    purchased: false,
+  },
+
+  // Duchy currency → Mints boost Royal Academies
+  {
+    id: 'prestige_minting_scholars_1',
+    name: 'Minting Scholars',
+    description: 'Each Mint gives +1.5% income to Royal Academies',
+    cost: 4,
+    tier: TierType.Duchy,
+    effect: {
+      type: 'prestige_building_synergy',
+      value: 0.015,
+      sourceBuilding: 'duchy_mint',
+      targetBuilding: 'duchy_academy',
+    },
+    purchased: false,
+  },
+
+  // Realm currency → Metropolises boost Wonders
+  {
+    id: 'prestige_metro_wonders_1',
+    name: 'Metropolitan Wonders',
+    description: 'Each Metropolis gives +2% income to Wonders',
+    cost: 4,
+    tier: TierType.Realm,
+    effect: {
+      type: 'prestige_building_synergy',
+      value: 0.02,
+      sourceBuilding: 'realm_metropolis',
+      targetBuilding: 'realm_wonder',
+    },
+    purchased: false,
+  },
+
+  // Kingdom currency → Empire Districts boost Eternal Monuments
+  {
+    id: 'prestige_imperial_legacy_1',
+    name: 'Imperial Legacy',
+    description: 'Each Empire District gives +1.5% income to Eternal Monuments',
+    cost: 3,
+    tier: TierType.Kingdom,
+    effect: {
+      type: 'prestige_building_synergy',
+      value: 0.015,
+      sourceBuilding: 'kingdom_empire',
+      targetBuilding: 'kingdom_monument',
+    },
+    purchased: false,
+  },
 ];
 
 /**
