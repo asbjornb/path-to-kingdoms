@@ -257,7 +257,7 @@ export class UI {
                 <div class="building-info">
                   <span class="building-name">${building.name} (${count})</span>
                   ${!compact ? `<span class="building-income">+${formatIncome(building.baseIncome)}</span>` : ''}
-                  ${!compact && building.effect ? `<span class="building-effect">${building.effect.description}</span>` : ''}
+                  ${building.effect ? `<span class="building-effect">${building.effect.description}</span>` : ''}
                 </div>
                 <button
                   class="buy-btn ${!canAfford ? 'disabled' : ''}"
@@ -788,7 +788,8 @@ export class UI {
 
       // Update currency and income values
       const currencyEl = settlementEl.querySelector('.settlement-stat .stat-value');
-      const incomeEl = settlementEl.querySelectorAll('.settlement-stat .stat-value')[1];
+      const statValues = settlementEl.querySelectorAll('.settlement-stat .stat-value');
+      const incomeEl = statValues.length > 1 ? statValues[1] : null;
       const headerIncomeEl = settlementEl.querySelector('.settlement-header .income');
       const crossTierBonus = this.game.getCrossTierBonus(settlement.id);
 

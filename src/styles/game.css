@@ -898,21 +898,30 @@
 /* ===== Compact View ===== */
 
 .settlement.compact {
-  padding: 0.5rem;
+  padding: 0.4rem 0.5rem;
 }
 
 .settlement.compact .settlement-header {
-  margin-bottom: 0.35rem;
-  gap: 0.5rem;
+  margin-bottom: 0.2rem;
+  gap: 0.25rem 0.5rem;
   align-items: center;
+  flex-wrap: nowrap;
 }
 
 .settlement.compact .settlement-header h4 {
   font-size: 0.85rem;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .settlement.compact .goal-display {
   font-size: 0.75rem;
+  width: auto;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .compact-currency {
@@ -922,20 +931,41 @@
 }
 
 .settlement.compact .buildings {
-  gap: 0.25rem;
+  gap: 0.15rem;
 }
 
 .settlement.compact .building {
-  padding: 0.2rem 0.4rem;
+  padding: 0.15rem 0.3rem;
+  flex-wrap: nowrap;
+}
+
+.settlement.compact .building-info {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 1;
+  min-width: 0;
 }
 
 .settlement.compact .building-name {
   font-size: 0.8rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.settlement.compact .building-effect {
+  font-size: 0.7rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .settlement.compact .buy-btn {
-  padding: 0.15rem 0.5rem;
+  padding: 0.1rem 0.4rem;
   font-size: 0.75rem;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* ===== Mobile Responsive ===== */
@@ -1078,6 +1108,23 @@
     flex-wrap: wrap;
     gap: 0.5rem;
   }
+
+  .settlement.compact .settlement-header {
+    flex-wrap: nowrap;
+  }
+
+  .settlement.compact .goal-display {
+    width: auto;
+  }
+
+  .settlement.compact .building {
+    flex-wrap: nowrap;
+    padding: 0.15rem 0.3rem;
+  }
+
+  .settlement.compact .buy-btn {
+    min-height: auto;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1130,5 +1177,16 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 0.2rem;
+  }
+
+  .settlement.compact .building {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .settlement.compact .buy-btn {
+    width: auto;
+    min-height: auto;
+    padding: 0.1rem 0.4rem;
   }
 }

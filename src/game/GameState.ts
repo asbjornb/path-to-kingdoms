@@ -94,7 +94,7 @@ export class GameStateManager {
         devModeEnabled: false,
         showCompletedResearch: false,
         buyAmount: 1,
-        compactView: false,
+        compactView: true,
       },
     };
   }
@@ -1402,7 +1402,7 @@ export class GameStateManager {
         settings.buyAmount = 1;
       }
       if (settings.compactView === undefined) {
-        settings.compactView = false;
+        settings.compactView = true;
       }
 
       // Load prestige upgrades, merging saved state with current definitions
