@@ -89,8 +89,6 @@ export class GameStateManager {
       prestigeUpgrades: PRESTIGE_UPGRADES.map((u) => ({ ...u, purchased: false })),
       achievements: ACHIEVEMENTS_DATA.map((a) => ({ ...a, unlocked: false })),
       settings: {
-        autobuyEnabled: false,
-        autobuyInterval: 1000,
         devModeEnabled: false,
         showCompletedResearch: false,
         buyAmount: 1,

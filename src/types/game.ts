@@ -78,8 +78,6 @@ export interface ResearchUpgrade {
   tier: TierType;
   effect: {
     type:
-      | 'autobuy_speed'
-      | 'bulk_buy'
       | 'cost_reduction'
       | 'parallel_slots'
       | 'starting_income'
@@ -169,8 +167,6 @@ export interface GameState {
   prestigeUpgrades: PrestigeUpgrade[];
   achievements: Achievement[];
   settings: {
-    autobuyEnabled: boolean;
-    autobuyInterval: number;
     devModeEnabled: boolean;
     showCompletedResearch: boolean;
     buyAmount: BuyAmount;
@@ -206,8 +202,6 @@ export interface SaveData {
     prestigeUpgrades?: PrestigeUpgrade[];
     achievements?: Achievement[];
     settings: {
-      autobuyEnabled: boolean;
-      autobuyInterval: number;
       devModeEnabled: boolean;
       showCompletedResearch: boolean;
       buyAmount: BuyAmount;
