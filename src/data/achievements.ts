@@ -378,9 +378,9 @@ export const ACHIEVEMENTS_DATA: Achievement[] = [
   {
     id: 'ach_synergy_hamlet',
     name: 'Ambient Gardening',
-    description: 'Have 20 Gardens in a single settlement',
+    description: 'Have 55 Gardens in a single settlement',
     hidden: true,
-    condition: { type: 'specific_building_count', buildingId: 'hamlet_garden', value: 20 },
+    condition: { type: 'specific_building_count', buildingId: 'hamlet_garden', value: 55 },
     bonus: {
       type: 'building_synergy',
       value: 0.01,
@@ -393,9 +393,9 @@ export const ACHIEVEMENTS_DATA: Achievement[] = [
   {
     id: 'ach_synergy_village',
     name: 'Blessed Harvests',
-    description: 'Have 8 Chapels in a single settlement',
+    description: 'Have 30 Chapels in a single settlement',
     hidden: true,
-    condition: { type: 'specific_building_count', buildingId: 'village_chapel', value: 8 },
+    condition: { type: 'specific_building_count', buildingId: 'village_chapel', value: 30 },
     bonus: {
       type: 'building_synergy',
       value: 0.02,
@@ -408,9 +408,9 @@ export const ACHIEVEMENTS_DATA: Achievement[] = [
   {
     id: 'ach_synergy_town',
     name: 'Forged Credentials',
-    description: 'Have 15 Forges in a single settlement',
+    description: 'Have 35 Forges in a single settlement',
     hidden: true,
-    condition: { type: 'specific_building_count', buildingId: 'town_forge', value: 15 },
+    condition: { type: 'specific_building_count', buildingId: 'town_forge', value: 35 },
     bonus: {
       type: 'building_synergy',
       value: 0.01,
@@ -423,9 +423,9 @@ export const ACHIEVEMENTS_DATA: Achievement[] = [
   {
     id: 'ach_synergy_city',
     name: 'Cathedral Acoustics',
-    description: 'Have 5 Cathedrals in a single settlement',
+    description: 'Have 20 Cathedrals in a single settlement',
     hidden: true,
-    condition: { type: 'specific_building_count', buildingId: 'city_cathedral', value: 5 },
+    condition: { type: 'specific_building_count', buildingId: 'city_cathedral', value: 20 },
     bonus: {
       type: 'building_synergy',
       value: 0.02,
@@ -438,9 +438,9 @@ export const ACHIEVEMENTS_DATA: Achievement[] = [
   {
     id: 'ach_synergy_county',
     name: 'Litigious Prosperity',
-    description: 'Have 6 Courthouses in a single settlement',
+    description: 'Have 25 Courthouses in a single settlement',
     hidden: true,
-    condition: { type: 'specific_building_count', buildingId: 'county_courthouse', value: 6 },
+    condition: { type: 'specific_building_count', buildingId: 'county_courthouse', value: 25 },
     bonus: {
       type: 'building_synergy',
       value: 0.015,
@@ -453,9 +453,9 @@ export const ACHIEVEMENTS_DATA: Achievement[] = [
   {
     id: 'ach_synergy_duchy',
     name: 'Port Authority',
-    description: 'Have 5 Grand Ports in a single settlement',
+    description: 'Have 18 Grand Ports in a single settlement',
     hidden: true,
-    condition: { type: 'specific_building_count', buildingId: 'duchy_port', value: 5 },
+    condition: { type: 'specific_building_count', buildingId: 'duchy_port', value: 18 },
     bonus: {
       type: 'building_synergy',
       value: 0.02,
@@ -468,9 +468,9 @@ export const ACHIEVEMENTS_DATA: Achievement[] = [
   {
     id: 'ach_synergy_realm',
     name: "Oracle's Stock Tips",
-    description: 'Have 3 Oracles in a single settlement',
+    description: 'Have 15 Oracles in a single settlement',
     hidden: true,
-    condition: { type: 'specific_building_count', buildingId: 'realm_oracle', value: 3 },
+    condition: { type: 'specific_building_count', buildingId: 'realm_oracle', value: 15 },
     bonus: {
       type: 'building_synergy',
       value: 0.03,
@@ -483,9 +483,9 @@ export const ACHIEVEMENTS_DATA: Achievement[] = [
   {
     id: 'ach_synergy_kingdom',
     name: 'Monumental Paperwork',
-    description: 'Have 3 Halls of Records in a single settlement',
+    description: 'Have 10 Halls of Records in a single settlement',
     hidden: true,
-    condition: { type: 'specific_building_count', buildingId: 'kingdom_records', value: 3 },
+    condition: { type: 'specific_building_count', buildingId: 'kingdom_records', value: 10 },
     bonus: {
       type: 'building_synergy',
       value: 0.02,
