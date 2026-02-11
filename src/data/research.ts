@@ -495,7 +495,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'hamlet_parallel_4',
     name: 'Quad Hamlet Management',
     description: 'Run 4 hamlets in parallel',
-    cost: 800,
+    cost: 250,
     tier: TierType.Village,
     prerequisite: 'hamlet_parallel_3',
     effect: {
@@ -580,7 +580,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'hamlet_parallel_5',
     name: 'Penta Hamlet Management',
     description: 'Run 5 hamlets in parallel',
-    cost: 3200,
+    cost: 500,
     tier: TierType.Town,
     prerequisite: 'hamlet_parallel_4',
     effect: {
