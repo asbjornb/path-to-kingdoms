@@ -136,6 +136,18 @@ export class GameStateManager {
       newSettlement.currency += Math.floor(newSettlement.currency * achievementStartBonus);
     }
 
+    // Apply prestige free buildings: start with N of the cheapest building pre-built
+    const freeBuildings = this.getPrestigeEffect('prestige_free_buildings');
+    if (freeBuildings > 0) {
+      const tierDef = getTierByType(tierType);
+      if (tierDef && tierDef.buildings.length > 0) {
+        const cheapestBuilding = tierDef.buildings[0]; // buildings are ordered by cost
+        const currentCount = newSettlement.buildings.get(cheapestBuilding.id) ?? 0;
+        newSettlement.buildings.set(cheapestBuilding.id, currentCount + freeBuildings);
+        newSettlement.totalIncome = this.calculateSettlementIncome(newSettlement);
+      }
+    }
+
     this.state.settlements.push(newSettlement);
     return newSettlement;
   }
@@ -357,6 +369,8 @@ export class GameStateManager {
     }
 
     // Build a map of production_boost multipliers per building ID
+    const productionBoostAmplifier =
+      1 + this.getPrestigeEffect('prestige_production_boost_amplifier');
     const productionBoosts = new Map<string, number>();
     for (const building of tierDef.buildings) {
       if (
@@ -368,7 +382,7 @@ export class GameStateManager {
         const currentBoost = productionBoosts.get(building.effect.targetBuilding) ?? 0;
         productionBoosts.set(
           building.effect.targetBuilding,
-          currentBoost + building.effect.value * boosterCount,
+          currentBoost + building.effect.value * boosterCount * productionBoostAmplifier,
         );
       }
     }
@@ -457,6 +471,10 @@ export class GameStateManager {
       bonus += (completedCount * tierBaseIncome * PATRONAGE_PER_COMPLETION) / Math.pow(2, distance);
     }
 
+    // Apply prestige patronage boost
+    const patronageBoost = 1 + this.getPrestigeEffect('prestige_patronage_boost');
+    bonus *= patronageBoost;
+
     return bonus;
   }
 
@@ -480,7 +498,8 @@ export class GameStateManager {
    */
   public getMasteryIncomeMultiplier(tier: TierType): number {
     const completions = this.getMasteryLevel(tier);
-    return 1 + completions * MASTERY_INCOME_PER_COMPLETION;
+    const masteryBoost = 1 + this.getPrestigeEffect('prestige_mastery_boost');
+    return 1 + completions * MASTERY_INCOME_PER_COMPLETION * masteryBoost;
   }
 
   /**
@@ -543,6 +562,24 @@ export class GameStateManager {
       case 'prestige_building_income_boost':
         // Handled per-building via getPrestigeBuildingBoost, not aggregated here
         return 0;
+      case 'prestige_patronage_boost':
+        // Additive sum (e.g., 0.5 + 0.75 = 1.25 → applied as 1 + total multiplier)
+        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+      case 'prestige_research_discount':
+        // Multiplicative (e.g., 0.85 * 0.75 = 0.6375)
+        return upgrades.reduce((mult, u) => mult * u.effect.value, 1);
+      case 'prestige_free_buildings':
+        // Additive sum of free building counts
+        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+      case 'prestige_currency_boost':
+        // Additive sum (e.g., 0.5 + 0.75 = 1.25 → applied as 1 + total)
+        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+      case 'prestige_mastery_boost':
+        // Additive sum (e.g., 0.5 + 1.0 = 1.5 → mastery rate multiplied by 1 + total)
+        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+      case 'prestige_production_boost_amplifier':
+        // Additive sum (e.g., 0.4 + 0.6 = 1.0 → production boosts are 100% stronger)
+        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
       default:
         return 0;
     }
@@ -609,9 +646,11 @@ export class GameStateManager {
    */
   public getPrestigePreview(): Map<TierType, number> {
     const preview = new Map<TierType, number>();
+    const currencyBoost = 1 + this.getPrestigeEffect('prestige_currency_boost');
     for (const [tier, count] of this.state.completedSettlements.entries()) {
       if (tier === TierType.Hamlet) continue;
-      const currency = calculatePrestigeCurrency(count);
+      const baseCurrency = calculatePrestigeCurrency(count);
+      const currency = Math.floor(baseCurrency * currencyBoost);
       if (currency > 0) {
         preview.set(tier, currency);
       }
@@ -903,9 +942,11 @@ export class GameStateManager {
     // Check if tier is unlocked
     if (!this.state.unlockedTiers.has(research.tier)) return false;
 
-    // Check if player has enough research points for this tier
+    // Check if player has enough research points for this tier (apply prestige discount)
     const tierPoints = this.state.researchPoints.get(research.tier) ?? 0;
-    if (tierPoints < research.cost) return false;
+    const researchDiscount = this.getPrestigeEffect('prestige_research_discount');
+    const effectiveCost = Math.max(1, Math.floor(research.cost * researchDiscount));
+    if (tierPoints < effectiveCost) return false;
 
     // Check prerequisites
     if (research.prerequisite !== undefined && research.prerequisite !== '') {
@@ -913,8 +954,8 @@ export class GameStateManager {
       if (!prereq || !prereq.purchased) return false;
     }
 
-    // Purchase the research
-    this.state.researchPoints.set(research.tier, tierPoints - research.cost);
+    // Purchase the research (at discounted cost)
+    this.state.researchPoints.set(research.tier, tierPoints - effectiveCost);
     research.purchased = true;
 
     // Handle special research effects

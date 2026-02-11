@@ -487,6 +487,313 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     effect: { type: 'prestige_cost_scaling_reduction', value: 0.04 },
     purchased: false,
   },
+
+  // ===== NEW: Patronage boosts =====
+
+  // Village currency → Patronage from higher tiers is stronger
+  {
+    id: 'prestige_patron_1',
+    name: 'Patron of the Arts',
+    description: '+50% patronage income from higher tiers',
+    cost: 3,
+    tier: TierType.Village,
+    effect: { type: 'prestige_patronage_boost', value: 0.5 },
+    purchased: false,
+  },
+  // County currency → Even more patronage
+  {
+    id: 'prestige_feudal_ties_1',
+    name: 'Feudal Ties',
+    description: '+75% patronage income from higher tiers',
+    cost: 3,
+    tier: TierType.County,
+    effect: { type: 'prestige_patronage_boost', value: 0.75 },
+    purchased: false,
+  },
+  // Kingdom currency → Massive patronage
+  {
+    id: 'prestige_royal_patronage_1',
+    name: 'Royal Patronage',
+    description: '+100% patronage income from higher tiers',
+    cost: 2,
+    tier: TierType.Kingdom,
+    effect: { type: 'prestige_patronage_boost', value: 1.0 },
+    purchased: false,
+  },
+
+  // ===== NEW: Research discounts =====
+
+  // Town currency → Cheaper research
+  {
+    id: 'prestige_stipend_1',
+    name: "Scholar's Stipend",
+    description: '-15% research costs',
+    cost: 3,
+    tier: TierType.Town,
+    effect: { type: 'prestige_research_discount', value: 0.85 },
+    purchased: false,
+  },
+  // Realm currency → Even cheaper research
+  {
+    id: 'prestige_endowment_1',
+    name: "Scholar's Endowment",
+    description: '-25% research costs',
+    cost: 4,
+    tier: TierType.Realm,
+    effect: { type: 'prestige_research_discount', value: 0.75 },
+    purchased: false,
+  },
+
+  // ===== NEW: Free starting buildings =====
+
+  // Duchy currency → Start with buildings pre-built
+  {
+    id: 'prestige_settlers_cache_1',
+    name: "Settler's Cache I",
+    description: 'New settlements start with 3 of the cheapest building',
+    cost: 3,
+    tier: TierType.Duchy,
+    effect: { type: 'prestige_free_buildings', value: 3 },
+    purchased: false,
+  },
+  {
+    id: 'prestige_settlers_cache_2',
+    name: "Settler's Cache II",
+    description: '+4 more free starting buildings',
+    cost: 6,
+    tier: TierType.Duchy,
+    effect: { type: 'prestige_free_buildings', value: 4 },
+    purchased: false,
+    prerequisite: 'prestige_settlers_cache_1',
+  },
+  // Kingdom currency → Big head start
+  {
+    id: 'prestige_royal_settlers_1',
+    name: 'Royal Settlers',
+    description: '+5 more free starting buildings',
+    cost: 2,
+    tier: TierType.Kingdom,
+    effect: { type: 'prestige_free_buildings', value: 5 },
+    purchased: false,
+  },
+
+  // ===== NEW: Prestige currency boost =====
+
+  // City currency → Earn more crowns on prestige
+  {
+    id: 'prestige_crowning_1',
+    name: 'Crowning Glory',
+    description: '+50% prestige currency earned on reset',
+    cost: 3,
+    tier: TierType.City,
+    effect: { type: 'prestige_currency_boost', value: 0.5 },
+    purchased: false,
+  },
+  // Realm currency → Even more crowns
+  {
+    id: 'prestige_realm_prestige_1',
+    name: 'Legacy of the Realm',
+    description: '+75% prestige currency earned on reset',
+    cost: 4,
+    tier: TierType.Realm,
+    effect: { type: 'prestige_currency_boost', value: 0.75 },
+    purchased: false,
+  },
+
+  // ===== NEW: Mastery boost =====
+
+  // County currency → Mastery grows faster
+  {
+    id: 'prestige_master_builder_1',
+    name: 'Master Builder',
+    description: 'Mastery income bonus grows 50% faster per completion',
+    cost: 4,
+    tier: TierType.County,
+    effect: { type: 'prestige_mastery_boost', value: 0.5 },
+    purchased: false,
+  },
+  // Kingdom currency → Mastery grows much faster
+  {
+    id: 'prestige_eternal_mastery_1',
+    name: 'Eternal Mastery',
+    description: 'Mastery income bonus grows 100% faster per completion',
+    cost: 3,
+    tier: TierType.Kingdom,
+    effect: { type: 'prestige_mastery_boost', value: 1.0 },
+    purchased: false,
+  },
+
+  // ===== NEW: Production boost amplifier =====
+
+  // County currency → Production boost buildings are stronger
+  {
+    id: 'prestige_synergy_1',
+    name: 'Feudal Synergy',
+    description: 'Production boost buildings are 40% more effective',
+    cost: 5,
+    tier: TierType.County,
+    effect: { type: 'prestige_production_boost_amplifier', value: 0.4 },
+    purchased: false,
+  },
+  // Duchy currency → Even stronger production boosts
+  {
+    id: 'prestige_trade_networks_1',
+    name: 'Trade Networks',
+    description: 'Production boost buildings are 60% more effective',
+    cost: 4,
+    tier: TierType.Duchy,
+    effect: { type: 'prestige_production_boost_amplifier', value: 0.6 },
+    purchased: false,
+  },
+
+  // ===== NEW: More building-specific income boosts (covering untouched buildings) =====
+
+  // Village currency → Boost Hamlet Garden
+  {
+    id: 'prestige_harvest_1',
+    name: 'Harvest Moon',
+    description: '+150% Garden income',
+    cost: 3,
+    tier: TierType.Village,
+    effect: {
+      type: 'prestige_building_income_boost',
+      value: 1.5,
+      targetBuilding: 'hamlet_garden',
+    },
+    purchased: false,
+  },
+
+  // Town currency → Boost Town Guild Hall
+  {
+    id: 'prestige_guild_1',
+    name: 'Guild Dominion',
+    description: '+100% Guild Hall income',
+    cost: 4,
+    tier: TierType.Town,
+    effect: {
+      type: 'prestige_building_income_boost',
+      value: 1.0,
+      targetBuilding: 'town_guild',
+    },
+    purchased: false,
+  },
+
+  // City currency → Boost City Cathedral
+  {
+    id: 'prestige_cathedral_1',
+    name: "Cathedral's Blessing",
+    description: '+100% Cathedral income',
+    cost: 3,
+    tier: TierType.City,
+    effect: {
+      type: 'prestige_building_income_boost',
+      value: 1.0,
+      targetBuilding: 'city_cathedral',
+    },
+    purchased: false,
+  },
+
+  // County currency → Boost County Plantation
+  {
+    id: 'prestige_plantation_1',
+    name: 'Plantation Bounty',
+    description: '+100% Plantation income',
+    cost: 3,
+    tier: TierType.County,
+    effect: {
+      type: 'prestige_building_income_boost',
+      value: 1.0,
+      targetBuilding: 'county_plantation',
+    },
+    purchased: false,
+  },
+
+  // Duchy currency → Boost Duchy Royal Academy
+  {
+    id: 'prestige_academy_1',
+    name: 'Royal Academy Award',
+    description: '+100% Royal Academy income',
+    cost: 4,
+    tier: TierType.Duchy,
+    effect: {
+      type: 'prestige_building_income_boost',
+      value: 1.0,
+      targetBuilding: 'duchy_academy',
+    },
+    purchased: false,
+  },
+  // Duchy currency → Cross-tier boost Hamlet Shrine
+  {
+    id: 'prestige_sacred_1',
+    name: 'Sacred Legacy',
+    description: '+200% Shrine income',
+    cost: 3,
+    tier: TierType.Duchy,
+    effect: {
+      type: 'prestige_building_income_boost',
+      value: 2.0,
+      targetBuilding: 'hamlet_shrine',
+    },
+    purchased: false,
+  },
+
+  // Realm currency → Boost Realm Wonder
+  {
+    id: 'prestige_wonder_1',
+    name: 'Wonder of the World',
+    description: '+150% Wonder income',
+    cost: 5,
+    tier: TierType.Realm,
+    effect: {
+      type: 'prestige_building_income_boost',
+      value: 1.5,
+      targetBuilding: 'realm_wonder',
+    },
+    purchased: false,
+  },
+  // Realm currency → Cross-tier boost Village Farm
+  {
+    id: 'prestige_agri_1',
+    name: 'Agricultural Revolution',
+    description: '+200% Farm income',
+    cost: 4,
+    tier: TierType.Realm,
+    effect: {
+      type: 'prestige_building_income_boost',
+      value: 2.0,
+      targetBuilding: 'village_farm',
+    },
+    purchased: false,
+  },
+
+  // Kingdom currency → Boost Kingdom Capital
+  {
+    id: 'prestige_capital_1',
+    name: 'Capital Glory',
+    description: '+100% Capital income',
+    cost: 1,
+    tier: TierType.Kingdom,
+    effect: {
+      type: 'prestige_building_income_boost',
+      value: 1.0,
+      targetBuilding: 'kingdom_capital',
+    },
+    purchased: false,
+  },
+  // Kingdom currency → Boost Kingdom Eternal Monument
+  {
+    id: 'prestige_monument_1',
+    name: 'Monumental Legacy',
+    description: '+200% Eternal Monument income',
+    cost: 3,
+    tier: TierType.Kingdom,
+    effect: {
+      type: 'prestige_building_income_boost',
+      value: 2.0,
+      targetBuilding: 'kingdom_monument',
+    },
+    purchased: false,
+  },
 ];
 
 /**
