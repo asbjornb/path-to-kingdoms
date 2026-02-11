@@ -1137,6 +1137,154 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     effect: { type: 'prestige_goal_reduction', value: 0.05 },
     purchased: false,
   },
+
+  // ===== Tiered chain extensions (currency sinks for early tiers) =====
+
+  // Village currency → Hut income chain extension
+  {
+    id: 'prestige_hearth_2',
+    name: 'Blessing of the Hearth II',
+    description: '+100% Hut income',
+    cost: 3,
+    tier: TierType.Village,
+    effect: { type: 'prestige_building_income_boost', value: 1.0, targetBuilding: 'hamlet_hut' },
+    purchased: false,
+    prerequisite: 'prestige_hearth_1',
+  },
+
+  // Village currency → Patronage chain extension
+  {
+    id: 'prestige_patron_2',
+    name: 'Patron of the Arts II',
+    description: '+40% patronage income from higher tiers',
+    cost: 4,
+    tier: TierType.Village,
+    effect: { type: 'prestige_patronage_boost', value: 0.4 },
+    purchased: false,
+    prerequisite: 'prestige_patron_1',
+  },
+
+  // Village currency → Survival speed chain extension
+  {
+    id: 'prestige_pastoral_3',
+    name: 'Pastoral Wisdom III',
+    description: 'Survival goals progress 15% faster',
+    cost: 5,
+    tier: TierType.Village,
+    effect: { type: 'prestige_survival_speed', value: 0.15 },
+    purchased: false,
+    prerequisite: 'prestige_pastoral_2',
+  },
+
+  // Town currency → Forge income chain extension
+  {
+    id: 'prestige_forgemaster_2',
+    name: "Forgemaster's Legacy II",
+    description: '+100% Forge income',
+    cost: 3,
+    tier: TierType.Town,
+    effect: { type: 'prestige_building_income_boost', value: 1.0, targetBuilding: 'town_forge' },
+    purchased: false,
+    prerequisite: 'prestige_forgemaster_1',
+  },
+
+  // Town currency → Flat cost chain extension
+  {
+    id: 'prestige_foundation_3',
+    name: 'Foundation Stone III',
+    description: '+2 more flat cost buildings (no scaling)',
+    cost: 5,
+    tier: TierType.Town,
+    effect: { type: 'prestige_flat_cost_count', value: 2 },
+    purchased: false,
+    prerequisite: 'prestige_foundation_2',
+  },
+
+  // Town currency → Cottage synergy chain extension
+  {
+    id: 'prestige_cottage_industry_2',
+    name: 'Cottage Industry II',
+    description: 'Each Cottage gives +2% income to Mills',
+    cost: 4,
+    tier: TierType.Town,
+    effect: {
+      type: 'prestige_building_synergy',
+      value: 0.02,
+      sourceBuilding: 'village_cottage',
+      targetBuilding: 'village_mill',
+    },
+    purchased: false,
+    prerequisite: 'prestige_cottage_industry_1',
+  },
+
+  // City currency → Cathedral income chain extension
+  {
+    id: 'prestige_cathedral_2',
+    name: "Cathedral's Blessing II",
+    description: '+100% Cathedral income',
+    cost: 4,
+    tier: TierType.City,
+    effect: {
+      type: 'prestige_building_income_boost',
+      value: 1.0,
+      targetBuilding: 'city_cathedral',
+    },
+    purchased: false,
+    prerequisite: 'prestige_cathedral_1',
+  },
+
+  // City currency → Prestige currency chain extension
+  {
+    id: 'prestige_crowning_2',
+    name: 'Crowning Glory II',
+    description: '+40% prestige currency earned on reset',
+    cost: 4,
+    tier: TierType.City,
+    effect: { type: 'prestige_currency_boost', value: 0.4 },
+    purchased: false,
+    prerequisite: 'prestige_crowning_1',
+  },
+
+  // City currency → University synergy chain extension
+  {
+    id: 'prestige_academic_commerce_2',
+    name: 'Academic Commerce II',
+    description: 'Each University gives +3% income to Grand Bazaars',
+    cost: 5,
+    tier: TierType.City,
+    effect: {
+      type: 'prestige_building_synergy',
+      value: 0.03,
+      sourceBuilding: 'city_university',
+      targetBuilding: 'city_bazaar',
+    },
+    purchased: false,
+    prerequisite: 'prestige_academic_commerce_1',
+  },
+
+  // County currency → Survival speed chain extension
+  {
+    id: 'prestige_swift_2',
+    name: 'Swift Conquest II',
+    description: 'Survival goals progress 20% faster',
+    cost: 3,
+    tier: TierType.County,
+    effect: { type: 'prestige_survival_speed', value: 0.2 },
+    purchased: false,
+    prerequisite: 'prestige_swift_1',
+  },
+
+  // County currency → Patronage chain extension
+  {
+    id: 'prestige_feudal_ties_2',
+    name: 'Feudal Ties II',
+    description: '+50% patronage income from higher tiers',
+    cost: 4,
+    tier: TierType.County,
+    effect: { type: 'prestige_patronage_boost', value: 0.5 },
+    purchased: false,
+    prerequisite: 'prestige_feudal_ties_1',
+  },
 ];
 
 /**
