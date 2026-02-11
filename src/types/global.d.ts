@@ -12,6 +12,9 @@ declare global {
     deleteSave: () => void;
     exportSave: () => void;
     importSave: (event: Event) => void;
+    performPrestige: () => void;
+    purchasePrestigeUpgrade: (upgradeId: string) => void;
+    toggleAchievements: () => void;
   }
 }
 

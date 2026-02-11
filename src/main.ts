@@ -56,7 +56,41 @@ function initGame(): void {
 
   window.toggleShowCompletedResearch = (): void => {
     game.toggleShowCompletedResearch();
-    ui.render(); // Re-render to update research list
+    ui.render();
+  };
+
+  window.performPrestige = (): void => {
+    const preview = game.getPrestigePreview();
+    if (preview.size === 0) {
+      alert('You need at least 1 non-Hamlet tier completion to prestige.');
+      return;
+    }
+
+    let previewText = 'Prestige will reset your settlements, research, and mastery progress.\n\n';
+    previewText += 'You will earn:\n';
+    for (const [tier, amount] of preview.entries()) {
+      const tierName = tier.charAt(0).toUpperCase() + tier.slice(1);
+      previewText += `  ${amount} ${tierName} Crown${amount !== 1 ? 's' : ''}\n`;
+    }
+    previewText += '\nSpend Crowns on permanent prestige upgrades in the research panel.';
+    previewText += '\n\nAre you sure you want to prestige?';
+
+    if (confirm(previewText)) {
+      game.performPrestige();
+      ui.selectTier(TierType.Hamlet);
+      ui.render();
+    }
+  };
+
+  window.purchasePrestigeUpgrade = (upgradeId: string): void => {
+    if (game.purchasePrestigeUpgrade(upgradeId)) {
+      ui.render();
+    }
+  };
+
+  window.toggleAchievements = (): void => {
+    ui.toggleAchievements();
+    ui.render();
   };
 
   window.saveGame = (): void => {

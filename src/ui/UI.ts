@@ -10,10 +10,15 @@ export class UI {
   private isInitialized: boolean = false;
   private lastSettlementCount: number = 0;
   private lastSettlementIds: string[] = [];
+  private showAchievements: boolean = false;
 
   constructor(game: GameStateManager, container: HTMLElement) {
     this.game = game;
     this.container = container;
+  }
+
+  public toggleAchievements(): void {
+    this.showAchievements = !this.showAchievements;
   }
 
   public render(): void {
@@ -30,6 +35,7 @@ export class UI {
               <span class="stat-label">${this.selectedTier.charAt(0).toUpperCase() + this.selectedTier.slice(1)} Research:</span>
               <span class="stat-value" id="research">${this.game.getResearchPoints(this.selectedTier)}</span>
             </div>
+            ${this.renderPrestigeHeader()}
             <div class="buy-amount-toggle">
               <span class="toggle-label">Buy:</span>
               ${this.renderBuyAmountButtons()}
@@ -68,6 +74,7 @@ export class UI {
                 ${this.renderTierProgress()}
               </div>
             </div>
+            ${this.renderAchievements()}
             <div class="settlements-list">
               ${this.renderSettlements()}
             </div>
@@ -75,6 +82,7 @@ export class UI {
           
           <aside class="research-panel">
             ${this.renderResearch()}
+            ${this.renderPrestigeUpgrades()}
           </aside>
         </div>
       </div>
@@ -293,6 +301,146 @@ export class UI {
         return `<button class="buy-amount-btn ${isActive ? 'active' : ''}" onclick="window.setBuyAmount(${amount === 'max' ? "'max'" : amount})">${label}</button>`;
       })
       .join('');
+  }
+
+  private renderPrestigeHeader(): string {
+    const prestigeCount = this.game.getPrestigeCount();
+    const canPrestige = this.game.canPrestige();
+    const prestigeCurrency = this.game.getPrestigeCurrency(this.selectedTier);
+    const tierName = this.selectedTier.charAt(0).toUpperCase() + this.selectedTier.slice(1);
+
+    const parts: string[] = [];
+
+    if (prestigeCount > 0) {
+      parts.push(`<span class="prestige-count">Prestige ${prestigeCount}</span>`);
+    }
+
+    if (this.selectedTier !== TierType.Hamlet && prestigeCurrency > 0) {
+      parts.push(`<span class="prestige-currency">${tierName} Crowns: ${prestigeCurrency}</span>`);
+    }
+
+    if (canPrestige) {
+      parts.push(
+        `<button onclick="window.performPrestige()" class="prestige-btn">Prestige</button>`,
+      );
+    }
+
+    if (parts.length === 0) return '';
+
+    return `<div class="prestige-header-info">${parts.join('')}</div>`;
+  }
+
+  private renderPrestigeUpgrades(): string {
+    const state = this.game.getState();
+
+    // Check if any prestige currency exists
+    let hasAnyCurrency = false;
+    for (const amount of state.prestigeCurrency.values()) {
+      if (amount > 0) {
+        hasAnyCurrency = true;
+        break;
+      }
+    }
+    // Also show if any prestige upgrades have been purchased
+    const hasPurchased = state.prestigeUpgrades.some((u) => u.purchased);
+    if (!hasAnyCurrency && !hasPurchased) return '';
+
+    // Show all prestige upgrades, filtering by prerequisites
+    let upgrades = state.prestigeUpgrades.filter((upgrade) => {
+      if (upgrade.prerequisite === undefined || upgrade.prerequisite === '') return true;
+      const prereq = state.prestigeUpgrades.find((u) => u.id === upgrade.prerequisite);
+      return prereq !== undefined && prereq.purchased;
+    });
+
+    // Hide purchased ones unless show completed is on
+    const showCompleted = this.game.isShowCompletedResearchEnabled();
+    if (!showCompleted) {
+      upgrades = upgrades.filter((u) => !u.purchased);
+    }
+
+    if (upgrades.length === 0 && !showCompleted) return '';
+
+    // Show prestige currencies summary
+    const currencyLines: string[] = [];
+    for (const tier of TIER_DATA) {
+      if (tier.type === TierType.Hamlet) continue;
+      const amount = state.prestigeCurrency.get(tier.type) ?? 0;
+      if (amount > 0 || state.prestigeUpgrades.some((u) => u.tier === tier.type && u.purchased)) {
+        currencyLines.push(`<span class="prestige-currency-item">${tier.name}: ${amount}</span>`);
+      }
+    }
+
+    return `
+      <div class="prestige-upgrades-section">
+        <h3>Prestige Shop</h3>
+        ${currencyLines.length > 0 ? `<div class="prestige-currencies">${currencyLines.join('')}</div>` : ''}
+        <div class="research-list">
+          ${upgrades
+            .map((upgrade) => {
+              const currency = state.prestigeCurrency.get(upgrade.tier) ?? 0;
+              const canAfford = currency >= upgrade.cost;
+              const tierName = upgrade.tier.charAt(0).toUpperCase() + upgrade.tier.slice(1);
+
+              return `
+              <div class="research-item prestige-item ${upgrade.purchased ? 'purchased' : ''}">
+                <h4>${upgrade.name}</h4>
+                <p>${upgrade.description}</p>
+                ${
+                  !upgrade.purchased
+                    ? `
+                  <button
+                    class="research-btn prestige-upgrade-btn ${!canAfford ? 'disabled' : ''}"
+                    onclick="window.purchasePrestigeUpgrade('${upgrade.id}')"
+                    ${!canAfford ? 'disabled' : ''}
+                  >
+                    ${upgrade.cost} ${tierName} Crowns
+                  </button>
+                `
+                    : '<span class="purchased-label">Purchased</span>'
+                }
+              </div>
+            `;
+            })
+            .join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  private renderAchievements(): string {
+    const state = this.game.getState();
+    const unlockedCount = state.achievements.filter((a) => a.unlocked).length;
+    const totalCount = state.achievements.length;
+
+    if (unlockedCount === 0 && !this.showAchievements) return '';
+
+    return `
+      <div class="achievements-section">
+        <div class="achievements-header" onclick="window.toggleAchievements()">
+          <span class="achievements-title">Achievements: ${unlockedCount}/${totalCount}</span>
+          <span class="achievements-toggle">${this.showAchievements ? '[-]' : '[+]'}</span>
+        </div>
+        ${
+          this.showAchievements
+            ? `<div class="achievements-list">
+            ${state.achievements
+              .map(
+                (achievement) => `
+              <div class="achievement ${achievement.unlocked ? 'unlocked' : 'locked'}">
+                <div class="achievement-info">
+                  <span class="achievement-name">${achievement.unlocked ? achievement.name : '???'}</span>
+                  <span class="achievement-desc">${achievement.unlocked ? achievement.description : achievement.description}</span>
+                </div>
+                <span class="achievement-bonus ${achievement.unlocked ? 'active' : ''}">${achievement.bonus.description}</span>
+              </div>
+            `,
+              )
+              .join('')}
+          </div>`
+            : ''
+        }
+      </div>
+    `;
   }
 
   public selectTier(tier: TierType): void {
