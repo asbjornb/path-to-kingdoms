@@ -907,6 +907,19 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     purchased: false,
   },
 
+  // ===== Hamlet parallel slots (prestige) =====
+
+  // Town prestige → 6th hamlet slot
+  {
+    id: 'prestige_hamlet_parallel_6',
+    name: 'Hexa Hamlet Management',
+    description: 'Run 6 hamlets in parallel',
+    cost: 3,
+    tier: TierType.Town,
+    effect: { type: 'prestige_parallel_slots', value: 6 },
+    purchased: false,
+  },
+
   // ===== Tier requirement reduction =====
 
   // City currency → Reduce completions needed to advance tiers

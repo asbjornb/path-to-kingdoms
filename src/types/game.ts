@@ -120,7 +120,8 @@ export interface PrestigeUpgrade {
       | 'prestige_mastery_boost'
       | 'prestige_production_boost_amplifier'
       | 'prestige_grant_building'
-      | 'prestige_tier_requirement_reduction';
+      | 'prestige_tier_requirement_reduction'
+      | 'prestige_parallel_slots';
     value: number;
     targetBuilding?: string; // For prestige_building_income_boost / prestige_grant_building
   };
