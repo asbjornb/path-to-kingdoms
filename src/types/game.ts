@@ -119,9 +119,21 @@ export interface Achievement {
   id: string;
   name: string;
   description: string;
+  hidden?: boolean; // If true, description is also hidden until unlocked
   condition: {
-    type: 'tier_completions' | 'total_completions' | 'prestige_count';
+    type:
+      | 'tier_completions'
+      | 'total_completions'
+      | 'prestige_count'
+      | 'speed_completion'
+      | 'max_single_building'
+      | 'max_currency_held'
+      | 'settlement_count'
+      | 'research_purchased'
+      | 'near_broke'
+      | 'specific_building_count';
     tier?: TierType;
+    buildingId?: string; // For specific_building_count
     value: number;
   };
   bonus: {

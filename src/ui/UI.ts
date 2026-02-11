@@ -429,9 +429,9 @@ export class UI {
               <div class="achievement ${achievement.unlocked ? 'unlocked' : 'locked'}">
                 <div class="achievement-info">
                   <span class="achievement-name">${achievement.unlocked ? achievement.name : '???'}</span>
-                  <span class="achievement-desc">${achievement.unlocked ? achievement.description : achievement.description}</span>
+                  <span class="achievement-desc">${achievement.unlocked ? achievement.description : achievement.hidden === true ? '???' : achievement.description}</span>
                 </div>
-                <span class="achievement-bonus ${achievement.unlocked ? 'active' : ''}">${achievement.bonus.description}</span>
+                <span class="achievement-bonus ${achievement.unlocked ? 'active' : ''}">${achievement.unlocked ? achievement.bonus.description : '???'}</span>
               </div>
             `,
               )
