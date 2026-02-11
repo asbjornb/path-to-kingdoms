@@ -102,6 +102,17 @@ export class UI {
               <span class="toggle-label">Buy:</span>
               ${this.renderBuyAmountButtons()}
             </div>
+            <div class="compact-toggle">
+              <label>
+                <input
+                  type="checkbox"
+                  id="compact-view-toggle"
+                  ${this.game.isCompactViewEnabled() ? 'checked' : ''}
+                  onchange="window.toggleCompactView()"
+                >
+                <span class="toggle-label">Compact</span>
+              </label>
+            </div>
             <div class="save-controls">
               <button onclick="window.saveGame()" class="save-btn">Save</button>
               <button onclick="window.deleteSave()" class="save-btn danger">Reset</button>
@@ -188,11 +199,12 @@ export class UI {
     const tierDef = getTierByType(settlement.tier);
     if (!tierDef) return '';
 
+    const compact = this.game.isCompactViewEnabled();
     const goal = settlement.goals[0]; // Single goal per settlement
     const goalProgress = goal !== undefined ? `${this.formatGoalProgress(goal, settlement)}` : '';
 
     return `
-      <div class="settlement ${settlement.isComplete ? 'complete' : ''}">
+      <div class="settlement ${settlement.isComplete ? 'complete' : ''} ${compact ? 'compact' : ''}">
         <div class="settlement-header">
           <h4>${tierDef.name} #${settlement.id.split('_')[1].slice(-4)}</h4>
           ${
@@ -204,8 +216,11 @@ export class UI {
               : ''
           }
           <span class="income">${formatIncome(settlement.totalIncome + this.game.getCrossTierBonus(settlement.id))}</span>
+          ${compact ? `<span class="stat-value compact-currency">${formatNumber(settlement.currency)}</span>` : ''}
         </div>
-        <div class="settlement-stats">
+        ${
+          !compact
+            ? `<div class="settlement-stats">
           <div class="settlement-stat">
             <span class="stat-label">Currency:</span>
             <span class="stat-value">${formatNumber(settlement.currency)}</span>
@@ -223,7 +238,9 @@ export class UI {
               </div>`
               : '';
           })()}
-        </div>
+        </div>`
+            : ''
+        }
         <div class="buildings">
           ${tierDef.buildings
             .map((building) => {
@@ -239,8 +256,8 @@ export class UI {
               <div class="building">
                 <div class="building-info">
                   <span class="building-name">${building.name} (${count})</span>
-                  <span class="building-income">+${formatIncome(building.baseIncome)}</span>
-                  ${building.effect ? `<span class="building-effect">${building.effect.description}</span>` : ''}
+                  ${!compact ? `<span class="building-income">+${formatIncome(building.baseIncome)}</span>` : ''}
+                  ${!compact && building.effect ? `<span class="building-effect">${building.effect.description}</span>` : ''}
                 </div>
                 <button
                   class="buy-btn ${!canAfford ? 'disabled' : ''}"
@@ -783,6 +800,12 @@ export class UI {
       }
       if (headerIncomeEl !== null) {
         headerIncomeEl.textContent = formatIncome(settlement.totalIncome + crossTierBonus);
+      }
+
+      // Update compact currency display in header
+      const compactCurrencyEl = settlementEl.querySelector('.compact-currency');
+      if (compactCurrencyEl !== null) {
+        compactCurrencyEl.textContent = formatNumber(settlement.currency);
       }
 
       // Update cross-tier tribute display

@@ -162,6 +162,7 @@ export interface GameState {
     devModeEnabled: boolean;
     showCompletedResearch: boolean;
     buyAmount: BuyAmount;
+    compactView: boolean;
   };
 }
 
@@ -198,6 +199,7 @@ export interface SaveData {
       devModeEnabled: boolean;
       showCompletedResearch: boolean;
       buyAmount: BuyAmount;
+      compactView: boolean;
     };
   };
 }

@@ -19,8 +19,7 @@ function initGame(): void {
     game.toggleDevMode();
     // Strip the parameter from the URL so it doesn't linger
     params.delete('t');
-    const cleanUrl =
-      window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+    const cleanUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
     window.history.replaceState({}, '', cleanUrl);
   }
 
@@ -109,6 +108,11 @@ function initGame(): void {
 
   window.toggleAchievements = (): void => {
     ui.toggleAchievements();
+    ui.render();
+  };
+
+  window.toggleCompactView = (): void => {
+    game.toggleCompactView();
     ui.render();
   };
 

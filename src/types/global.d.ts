@@ -18,6 +18,7 @@ declare global {
     confirmPrestige: () => void;
     purchasePrestigeUpgrade: (upgradeId: string) => void;
     toggleAchievements: () => void;
+    toggleCompactView: () => void;
   }
 }
 
