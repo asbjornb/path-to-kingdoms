@@ -67,8 +67,6 @@ describe('UI', () => {
     });
 
     it('should render buildings with correct structure', () => {
-      // Disable compact mode to see all building details
-      game.toggleCompactView();
       ui.render();
 
       const buildings = container.querySelectorAll('.building');
