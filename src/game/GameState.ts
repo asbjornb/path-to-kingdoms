@@ -1361,7 +1361,7 @@ export class GameStateManager {
           const avgBaseIncome = tierDef
             ? tierDef.buildings.reduce((sum, b) => sum + b.baseIncome, 0) / tierDef.buildings.length
             : 1;
-          const incomeThreshold = avgBaseIncome * 50;
+          const incomeThreshold = avgBaseIncome * 100;
           const timeMultiplier = 1 + settlement.totalIncome / incomeThreshold;
           // Apply prestige survival speed bonus
           const survivalSpeedBonus = 1 + this.getPrestigeEffect('prestige_survival_speed');
