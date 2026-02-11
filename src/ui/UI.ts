@@ -40,17 +40,6 @@ export class UI {
               <span class="toggle-label">Buy:</span>
               ${this.renderBuyAmountButtons()}
             </div>
-            <div class="dev-mode-toggle">
-              <label>
-                <input
-                  type="checkbox"
-                  id="dev-mode"
-                  ${this.game.isDevModeEnabled() ? 'checked' : ''}
-                  onchange="window.toggleDevMode()"
-                >
-                <span class="dev-mode-label">Dev Mode (1000x income)</span>
-              </label>
-            </div>
             <div class="save-controls">
               <button onclick="window.saveGame()" class="save-btn">Save</button>
               <button onclick="window.deleteSave()" class="save-btn danger">Reset</button>
@@ -537,12 +526,6 @@ export class UI {
     const researchEl = document.getElementById('research');
     if (researchEl) {
       researchEl.textContent = this.game.getResearchPoints(this.selectedTier).toString();
-    }
-
-    // Update dev mode checkbox state
-    const devModeCheckbox = document.getElementById('dev-mode') as HTMLInputElement;
-    if (devModeCheckbox !== null) {
-      devModeCheckbox.checked = this.game.isDevModeEnabled();
     }
 
     // Update show completed research checkbox state
