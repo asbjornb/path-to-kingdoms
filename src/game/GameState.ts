@@ -57,6 +57,7 @@ const MASTERY_AUTOBUILD_HALFPOINT = 500; // completions at which auto-build spee
 export class GameStateManager {
   private state: GameState;
   private lastUpdate: number = Date.now();
+  private lastAchievementCheck: number = 0;
   private readonly GAME_VERSION = '0.1.0';
   private readonly SAVE_KEY = 'path-to-kingdoms-save';
   private autoSaveInterval: number | null = null;
@@ -663,8 +664,9 @@ export class GameStateManager {
 
   /**
    * Check all achievements and unlock any whose conditions are met.
+   * @param context Optional context from settlement completion (e.g. completion speed).
    */
-  public checkAchievements(): void {
+  public checkAchievements(context?: { completionTimeSeconds?: number }): void {
     for (const achievement of this.state.achievements) {
       if (achievement.unlocked) continue;
 
@@ -685,6 +687,46 @@ export class GameStateManager {
         }
         case 'prestige_count':
           conditionMet = this.state.prestigeCount >= achievement.condition.value;
+          break;
+        case 'speed_completion':
+          if (context?.completionTimeSeconds !== undefined) {
+            conditionMet = context.completionTimeSeconds <= achievement.condition.value;
+          }
+          break;
+        case 'max_single_building':
+          for (const settlement of this.state.settlements) {
+            for (const count of settlement.buildings.values()) {
+              if (count >= achievement.condition.value) {
+                conditionMet = true;
+                break;
+              }
+            }
+            if (conditionMet) break;
+          }
+          break;
+        case 'max_currency_held':
+          for (const settlement of this.state.settlements) {
+            if (settlement.currency >= achievement.condition.value) {
+              conditionMet = true;
+              break;
+            }
+          }
+          break;
+        case 'settlement_count':
+          conditionMet = this.state.settlements.length >= achievement.condition.value;
+          break;
+        case 'research_purchased': {
+          const purchasedCount = this.state.research.filter((r) => r.purchased).length;
+          conditionMet = purchasedCount >= achievement.condition.value;
+          break;
+        }
+        case 'near_broke':
+          for (const settlement of this.state.settlements) {
+            if (settlement.currency < achievement.condition.value && settlement.totalIncome > 0) {
+              conditionMet = true;
+              break;
+            }
+          }
           break;
       }
 
@@ -747,8 +789,9 @@ export class GameStateManager {
       const lifetimeCount = (this.state.lifetimeCompletions.get(settlement.tier) ?? 0) + 1;
       this.state.lifetimeCompletions.set(settlement.tier, lifetimeCount);
 
-      // Check achievements
-      this.checkAchievements();
+      // Check achievements (pass completion speed for speed achievements)
+      const completionTimeSeconds = (Date.now() - settlement.spawnTime) / 1000;
+      this.checkAchievements({ completionTimeSeconds });
 
       // Remove completed settlement
       this.state.settlements = this.state.settlements.filter((s) => s.id !== settlement.id);
@@ -835,6 +878,9 @@ export class GameStateManager {
       .forEach((settlement) => {
         settlement.totalIncome = this.calculateSettlementIncome(settlement);
       });
+
+    // Check achievements (research_purchased condition)
+    this.checkAchievements();
 
     return true;
   }
@@ -985,6 +1031,12 @@ export class GameStateManager {
 
     // Process automated building purchases
     this.processAutoBuildingPurchases(now);
+
+    // Periodically check live-state achievements (every 2 seconds)
+    if (now - this.lastAchievementCheck >= 2000) {
+      this.lastAchievementCheck = now;
+      this.checkAchievements();
+    }
   }
 
   private processAutoBuildingPurchases(now: number): void {
