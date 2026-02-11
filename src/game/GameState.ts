@@ -94,6 +94,7 @@ export class GameStateManager {
         devModeEnabled: false,
         showCompletedResearch: false,
         buyAmount: 1,
+        compactView: false,
       },
     };
   }
@@ -1300,6 +1301,15 @@ export class GameStateManager {
     return this.state.settings.showCompletedResearch;
   }
 
+  public toggleCompactView(): boolean {
+    this.state.settings.compactView = !this.state.settings.compactView;
+    return this.state.settings.compactView;
+  }
+
+  public isCompactViewEnabled(): boolean {
+    return this.state.settings.compactView;
+  }
+
   // For testing - manually trigger autospawn
   public triggerAutospawn(): void {
     this.autospawnSettlements();
@@ -1390,6 +1400,9 @@ export class GameStateManager {
       const settings = saveData.gameState.settings;
       if (settings.buyAmount === undefined) {
         settings.buyAmount = 1;
+      }
+      if (settings.compactView === undefined) {
+        settings.compactView = false;
       }
 
       // Load prestige upgrades, merging saved state with current definitions
