@@ -95,6 +95,43 @@ export interface ResearchUpgrade {
   level?: number; // Current level for repeatable research
 }
 
+export interface PrestigeUpgrade {
+  id: string;
+  name: string;
+  description: string;
+  cost: number;
+  tier: TierType; // Which prestige currency to spend
+  effect: {
+    type:
+      | 'prestige_income_multiplier'
+      | 'prestige_cost_reduction'
+      | 'prestige_research_bonus'
+      | 'prestige_goal_reduction'
+      | 'prestige_starting_currency'
+      | 'prestige_autobuild_speed';
+    value: number;
+  };
+  purchased: boolean;
+  prerequisite?: string;
+}
+
+export interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  condition: {
+    type: 'tier_completions' | 'total_completions' | 'prestige_count';
+    tier?: TierType;
+    value: number;
+  };
+  bonus: {
+    type: 'income_multiplier' | 'cost_reduction' | 'research_bonus' | 'starting_currency';
+    value: number;
+    description: string;
+  };
+  unlocked: boolean;
+}
+
 export interface GameState {
   settlements: Settlement[];
   researchPoints: Map<TierType, number>; // Tier-specific research points
@@ -102,6 +139,11 @@ export interface GameState {
   completedSettlements: Map<TierType, number>;
   research: ResearchUpgrade[];
   autoBuildingTimers: Map<string, number>; // Track last auto-purchase time for each research upgrade
+  prestigeCurrency: Map<TierType, number>; // Prestige currency per tier (Village+)
+  prestigeCount: number;
+  lifetimeCompletions: Map<TierType, number>; // Persists through prestige resets
+  prestigeUpgrades: PrestigeUpgrade[];
+  achievements: Achievement[];
   settings: {
     autobuyEnabled: boolean;
     autobuyInterval: number;
@@ -133,6 +175,11 @@ export interface SaveData {
     completedSettlements: [TierType, number][]; // Serialized Map
     research: ResearchUpgrade[];
     autoBuildingTimers: [string, number][]; // Serialized Map
+    prestigeCurrency?: [TierType, number][]; // Serialized Map
+    prestigeCount?: number;
+    lifetimeCompletions?: [TierType, number][]; // Serialized Map
+    prestigeUpgrades?: PrestigeUpgrade[];
+    achievements?: Achievement[];
     settings: {
       autobuyEnabled: boolean;
       autobuyInterval: number;

@@ -7,10 +7,14 @@ import {
   SerializableSettlement,
   BuyAmount,
   ResearchUpgrade,
+  PrestigeUpgrade,
+  Achievement,
 } from '../types/game';
 import { TIER_DATA, getTierByType } from '../data/tiers';
 import { RESEARCH_DATA } from '../data/research';
 import { GoalGenerator } from '../data/goals';
+import { PRESTIGE_UPGRADES, calculatePrestigeCurrency } from '../data/prestige';
+import { ACHIEVEMENTS_DATA } from '../data/achievements';
 
 function createSettlement(tierType: TierType): Settlement {
   const tierDef = getTierByType(tierType);
@@ -78,11 +82,16 @@ export class GameStateManager {
       completedSettlements: new Map(),
       research: RESEARCH_DATA.map((r) => ({ ...r, purchased: false })),
       autoBuildingTimers: new Map(),
+      prestigeCurrency: new Map(),
+      prestigeCount: 0,
+      lifetimeCompletions: new Map(),
+      prestigeUpgrades: PRESTIGE_UPGRADES.map((u) => ({ ...u, purchased: false })),
+      achievements: ACHIEVEMENTS_DATA.map((a) => ({ ...a, unlocked: false })),
       settings: {
         autobuyEnabled: false,
         autobuyInterval: 1000,
         devModeEnabled: false,
-        showCompletedResearch: false, // Default to hiding completed research
+        showCompletedResearch: false,
         buyAmount: 1,
       },
     };
@@ -111,6 +120,19 @@ export class GameStateManager {
     const masteryBonus = this.getMasteryStartingCurrency(tierType);
     if (masteryBonus > 0) {
       newSettlement.currency += masteryBonus;
+    }
+
+    // Apply prestige starting currency multiplier
+    const prestigeStartMult = this.getPrestigeEffect('prestige_starting_currency');
+    if (prestigeStartMult > 1) {
+      newSettlement.currency *= prestigeStartMult;
+      newSettlement.currency = Math.floor(newSettlement.currency);
+    }
+
+    // Apply achievement starting currency bonus (additive percentage)
+    const achievementStartBonus = this.getAchievementEffect('starting_currency');
+    if (achievementStartBonus > 0) {
+      newSettlement.currency += Math.floor(newSettlement.currency * achievementStartBonus);
     }
 
     this.state.settlements.push(newSettlement);
@@ -238,7 +260,19 @@ export class GameStateManager {
       }
     }
 
-    return Math.floor(baseCost * Math.pow(adjustedMultiplier, count) * costReduction);
+    // Apply prestige cost reduction (multiplicative)
+    const prestigeCostReduction = this.getPrestigeEffect('prestige_cost_reduction');
+
+    // Apply achievement cost reduction (multiplicative)
+    const achievementCostReduction = this.getAchievementEffect('cost_reduction');
+
+    return Math.floor(
+      baseCost *
+        Math.pow(adjustedMultiplier, count) *
+        costReduction *
+        prestigeCostReduction *
+        achievementCostReduction,
+    );
   }
 
   private getBuildingEffectMultiplier(settlement: Settlement, effectType: string): number {
@@ -278,6 +312,10 @@ export class GameStateManager {
         totalReduction += building.effect.value * count;
       }
     }
+
+    // Apply prestige goal reduction
+    const prestigeGoalReduction = this.getPrestigeEffect('prestige_goal_reduction');
+    totalReduction += prestigeGoalReduction;
 
     // Cap at 75% reduction (factor of 0.25)
     return Math.max(0.25, 1 - totalReduction);
@@ -365,7 +403,19 @@ export class GameStateManager {
     // Apply mastery income multiplier
     const masteryMultiplier = this.getMasteryIncomeMultiplier(settlement.tier);
 
-    return baseIncome * incomeMultiplier * masteryMultiplier;
+    // Apply prestige income multiplier (additive sum, applied as 1 + total)
+    const prestigeIncomeBonus = 1 + this.getPrestigeEffect('prestige_income_multiplier');
+
+    // Apply achievement income multiplier (additive sum, applied as 1 + total)
+    const achievementIncomeBonus = 1 + this.getAchievementEffect('income_multiplier');
+
+    return (
+      baseIncome *
+      incomeMultiplier *
+      masteryMultiplier *
+      prestigeIncomeBonus *
+      achievementIncomeBonus
+    );
   }
 
   /**
@@ -441,6 +491,209 @@ export class GameStateManager {
     return completions / (completions + MASTERY_AUTOBUILD_HALFPOINT);
   }
 
+  // ===== Prestige & Achievement Effect Helpers =====
+
+  /**
+   * Get aggregate prestige effect for a given type.
+   */
+  public getPrestigeEffect(type: PrestigeUpgrade['effect']['type']): number {
+    const upgrades = this.state.prestigeUpgrades.filter(
+      (u) => u.purchased && u.effect.type === type,
+    );
+    switch (type) {
+      case 'prestige_income_multiplier':
+        // Additive sum (e.g., 0.15 + 0.25 = 0.40 → applied as 1 + total)
+        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+      case 'prestige_cost_reduction':
+        // Multiplicative (e.g., 0.90 * 0.85 = 0.765)
+        return upgrades.reduce((mult, u) => mult * u.effect.value, 1);
+      case 'prestige_research_bonus':
+        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+      case 'prestige_goal_reduction':
+        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+      case 'prestige_starting_currency':
+        // Multiplicative (e.g., 2 * 3 = 6x)
+        return upgrades.reduce((mult, u) => mult * u.effect.value, 1);
+      case 'prestige_autobuild_speed':
+        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+      default:
+        return 0;
+    }
+  }
+
+  /**
+   * Get aggregate achievement bonus for a given type.
+   */
+  public getAchievementEffect(type: Achievement['bonus']['type']): number {
+    const achievements = this.state.achievements.filter((a) => a.unlocked && a.bonus.type === type);
+    switch (type) {
+      case 'income_multiplier':
+        return achievements.reduce((sum, a) => sum + a.bonus.value, 0);
+      case 'cost_reduction':
+        return achievements.reduce((mult, a) => mult * a.bonus.value, 1);
+      case 'research_bonus':
+        return achievements.reduce((sum, a) => sum + a.bonus.value, 0);
+      case 'starting_currency':
+        return achievements.reduce((sum, a) => sum + a.bonus.value, 0);
+      default:
+        return 0;
+    }
+  }
+
+  public getPrestigeCurrency(tier: TierType): number {
+    return this.state.prestigeCurrency.get(tier) ?? 0;
+  }
+
+  public getPrestigeCount(): number {
+    return this.state.prestigeCount;
+  }
+
+  public getLifetimeCompletions(tier: TierType): number {
+    return this.state.lifetimeCompletions.get(tier) ?? 0;
+  }
+
+  public getTotalLifetimeCompletions(): number {
+    let total = 0;
+    for (const count of this.state.lifetimeCompletions.values()) {
+      total += count;
+    }
+    return total;
+  }
+
+  /**
+   * Calculate how much prestige currency would be earned for each tier
+   * based on current completedSettlements (preview before prestiging).
+   */
+  public getPrestigePreview(): Map<TierType, number> {
+    const preview = new Map<TierType, number>();
+    for (const [tier, count] of this.state.completedSettlements.entries()) {
+      if (tier === TierType.Hamlet) continue;
+      const currency = calculatePrestigeCurrency(count);
+      if (currency > 0) {
+        preview.set(tier, currency);
+      }
+    }
+    return preview;
+  }
+
+  /**
+   * Check if prestige is available (need at least 1 non-hamlet tier completion).
+   */
+  public canPrestige(): boolean {
+    for (const [tier, count] of this.state.completedSettlements.entries()) {
+      if (tier !== TierType.Hamlet && count > 0) return true;
+    }
+    return false;
+  }
+
+  /**
+   * Perform a prestige reset.
+   * Resets: settlements, research, research points, completedSettlements, autoBuildingTimers.
+   * Keeps: unlockedTiers, prestigeCurrency (+ new earnings), prestigeCount,
+   *        prestigeUpgrades, achievements, lifetimeCompletions, settings.
+   */
+  public performPrestige(): boolean {
+    if (!this.canPrestige()) return false;
+
+    // Calculate and award prestige currencies
+    const earnings = this.getPrestigePreview();
+    for (const [tier, amount] of earnings.entries()) {
+      const current = this.state.prestigeCurrency.get(tier) ?? 0;
+      this.state.prestigeCurrency.set(tier, current + amount);
+    }
+
+    // Increment prestige count
+    this.state.prestigeCount++;
+
+    // Reset settlements
+    this.state.settlements = [];
+
+    // Reset research (keep prestige upgrades)
+    this.state.research = RESEARCH_DATA.map((r) => ({ ...r, purchased: false }));
+
+    // Reset research points
+    this.state.researchPoints = new Map([[TierType.Hamlet, 0]]);
+
+    // Reset completed settlements (mastery)
+    this.state.completedSettlements = new Map();
+
+    // Reset auto-building timers
+    this.state.autoBuildingTimers = new Map();
+
+    // Keep unlockedTiers - but reset to just Hamlet
+    this.state.unlockedTiers = new Set([TierType.Hamlet]);
+
+    // Re-spawn starting hamlet
+    this.autospawnSettlements();
+
+    // Check achievements (prestige count achievements)
+    this.checkAchievements();
+
+    return true;
+  }
+
+  /**
+   * Purchase a prestige upgrade with prestige currency.
+   */
+  public purchasePrestigeUpgrade(upgradeId: string): boolean {
+    const upgrade = this.state.prestigeUpgrades.find((u) => u.id === upgradeId);
+    if (!upgrade || upgrade.purchased) return false;
+
+    // Check prerequisite
+    if (upgrade.prerequisite !== undefined && upgrade.prerequisite !== '') {
+      const prereq = this.state.prestigeUpgrades.find((u) => u.id === upgrade.prerequisite);
+      if (!prereq || !prereq.purchased) return false;
+    }
+
+    // Check currency
+    const currency = this.state.prestigeCurrency.get(upgrade.tier) ?? 0;
+    if (currency < upgrade.cost) return false;
+
+    // Purchase
+    this.state.prestigeCurrency.set(upgrade.tier, currency - upgrade.cost);
+    upgrade.purchased = true;
+
+    // Recalculate income for all settlements
+    this.state.settlements.forEach((settlement) => {
+      settlement.totalIncome = this.calculateSettlementIncome(settlement);
+    });
+
+    return true;
+  }
+
+  /**
+   * Check all achievements and unlock any whose conditions are met.
+   */
+  public checkAchievements(): void {
+    for (const achievement of this.state.achievements) {
+      if (achievement.unlocked) continue;
+
+      let conditionMet = false;
+      switch (achievement.condition.type) {
+        case 'tier_completions': {
+          const tier = achievement.condition.tier;
+          if (tier !== undefined) {
+            const completions = this.state.lifetimeCompletions.get(tier) ?? 0;
+            conditionMet = completions >= achievement.condition.value;
+          }
+          break;
+        }
+        case 'total_completions': {
+          const total = this.getTotalLifetimeCompletions();
+          conditionMet = total >= achievement.condition.value;
+          break;
+        }
+        case 'prestige_count':
+          conditionMet = this.state.prestigeCount >= achievement.condition.value;
+          break;
+      }
+
+      if (conditionMet) {
+        achievement.unlocked = true;
+      }
+    }
+  }
+
   private getResearchEffect(type: string, tier?: TierType): number {
     const upgrades = this.state.research.filter(
       (r) => r.purchased && r.effect.type === type && (tier !== undefined ? r.tier === tier : true),
@@ -478,11 +731,24 @@ export class GameStateManager {
       const completionBonus = this.getBuildingCompletionBonus(settlement);
       researchBonus += completionBonus;
 
+      // Add prestige research bonus
+      researchBonus += this.getPrestigeEffect('prestige_research_bonus');
+
+      // Add achievement research bonus
+      researchBonus += this.getAchievementEffect('research_bonus');
+
       const currentPoints = this.state.researchPoints.get(settlement.tier) ?? 0;
       this.state.researchPoints.set(settlement.tier, currentPoints + researchBonus);
 
       const completedCount = (this.state.completedSettlements.get(settlement.tier) ?? 0) + 1;
       this.state.completedSettlements.set(settlement.tier, completedCount);
+
+      // Track lifetime completions (persists through prestige)
+      const lifetimeCount = (this.state.lifetimeCompletions.get(settlement.tier) ?? 0) + 1;
+      this.state.lifetimeCompletions.set(settlement.tier, lifetimeCount);
+
+      // Check achievements
+      this.checkAchievements();
 
       // Remove completed settlement
       this.state.settlements = this.state.settlements.filter((s) => s.id !== settlement.id);
@@ -739,9 +1005,11 @@ export class GameStateManager {
       )
         continue;
 
-      // Apply mastery auto-build speed bonus
+      // Apply mastery auto-build speed bonus + prestige bonus
       const speedBonus = this.getMasteryAutoBuildSpeed(research.tier);
-      const interval = Math.round(baseInterval * (1 - speedBonus));
+      const prestigeSpeedBonus = this.getPrestigeEffect('prestige_autobuild_speed');
+      const totalSpeedBonus = Math.min(0.9, speedBonus + prestigeSpeedBonus); // Cap at 90% reduction
+      const interval = Math.round(baseInterval * (1 - totalSpeedBonus));
 
       const lastPurchaseTime = this.state.autoBuildingTimers.get(research.id) ?? 0;
 
@@ -897,6 +1165,11 @@ export class GameStateManager {
           completedSettlements: Array.from(this.state.completedSettlements.entries()),
           research: this.state.research,
           autoBuildingTimers: Array.from(this.state.autoBuildingTimers.entries()),
+          prestigeCurrency: Array.from(this.state.prestigeCurrency.entries()),
+          prestigeCount: this.state.prestigeCount,
+          lifetimeCompletions: Array.from(this.state.lifetimeCompletions.entries()),
+          prestigeUpgrades: this.state.prestigeUpgrades,
+          achievements: this.state.achievements,
           settings: this.state.settings,
         },
       };
@@ -940,6 +1213,20 @@ export class GameStateManager {
         settings.buyAmount = 1;
       }
 
+      // Load prestige upgrades, merging saved state with current definitions
+      const savedPrestigeUpgrades = saveData.gameState.prestigeUpgrades ?? [];
+      const prestigeUpgrades = PRESTIGE_UPGRADES.map((def) => {
+        const saved = savedPrestigeUpgrades.find((u: PrestigeUpgrade) => u.id === def.id);
+        return saved ? { ...def, purchased: saved.purchased } : { ...def, purchased: false };
+      });
+
+      // Load achievements, merging saved state with current definitions
+      const savedAchievements = saveData.gameState.achievements ?? [];
+      const achievements = ACHIEVEMENTS_DATA.map((def) => {
+        const saved = savedAchievements.find((a: Achievement) => a.id === def.id);
+        return saved ? { ...def, unlocked: saved.unlocked } : { ...def, unlocked: false };
+      });
+
       this.state = {
         settlements,
         researchPoints: new Map(saveData.gameState.researchPoints),
@@ -947,6 +1234,11 @@ export class GameStateManager {
         completedSettlements: new Map(saveData.gameState.completedSettlements),
         research: saveData.gameState.research,
         autoBuildingTimers: new Map(saveData.gameState.autoBuildingTimers),
+        prestigeCurrency: new Map(saveData.gameState.prestigeCurrency ?? []),
+        prestigeCount: saveData.gameState.prestigeCount ?? 0,
+        lifetimeCompletions: new Map(saveData.gameState.lifetimeCompletions ?? []),
+        prestigeUpgrades,
+        achievements,
         settings,
       };
 
