@@ -552,6 +552,37 @@ describe('GameStateManager', () => {
     });
   });
 
+  describe('Starting income applied at spawn', () => {
+    it('should include starting_income research in totalIncome for newly spawned settlements', () => {
+      // Purchase starting income research
+      game.getState().researchPoints.set(TierType.Hamlet, 100);
+      game.purchaseResearch('hamlet_starting_income_1'); // +5
+
+      // Complete the current hamlet to trigger a new one to spawn
+      const settlement = game.getState().settlements.find((s) => s.tier === TierType.Hamlet)!;
+      settlement.currency = 100000;
+      settlement.goals.forEach((goal) => {
+        goal.isCompleted = true;
+        goal.currentValue = goal.targetValue;
+      });
+      game.update();
+
+      // The newly spawned hamlet should already have starting income applied
+      const newHamlet = game.getState().settlements.find((s) => s.tier === TierType.Hamlet)!;
+      expect(newHamlet.totalIncome).toBeGreaterThan(0);
+
+      // Buy first hut — income should only increase by the hut's base income (1),
+      // not by 1 + the entire starting bonus
+      const incomeBeforeHut = newHamlet.totalIncome;
+      newHamlet.currency = 100;
+      game.buyBuilding(newHamlet.id, 'hamlet_hut');
+      const incomeAfterHut = newHamlet.totalIncome;
+
+      // The hut adds 1 base income (plus tiny mastery multiplier), not ~20
+      expect(incomeAfterHut - incomeBeforeHut).toBeLessThan(2);
+    });
+  });
+
   describe('Repeatable research', () => {
     it('should generate next level when terminal research is purchased', () => {
       game.getState().researchPoints.set(TierType.Hamlet, 1000);
