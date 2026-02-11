@@ -108,8 +108,13 @@ export interface PrestigeUpgrade {
       | 'prestige_research_bonus'
       | 'prestige_goal_reduction'
       | 'prestige_starting_currency'
-      | 'prestige_autobuild_speed';
+      | 'prestige_autobuild_speed'
+      | 'prestige_building_income_boost'
+      | 'prestige_survival_speed'
+      | 'prestige_flat_cost_count'
+      | 'prestige_cost_scaling_reduction';
     value: number;
+    targetBuilding?: string; // For prestige_building_income_boost - which building ID to boost
   };
   purchased: boolean;
   prerequisite?: string;

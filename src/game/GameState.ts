@@ -249,9 +249,13 @@ export class GameStateManager {
   ): number {
     let costReduction = this.getResearchEffect('cost_reduction');
 
-    // Apply cost scaling reduction to the multiplier
+    // Apply cost scaling reduction to the multiplier (research + prestige)
     const scalingReduction = this.getResearchEffect('cost_scaling_reduction');
-    const adjustedMultiplier = Math.max(1.0, multiplier - scalingReduction);
+    const prestigeScalingReduction = this.getPrestigeEffect('prestige_cost_scaling_reduction');
+    const adjustedMultiplier = Math.max(
+      1.0,
+      multiplier - scalingReduction - prestigeScalingReduction,
+    );
 
     // Apply building-specific cost reduction effects
     if (settlementId !== undefined && settlementId !== '') {
@@ -267,9 +271,13 @@ export class GameStateManager {
     // Apply achievement cost reduction (multiplicative)
     const achievementCostReduction = this.getAchievementEffect('cost_reduction');
 
+    // Apply prestige flat cost: first N buildings of each type use flat cost (no scaling)
+    const flatCostCount = this.getPrestigeEffect('prestige_flat_cost_count');
+    const effectiveCount = Math.max(0, count - flatCostCount);
+
     return Math.floor(
       baseCost *
-        Math.pow(adjustedMultiplier, count) *
+        Math.pow(adjustedMultiplier, effectiveCount) *
         costReduction *
         prestigeCostReduction *
         achievementCostReduction,
@@ -367,7 +375,7 @@ export class GameStateManager {
 
     let baseIncome = 0;
 
-    // Calculate base income from all buildings, applying production_boost
+    // Calculate base income from all buildings, applying production_boost and prestige building boosts
     for (const building of tierDef.buildings) {
       const count = settlement.buildings.get(building.id) ?? 0;
       let buildingIncome = building.baseIncome * count;
@@ -376,6 +384,12 @@ export class GameStateManager {
       const boost = productionBoosts.get(building.id) ?? 0;
       if (boost > 0) {
         buildingIncome *= 1 + boost;
+      }
+
+      // Apply prestige building-specific income boost
+      const prestigeBuildingBoost = this.getPrestigeBuildingBoost(building.id);
+      if (prestigeBuildingBoost > 0) {
+        buildingIncome *= 1 + prestigeBuildingBoost;
       }
 
       baseIncome += buildingIncome;
@@ -517,9 +531,37 @@ export class GameStateManager {
         return upgrades.reduce((mult, u) => mult * u.effect.value, 1);
       case 'prestige_autobuild_speed':
         return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+      case 'prestige_survival_speed':
+        // Additive sum (e.g., 0.2 + 0.3 = 0.5 → applied as 1 + total multiplier)
+        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+      case 'prestige_flat_cost_count':
+        // Additive sum of flat-cost building counts
+        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+      case 'prestige_cost_scaling_reduction':
+        // Additive sum (reduces cost multiplier by total)
+        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+      case 'prestige_building_income_boost':
+        // Handled per-building via getPrestigeBuildingBoost, not aggregated here
+        return 0;
       default:
         return 0;
     }
+  }
+
+  /**
+   * Get the prestige income boost for a specific building ID.
+   * Returns the additive sum of all purchased prestige_building_income_boost upgrades
+   * that target this building (e.g., 1.0 = +100% income for that building).
+   */
+  public getPrestigeBuildingBoost(buildingId: string): number {
+    return this.state.prestigeUpgrades
+      .filter(
+        (u) =>
+          u.purchased &&
+          u.effect.type === 'prestige_building_income_boost' &&
+          u.effect.targetBuilding === buildingId,
+      )
+      .reduce((sum, u) => sum + u.effect.value, 0);
   }
 
   /**
@@ -1160,7 +1202,9 @@ export class GameStateManager {
             : 1;
           const incomeThreshold = avgBaseIncome * 10;
           const timeMultiplier = 1 + settlement.totalIncome / incomeThreshold;
-          newValue = Math.floor(elapsedSeconds * timeMultiplier);
+          // Apply prestige survival speed bonus
+          const survivalSpeedBonus = 1 + this.getPrestigeEffect('prestige_survival_speed');
+          newValue = Math.floor(elapsedSeconds * timeMultiplier * survivalSpeedBonus);
           completed = newValue >= effectiveTarget;
           break;
         }

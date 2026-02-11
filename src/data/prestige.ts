@@ -197,6 +197,296 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     purchased: false,
     prerequisite: 'prestige_destiny_1',
   },
+
+  // ===== NEW: Building-specific income boosts =====
+
+  // Village currency → Boost Hamlet Hut
+  {
+    id: 'prestige_hearth_1',
+    name: 'Blessing of the Hearth',
+    description: '+100% Hut income',
+    cost: 2,
+    tier: TierType.Village,
+    effect: { type: 'prestige_building_income_boost', value: 1.0, targetBuilding: 'hamlet_hut' },
+    purchased: false,
+  },
+
+  // Town currency → Boost Town Forge
+  {
+    id: 'prestige_forgemaster_1',
+    name: "Forgemaster's Legacy",
+    description: '+100% Forge income',
+    cost: 2,
+    tier: TierType.Town,
+    effect: { type: 'prestige_building_income_boost', value: 1.0, targetBuilding: 'town_forge' },
+    purchased: false,
+  },
+
+  // City currency → Boost City University
+  {
+    id: 'prestige_academic_1',
+    name: 'Academic Excellence',
+    description: '+100% University income',
+    cost: 2,
+    tier: TierType.City,
+    effect: {
+      type: 'prestige_building_income_boost',
+      value: 1.0,
+      targetBuilding: 'city_university',
+    },
+    purchased: false,
+  },
+  // City currency → Boost City Grand Bazaar
+  {
+    id: 'prestige_bazaar_1',
+    name: 'Bazaar Mastery',
+    description: '+150% Grand Bazaar income',
+    cost: 4,
+    tier: TierType.City,
+    effect: { type: 'prestige_building_income_boost', value: 1.5, targetBuilding: 'city_bazaar' },
+    purchased: false,
+  },
+  // City currency → Cross-tier boost to Village Cottage
+  {
+    id: 'prestige_cottage_1',
+    name: 'Urban Blueprint',
+    description: '+75% Cottage income',
+    cost: 5,
+    tier: TierType.City,
+    effect: {
+      type: 'prestige_building_income_boost',
+      value: 0.75,
+      targetBuilding: 'village_cottage',
+    },
+    purchased: false,
+  },
+
+  // County currency → Boost County Manor
+  {
+    id: 'prestige_manor_1',
+    name: 'Estate Management',
+    description: '+100% Manor income',
+    cost: 2,
+    tier: TierType.County,
+    effect: {
+      type: 'prestige_building_income_boost',
+      value: 1.0,
+      targetBuilding: 'county_manor',
+    },
+    purchased: false,
+  },
+
+  // Duchy currency → Boost Duchy Grand Port
+  {
+    id: 'prestige_port_1',
+    name: 'Maritime Dominance',
+    description: '+100% Grand Port income',
+    cost: 2,
+    tier: TierType.Duchy,
+    effect: { type: 'prestige_building_income_boost', value: 1.0, targetBuilding: 'duchy_port' },
+    purchased: false,
+  },
+  // Duchy currency → Cross-tier boost to Village Chapel
+  {
+    id: 'prestige_chapel_1',
+    name: 'Ducal Patronage',
+    description: '+150% Chapel income',
+    cost: 3,
+    tier: TierType.Duchy,
+    effect: {
+      type: 'prestige_building_income_boost',
+      value: 1.5,
+      targetBuilding: 'village_chapel',
+    },
+    purchased: false,
+  },
+
+  // Realm currency → Boost Realm Grand Exchange
+  {
+    id: 'prestige_exchange_1',
+    name: 'Exchange Mastery',
+    description: '+100% Grand Exchange income',
+    cost: 2,
+    tier: TierType.Realm,
+    effect: {
+      type: 'prestige_building_income_boost',
+      value: 1.0,
+      targetBuilding: 'realm_exchange',
+    },
+    purchased: false,
+  },
+  // Realm currency → Cross-tier boost to Hamlet Workshop
+  {
+    id: 'prestige_workshop_1',
+    name: "Realm's Blessing",
+    description: '+200% Workshop income',
+    cost: 5,
+    tier: TierType.Realm,
+    effect: {
+      type: 'prestige_building_income_boost',
+      value: 2.0,
+      targetBuilding: 'hamlet_workshop',
+    },
+    purchased: false,
+  },
+
+  // Kingdom currency → Cross-tier boost to Town Market
+  {
+    id: 'prestige_market_1',
+    name: 'Royal Commerce',
+    description: '+200% Market income',
+    cost: 2,
+    tier: TierType.Kingdom,
+    effect: { type: 'prestige_building_income_boost', value: 2.0, targetBuilding: 'town_market' },
+    purchased: false,
+  },
+
+  // ===== NEW: Survival speed boosts =====
+
+  // Village currency → Survival speed I
+  {
+    id: 'prestige_pastoral_1',
+    name: 'Pastoral Wisdom I',
+    description: 'Survival goals progress 20% faster',
+    cost: 2,
+    tier: TierType.Village,
+    effect: { type: 'prestige_survival_speed', value: 0.2 },
+    purchased: false,
+  },
+  {
+    id: 'prestige_pastoral_2',
+    name: 'Pastoral Wisdom II',
+    description: 'Survival goals progress 25% faster',
+    cost: 5,
+    tier: TierType.Village,
+    effect: { type: 'prestige_survival_speed', value: 0.25 },
+    purchased: false,
+    prerequisite: 'prestige_pastoral_1',
+  },
+
+  // County currency → Survival speed
+  {
+    id: 'prestige_swift_1',
+    name: 'Swift Conquest',
+    description: 'Survival goals progress 30% faster',
+    cost: 2,
+    tier: TierType.County,
+    effect: { type: 'prestige_survival_speed', value: 0.3 },
+    purchased: false,
+  },
+
+  // Realm currency → Survival speed
+  {
+    id: 'prestige_oracle_speed_1',
+    name: "Oracle's Swiftness",
+    description: 'Survival goals progress 35% faster',
+    cost: 3,
+    tier: TierType.Realm,
+    effect: { type: 'prestige_survival_speed', value: 0.35 },
+    purchased: false,
+  },
+
+  // Kingdom currency → Survival speed
+  {
+    id: 'prestige_eternal_speed_1',
+    name: 'Eternal Swiftness',
+    description: 'Survival goals progress 50% faster',
+    cost: 1,
+    tier: TierType.Kingdom,
+    effect: { type: 'prestige_survival_speed', value: 0.5 },
+    purchased: false,
+  },
+
+  // ===== NEW: Flat cost for first N buildings =====
+
+  // Town currency → First 3 buildings don't scale
+  {
+    id: 'prestige_foundation_1',
+    name: 'Foundation Stone I',
+    description: 'First 3 of each building have flat cost (no scaling)',
+    cost: 2,
+    tier: TierType.Town,
+    effect: { type: 'prestige_flat_cost_count', value: 3 },
+    purchased: false,
+  },
+  {
+    id: 'prestige_foundation_2',
+    name: 'Foundation Stone II',
+    description: '+2 more flat cost buildings (no scaling)',
+    cost: 5,
+    tier: TierType.Town,
+    effect: { type: 'prestige_flat_cost_count', value: 2 },
+    purchased: false,
+    prerequisite: 'prestige_foundation_1',
+  },
+
+  // County currency → More flat cost buildings
+  {
+    id: 'prestige_feudal_foundation_1',
+    name: 'Feudal Foundation',
+    description: '+3 more flat cost buildings (no scaling)',
+    cost: 4,
+    tier: TierType.County,
+    effect: { type: 'prestige_flat_cost_count', value: 3 },
+    purchased: false,
+  },
+
+  // Kingdom currency → Even more flat cost buildings
+  {
+    id: 'prestige_royal_foundation_1',
+    name: 'Royal Foundation',
+    description: '+5 more flat cost buildings (no scaling)',
+    cost: 2,
+    tier: TierType.Kingdom,
+    effect: { type: 'prestige_flat_cost_count', value: 5 },
+    purchased: false,
+  },
+
+  // ===== NEW: Cost scaling reduction =====
+
+  // Town currency → Reduce cost multiplier
+  {
+    id: 'prestige_scaling_town_1',
+    name: 'Efficient Construction',
+    description: 'Reduce all building cost scaling by 0.02',
+    cost: 5,
+    tier: TierType.Town,
+    effect: { type: 'prestige_cost_scaling_reduction', value: 0.02 },
+    purchased: false,
+  },
+
+  // City currency → Reduce cost multiplier
+  {
+    id: 'prestige_scaling_city_1',
+    name: 'Architectural Mastery',
+    description: 'Reduce all building cost scaling by 0.02',
+    cost: 5,
+    tier: TierType.City,
+    effect: { type: 'prestige_cost_scaling_reduction', value: 0.02 },
+    purchased: false,
+  },
+
+  // Duchy currency → Reduce cost multiplier
+  {
+    id: 'prestige_scaling_duchy_1',
+    name: 'Economic Reform',
+    description: 'Reduce all building cost scaling by 0.03',
+    cost: 5,
+    tier: TierType.Duchy,
+    effect: { type: 'prestige_cost_scaling_reduction', value: 0.03 },
+    purchased: false,
+  },
+
+  // Kingdom currency → Large cost scaling reduction
+  {
+    id: 'prestige_imperial_scaling_1',
+    name: 'Imperial Efficiency',
+    description: 'Reduce all building cost scaling by 0.04',
+    cost: 3,
+    tier: TierType.Kingdom,
+    effect: { type: 'prestige_cost_scaling_reduction', value: 0.04 },
+    purchased: false,
+  },
 ];
 
 /**
