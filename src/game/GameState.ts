@@ -163,10 +163,8 @@ export class GameStateManager {
       }
     }
 
-    // Recalculate income if any buildings were granted
-    if (freeBuildings > 0 || grantUpgrades.length > 0) {
-      newSettlement.totalIncome = this.calculateSettlementIncome(newSettlement);
-    }
+    // Calculate initial income so starting_income research and granted buildings are reflected immediately
+    newSettlement.totalIncome = this.calculateSettlementIncome(newSettlement);
 
     this.state.settlements.push(newSettlement);
     return newSettlement;
