@@ -130,8 +130,10 @@ export interface Achievement {
       | 'max_currency_held'
       | 'settlement_count'
       | 'research_purchased'
-      | 'near_broke';
+      | 'near_broke'
+      | 'specific_building_count';
     tier?: TierType;
+    buildingId?: string; // For specific_building_count
     value: number;
   };
   bonus: {

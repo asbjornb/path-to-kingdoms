@@ -728,6 +728,18 @@ export class GameStateManager {
             }
           }
           break;
+        case 'specific_building_count': {
+          const bId = achievement.condition.buildingId;
+          if (bId !== undefined && bId !== '') {
+            for (const settlement of this.state.settlements) {
+              if ((settlement.buildings.get(bId) ?? 0) >= achievement.condition.value) {
+                conditionMet = true;
+                break;
+              }
+            }
+          }
+          break;
+        }
       }
 
       if (conditionMet) {
