@@ -444,33 +444,6 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
 
   // ===== VILLAGE RESEARCH =====
 
-  // Village Parallel Slots
-  {
-    id: 'village_parallel_2',
-    name: 'Dual Village Management',
-    description: 'Run 2 villages in parallel',
-    cost: 100,
-    tier: TierType.Village,
-    effect: {
-      type: 'parallel_slots',
-      value: 2,
-    },
-    purchased: false,
-  },
-  {
-    id: 'village_parallel_3',
-    name: 'Triple Village Management',
-    description: 'Run 3 villages in parallel',
-    cost: 400,
-    tier: TierType.Village,
-    prerequisite: 'village_parallel_2',
-    effect: {
-      type: 'parallel_slots',
-      value: 3,
-    },
-    purchased: false,
-  },
-
   // Village Starting Income
   {
     id: 'village_starting_income_1',
@@ -556,33 +529,6 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
 
   // ===== TOWN RESEARCH =====
 
-  // Town Parallel Slots
-  {
-    id: 'town_parallel_2',
-    name: 'Dual Town Administration',
-    description: 'Run 2 towns in parallel',
-    cost: 200,
-    tier: TierType.Town,
-    effect: {
-      type: 'parallel_slots',
-      value: 2,
-    },
-    purchased: false,
-  },
-  {
-    id: 'town_parallel_3',
-    name: 'Triple Town Administration',
-    description: 'Run 3 towns in parallel',
-    cost: 800,
-    tier: TierType.Town,
-    prerequisite: 'town_parallel_2',
-    effect: {
-      type: 'parallel_slots',
-      value: 3,
-    },
-    purchased: false,
-  },
-
   // Town Starting Income
   {
     id: 'town_starting_income_1',
@@ -652,20 +598,6 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
   },
 
   // ===== CITY RESEARCH =====
-
-  // City Parallel Slots
-  {
-    id: 'city_parallel_2',
-    name: 'Dual City Governance',
-    description: 'Run 2 cities in parallel',
-    cost: 500,
-    tier: TierType.City,
-    effect: {
-      type: 'parallel_slots',
-      value: 2,
-    },
-    purchased: false,
-  },
 
   // City Starting Income
   {

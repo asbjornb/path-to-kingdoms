@@ -110,8 +110,12 @@ export class UI {
 
     if (settlements.length === 0) {
       const isUnlocked = this.game.getState().unlockedTiers.has(this.selectedTier);
-      if (isUnlocked) {
+      if (isUnlocked && this.selectedTier === TierType.Hamlet) {
         return '<div class="empty-message">Settlements auto-spawn when you unlock parallel slots!</div>';
+      } else if (isUnlocked) {
+        const tierIndex = TIER_DATA.findIndex((t) => t.type === this.selectedTier);
+        const prevTierName = tierIndex > 0 ? TIER_DATA[tierIndex - 1].name : 'previous tier';
+        return `<div class="empty-message">Complete 6 ${prevTierName}s to earn a new settlement here.</div>`;
       } else {
         return '<div class="empty-message">Complete 6 of the previous tier to unlock this tier.</div>';
       }
@@ -154,7 +158,7 @@ export class UI {
             const crossBonus = this.game.getCrossTierBonus(settlement.id);
             return crossBonus > 0.01
               ? `<div class="settlement-stat cross-tier-stat">
-                <span class="stat-label">Tribute:</span>
+                <span class="stat-label">Patronage:</span>
                 <span class="stat-value cross-tier-value">+${formatIncome(crossBonus)}</span>
               </div>`
               : '';

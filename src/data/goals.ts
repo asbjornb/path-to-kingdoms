@@ -1,82 +1,139 @@
 import { Goal, GoalType, TierType } from '../types/game';
 import { TIER_DATA } from './tiers';
 
+// Tier difficulty multiplier: each tier is slightly harder relative to its economic baseline
+const TIER_DIFFICULTY: Record<TierType, number> = {
+  [TierType.Hamlet]: 1.0,
+  [TierType.Village]: 1.1,
+  [TierType.Town]: 1.2,
+  [TierType.City]: 1.3,
+  [TierType.County]: 1.4,
+  [TierType.Duchy]: 1.5,
+  [TierType.Realm]: 1.6,
+  [TierType.Kingdom]: 1.7,
+};
+
 export const GoalGenerator = {
   goalCounter: 0,
 
-  generateRandomGoals(tierType: TierType, count: number = 3): Goal[] {
+  /**
+   * Get the economic scale factor for a tier relative to Hamlet.
+   * Uses the tier's average building income to determine scaling.
+   */
+  getTierScale(tierType: TierType): number {
+    const tierDef = TIER_DATA.find((t) => t.type === tierType);
+    const hamletDef = TIER_DATA.find((t) => t.type === TierType.Hamlet);
+    if (!tierDef || !hamletDef) return 1;
+
+    const tierAvgIncome =
+      tierDef.buildings.reduce((sum, b) => sum + b.baseIncome, 0) / tierDef.buildings.length;
+    const hamletAvgIncome =
+      hamletDef.buildings.reduce((sum, b) => sum + b.baseIncome, 0) / hamletDef.buildings.length;
+
+    return tierAvgIncome / hamletAvgIncome;
+  },
+
+  getCostScale(tierType: TierType): number {
+    const tierDef = TIER_DATA.find((t) => t.type === tierType);
+    const hamletDef = TIER_DATA.find((t) => t.type === TierType.Hamlet);
+    if (!tierDef || !hamletDef) return 1;
+
+    const tierFirstCost = tierDef.buildings[0]?.baseCost ?? 10;
+    const hamletFirstCost = hamletDef.buildings[0]?.baseCost ?? 10;
+
+    return tierFirstCost / hamletFirstCost;
+  },
+
+  generateRandomGoals(tierType: TierType, count: number = 1): Goal[] {
     const goals: Goal[] = [];
     const tierDef = TIER_DATA.find((t) => t.type === tierType);
     if (!tierDef) return goals;
 
-    // Available goal templates for hamlet tier
+    const incomeScale = this.getTierScale(tierType);
+    const costScale = this.getCostScale(tierType);
+    const difficulty = TIER_DIFFICULTY[tierType];
+
     const goalTemplates: Array<{
       type: GoalType;
       baseValue: number;
       description: string;
       buildingId?: string;
     }> = [
-      // Income goals
-      { type: GoalType.ReachIncome, baseValue: 50, description: 'Reach {value} income per second' },
+      // Income goals (scaled by tier income level and difficulty)
       {
         type: GoalType.ReachIncome,
-        baseValue: 100,
+        baseValue: Math.round(50 * incomeScale * difficulty),
         description: 'Reach {value} income per second',
       },
       {
         type: GoalType.ReachIncome,
-        baseValue: 200,
+        baseValue: Math.round(100 * incomeScale * difficulty),
+        description: 'Reach {value} income per second',
+      },
+      {
+        type: GoalType.ReachIncome,
+        baseValue: Math.round(200 * incomeScale * difficulty),
         description: 'Reach {value} income per second',
       },
 
-      // Lifetime currency goals
+      // Lifetime currency goals (scaled by tier cost level and difficulty)
       {
         type: GoalType.AccumulateCurrency,
-        baseValue: 5000,
+        baseValue: Math.round(5000 * costScale * difficulty),
         description: 'Earn {value} total currency',
       },
       {
         type: GoalType.AccumulateCurrency,
-        baseValue: 15000,
+        baseValue: Math.round(15000 * costScale * difficulty),
         description: 'Earn {value} total currency',
       },
       {
         type: GoalType.AccumulateCurrency,
-        baseValue: 50000,
+        baseValue: Math.round(50000 * costScale * difficulty),
         description: 'Earn {value} total currency',
       },
 
-      // Current currency goals
+      // Current currency goals (scaled by tier cost level and difficulty)
       {
         type: GoalType.CurrentCurrency,
-        baseValue: 1000,
+        baseValue: Math.round(1000 * costScale * difficulty),
         description: 'Have {value} currency at once',
       },
       {
         type: GoalType.CurrentCurrency,
-        baseValue: 2500,
+        baseValue: Math.round(2500 * costScale * difficulty),
         description: 'Have {value} currency at once',
       },
       {
         type: GoalType.CurrentCurrency,
-        baseValue: 5000,
+        baseValue: Math.round(5000 * costScale * difficulty),
         description: 'Have {value} currency at once',
       },
 
-      // Survival goals (in seconds)
-      { type: GoalType.Survival, baseValue: 300, description: 'Survive for {minutes} minutes' }, // 5 min
-      { type: GoalType.Survival, baseValue: 600, description: 'Survive for {minutes} minutes' }, // 10 min
-      { type: GoalType.Survival, baseValue: 900, description: 'Survive for {minutes} minutes' }, // 15 min
+      // Survival goals (slightly longer per tier)
+      {
+        type: GoalType.Survival,
+        baseValue: Math.round(300 * difficulty),
+        description: 'Survive for {minutes} minutes',
+      },
+      {
+        type: GoalType.Survival,
+        baseValue: Math.round(600 * difficulty),
+        description: 'Survive for {minutes} minutes',
+      },
+      {
+        type: GoalType.Survival,
+        baseValue: Math.round(900 * difficulty),
+        description: 'Survive for {minutes} minutes',
+      },
     ];
 
-    // Building count goals (one for each building type)
-    tierDef.buildings.forEach((building) => {
-      let targetCount = 40;
-      if (building.id.includes('garden')) targetCount = 35;
-      else if (building.id.includes('workshop')) targetCount = 30;
-      else if (building.id.includes('shrine')) targetCount = 25;
-      else if (building.id.includes('market')) targetCount = 20;
-      else if (building.id.includes('library')) targetCount = 15;
+    // Building count goals (one for each building type, scaled by difficulty)
+    const buildingIndex = tierDef.buildings.length;
+    tierDef.buildings.forEach((building, i) => {
+      // Cheaper buildings get higher targets, expensive buildings get lower targets
+      const positionFactor = 1 - (i / buildingIndex) * 0.6; // 1.0 down to 0.4
+      const targetCount = Math.round(40 * positionFactor * difficulty);
 
       goalTemplates.push({
         type: GoalType.BuildingCount,

@@ -6,6 +6,7 @@ import {
   SaveData,
   SerializableSettlement,
   BuyAmount,
+  ResearchUpgrade,
 } from '../types/game';
 import { TIER_DATA, getTierByType } from '../data/tiers';
 import { RESEARCH_DATA } from '../data/research';
@@ -39,8 +40,10 @@ function createSettlement(tierType: TierType): Settlement {
   return settlement;
 }
 
-// Cross-tier contribution: 0.1% of higher-tier total income, halved per tier of distance
-const CROSS_TIER_RATE = 0.001;
+// Patronage: each completed higher-tier settlement gives a small flat income bonus
+// to all lower-tier settlements, scaled by the higher tier's base income and
+// decayed by tier distance. Slow but accumulates permanently.
+const PATRONAGE_PER_COMPLETION = 0.05; // fraction of higher tier's first building income
 
 // Mastery: permanent bonuses from repeated tier completions (intentionally slow)
 const MASTERY_INCOME_PER_COMPLETION = 0.005; // +0.5% income per completion
@@ -307,9 +310,9 @@ export class GameStateManager {
   }
 
   /**
-   * Calculate the cross-tier income bonus for a settlement.
-   * Higher-tier settlements contribute a small fraction of their income
-   * to all lower-tier settlements, decaying with tier distance.
+   * Calculate the patronage bonus for a settlement.
+   * Each completed settlement of a higher tier provides a small permanent
+   * income bonus, scaled by that tier's economic level and decayed by distance.
    */
   private calculateCrossTierBonus(settlement: Settlement): number {
     const settlementTierIndex = TIER_DATA.findIndex((t) => t.type === settlement.tier);
@@ -317,19 +320,17 @@ export class GameStateManager {
 
     let bonus = 0;
 
-    // Sum contributions from each higher tier
+    // Sum contributions from each higher tier's completed settlements
     for (let i = settlementTierIndex + 1; i < TIER_DATA.length; i++) {
       const higherTier = TIER_DATA[i];
       const distance = i - settlementTierIndex;
 
-      // Sum total income of all active settlements in this higher tier
-      const higherTierIncome = this.state.settlements
-        .filter((s) => s.tier === higherTier.type && !s.isComplete)
-        .reduce((sum, s) => sum + s.totalIncome, 0);
+      const completedCount = this.state.completedSettlements.get(higherTier.type) ?? 0;
+      if (completedCount === 0) continue;
 
-      if (higherTierIncome > 0) {
-        bonus += (higherTierIncome * CROSS_TIER_RATE) / Math.pow(2, distance);
-      }
+      // Base bonus scales with the higher tier's first building income
+      const tierBaseIncome = higherTier.buildings[0]?.baseIncome ?? 1;
+      bonus += (completedCount * tierBaseIncome * PATRONAGE_PER_COMPLETION) / Math.pow(2, distance);
     }
 
     return bonus;
@@ -427,18 +428,21 @@ export class GameStateManager {
       // Remove completed settlement
       this.state.settlements = this.state.settlements.filter((s) => s.id !== settlement.id);
 
-      // Check if we should spawn next tier settlement
+      // Check if we should spawn next tier settlement (every 6 completions)
       this.checkNextTierSpawn(settlement.tier);
 
-      // Autospawn replacement in same tier
-      this.autospawnSettlements();
+      // Only auto-replace hamlets (the base tier). Higher tier settlements
+      // are earned through lower tier completions and don't respawn.
+      if (settlement.tier === TierType.Hamlet) {
+        this.autospawnSettlements();
+      }
     }
   }
 
   private checkNextTierSpawn(completedTier: TierType): void {
     const completedCount = this.state.completedSettlements.get(completedTier) ?? 0;
 
-    // Every 6 completions spawn next tier
+    // Every 6 completions of a tier spawns 1 settlement of the next tier
     if (completedCount % 6 === 0) {
       const tierIndex = TIER_DATA.findIndex((t) => t.type === completedTier);
       if (tierIndex !== -1 && tierIndex < TIER_DATA.length - 1) {
@@ -450,23 +454,23 @@ export class GameStateManager {
           this.state.researchPoints.set(nextTier.type, 0);
         }
 
-        // The autospawn will handle creating the settlement
+        // Directly spawn 1 settlement of the next tier
+        this.spawnSettlement(nextTier.type);
       }
     }
   }
 
   private autospawnSettlements(): void {
-    // For each tier, check if we need to spawn settlements
-    for (const tierDef of TIER_DATA) {
-      if (!this.state.unlockedTiers.has(tierDef.type)) continue;
+    // Only auto-spawn for Hamlet (the base tier).
+    // Higher tiers are earned by completing 6 of the tier below, not auto-spawned.
+    if (!this.state.unlockedTiers.has(TierType.Hamlet)) return;
 
-      const maxSlots = this.getResearchEffect('parallel_slots', tierDef.type);
-      const currentCount = this.state.settlements.filter((s) => s.tier === tierDef.type).length;
-      const slotsNeeded = maxSlots - currentCount;
+    const maxSlots = this.getResearchEffect('parallel_slots', TierType.Hamlet);
+    const currentCount = this.state.settlements.filter((s) => s.tier === TierType.Hamlet).length;
+    const slotsNeeded = maxSlots - currentCount;
 
-      for (let i = 0; i < slotsNeeded; i++) {
-        this.spawnSettlement(tierDef.type);
-      }
+    for (let i = 0; i < slotsNeeded; i++) {
+      this.spawnSettlement(TierType.Hamlet);
     }
   }
 
@@ -496,6 +500,9 @@ export class GameStateManager {
       this.autospawnSettlements();
     }
 
+    // Generate next level for repeatable research (everything except parallel_slots)
+    this.maybeGenerateNextResearchLevel(research);
+
     // Recalculate income for all existing settlements of this tier
     // (applies to starting_income, and potentially other income-affecting research)
     this.state.settlements
@@ -505,6 +512,128 @@ export class GameStateManager {
       });
 
     return true;
+  }
+
+  private static readonly ROMAN_NUMERALS = [
+    'I',
+    'II',
+    'III',
+    'IV',
+    'V',
+    'VI',
+    'VII',
+    'VIII',
+    'IX',
+    'X',
+  ];
+
+  /**
+   * After purchasing a research item, check if it's the terminal item in its chain.
+   * If so, generate a more expensive next level (research is uncapped, just gets pricier).
+   * parallel_slots is excluded (hamlet slots capped at 6).
+   */
+  private maybeGenerateNextResearchLevel(purchased: ResearchUpgrade): void {
+    // parallel_slots is capped, don't generate more
+    if (purchased.effect.type === 'parallel_slots') return;
+
+    // Check if there's already an unpurchased successor in the same chain
+    const hasSameChainSuccessor = this.state.research.some(
+      (r) =>
+        r.prerequisite === purchased.id &&
+        !r.purchased &&
+        r.effect.type === purchased.effect.type &&
+        (purchased.effect.type !== 'auto_building' ||
+          r.effect.buildingId === purchased.effect.buildingId),
+    );
+    if (hasSameChainSuccessor) return;
+
+    // Determine current level from the id suffix (e.g., hamlet_cost_reduction_3 → 3)
+    const idParts = purchased.id.split('_');
+    const lastPart = idParts[idParts.length - 1];
+    const currentLevel = parseInt(lastPart) || 1;
+    const nextLevel = currentLevel + 1;
+
+    // Build next level id
+    const baseId = idParts.slice(0, -1).join('_');
+    const nextId = `${baseId}_${nextLevel}`;
+
+    // Don't create duplicates
+    if (this.state.research.some((r) => r.id === nextId)) return;
+
+    // Cost escalates: each level costs 3x the previous
+    const nextCost = Math.round(purchased.cost * 3);
+
+    // Compute next effect
+    const nextEffect = { ...purchased.effect };
+    switch (purchased.effect.type) {
+      case 'auto_building':
+        // Reduce interval by 20%, minimum 5 seconds
+        if (nextEffect.interval !== undefined) {
+          nextEffect.interval = Math.max(5000, Math.round(nextEffect.interval * 0.8));
+        }
+        break;
+      case 'cost_reduction':
+        // Each level multiplies by another 0.95
+        if (nextEffect.value !== undefined) {
+          nextEffect.value = parseFloat((nextEffect.value * 0.95).toFixed(4));
+        }
+        break;
+      case 'cost_scaling_reduction':
+        // Each level adds another 0.02
+        if (nextEffect.value !== undefined) {
+          nextEffect.value = parseFloat((nextEffect.value + 0.02).toFixed(4));
+        }
+        break;
+      // starting_income: same value each level (keeps stacking)
+    }
+
+    // Generate name: strip existing roman numeral and add next
+    const baseName = purchased.name.replace(/ [IVXLCDM]+$/, '');
+    const numeral =
+      nextLevel <= GameStateManager.ROMAN_NUMERALS.length
+        ? GameStateManager.ROMAN_NUMERALS[nextLevel - 1]
+        : `${nextLevel}`;
+    const nextName = `${baseName} ${numeral}`;
+
+    // Generate description based on effect type
+    const nextDescription = this.generateResearchDescription(purchased, nextEffect);
+
+    this.state.research.push({
+      id: nextId,
+      name: nextName,
+      description: nextDescription,
+      cost: nextCost,
+      tier: purchased.tier,
+      effect: nextEffect,
+      purchased: false,
+      prerequisite: purchased.id,
+      repeatable: true,
+      level: nextLevel,
+    });
+  }
+
+  private generateResearchDescription(
+    base: ResearchUpgrade,
+    effect: ResearchUpgrade['effect'],
+  ): string {
+    const tierName = base.tier.charAt(0).toUpperCase() + base.tier.slice(1);
+    switch (effect.type) {
+      case 'starting_income':
+        return `+${effect.value} starting income for new ${tierName.toLowerCase()}s`;
+      case 'auto_building': {
+        const seconds = effect.interval !== undefined ? Math.round(effect.interval / 1000) : 0;
+        const buildingName = effect.buildingId?.split('_').slice(1).join(' ') ?? 'building';
+        return `Automatically buys 1 ${buildingName} every ${seconds} seconds`;
+      }
+      case 'cost_reduction': {
+        const pct = effect.value !== undefined ? Math.round((1 - effect.value) * 100) : 0;
+        return `Reduces all building costs by ${pct}%`;
+      }
+      case 'cost_scaling_reduction':
+        return `Reduces building cost scaling by improving multipliers`;
+      default:
+        return base.description;
+    }
   }
 
   public update(): void {
@@ -665,6 +794,11 @@ export class GameStateManager {
   // For testing - manually trigger autospawn
   public triggerAutospawn(): void {
     this.autospawnSettlements();
+  }
+
+  // For testing - spawn a settlement of a specific tier
+  public spawnTestSettlement(tierType: TierType): Settlement | null {
+    return this.spawnSettlement(tierType);
   }
 
   private startAutoSave(): void {

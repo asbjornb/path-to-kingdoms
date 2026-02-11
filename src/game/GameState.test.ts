@@ -398,68 +398,34 @@ describe('GameStateManager', () => {
       expect(game.getCrossTierBonus('fake-id')).toBe(0);
     });
 
-    it('should provide bonus from higher-tier settlements', () => {
-      // Unlock village tier and spawn a village with income
-      game.getState().unlockedTiers.add(TierType.Village);
-      game.getState().researchPoints.set(TierType.Village, 0);
-      game.triggerAutospawn();
-
-      const villageSettlement = game
-        .getState()
-        .settlements.find((s) => s.tier === TierType.Village);
-      expect(villageSettlement).toBeDefined();
-
-      // Give village some income by buying buildings
-      villageSettlement!.currency = 100000;
-      game.buyBuilding(villageSettlement!.id, 'village_cottage'); // 10 income
-      expect(villageSettlement!.totalIncome).toBe(10);
-
-      // Hamlet should now get a cross-tier bonus
-      const hamletSettlement = game.getState().settlements.find((s) => s.tier === TierType.Hamlet);
-      const bonus = game.getCrossTierBonus(hamletSettlement!.id);
-
-      // Village is 1 tier above hamlet: 10 * 0.001 / 2^1 = 0.005
-      expect(bonus).toBeCloseTo(0.005, 4);
-    });
-
-    it('should decay bonus with tier distance', () => {
-      // Unlock village and town tiers
-      game.getState().unlockedTiers.add(TierType.Village);
-      game.getState().unlockedTiers.add(TierType.Town);
-      game.getState().researchPoints.set(TierType.Village, 0);
-      game.getState().researchPoints.set(TierType.Town, 0);
-      game.triggerAutospawn();
-
-      const villageSettlement = game
-        .getState()
-        .settlements.find((s) => s.tier === TierType.Village);
-      const townSettlement = game.getState().settlements.find((s) => s.tier === TierType.Town);
-
-      // Give both settlements equal income
-      villageSettlement!.currency = 100000;
-      townSettlement!.currency = 100000;
-      game.buyBuilding(villageSettlement!.id, 'village_cottage'); // 10 income
-      game.buyBuilding(townSettlement!.id, 'town_house'); // 100 income
+    it('should provide patronage bonus from completed higher-tier settlements', () => {
+      // Record some completed villages
+      game.getState().completedSettlements.set(TierType.Village, 3);
 
       const hamletSettlement = game.getState().settlements.find((s) => s.tier === TierType.Hamlet);
       const bonus = game.getCrossTierBonus(hamletSettlement!.id);
 
-      // Village (distance 1): 10 * 0.001 / 2 = 0.005
-      // Town (distance 2): 100 * 0.001 / 4 = 0.025
-      expect(bonus).toBeCloseTo(0.03, 4);
+      // Village first building baseIncome = 10
+      // Patronage: 3 completions * 10 * 0.05 / 2^1 = 0.75
+      expect(bonus).toBeCloseTo(0.75, 4);
     });
 
-    it('should apply cross-tier bonus to currency in update loop', () => {
-      // Unlock village and give it income
-      game.getState().unlockedTiers.add(TierType.Village);
-      game.getState().researchPoints.set(TierType.Village, 0);
-      game.triggerAutospawn();
+    it('should decay patronage bonus with tier distance', () => {
+      // Record completed villages and towns
+      game.getState().completedSettlements.set(TierType.Village, 2);
+      game.getState().completedSettlements.set(TierType.Town, 1);
 
-      const villageSettlement = game
-        .getState()
-        .settlements.find((s) => s.tier === TierType.Village);
-      villageSettlement!.currency = 100000;
-      game.buyBuilding(villageSettlement!.id, 'village_cottage'); // 10 income
+      const hamletSettlement = game.getState().settlements.find((s) => s.tier === TierType.Hamlet);
+      const bonus = game.getCrossTierBonus(hamletSettlement!.id);
+
+      // Village (distance 1): 2 * 10 * 0.05 / 2 = 0.5
+      // Town (distance 2): 1 * 100 * 0.05 / 4 = 1.25
+      expect(bonus).toBeCloseTo(1.75, 4);
+    });
+
+    it('should apply patronage bonus to currency in update loop', () => {
+      // Record some completed villages so patronage exists
+      game.getState().completedSettlements.set(TierType.Village, 2);
 
       const hamletSettlement = game.getState().settlements.find((s) => s.tier === TierType.Hamlet);
       const initialCurrency = hamletSettlement!.currency;
@@ -468,8 +434,8 @@ describe('GameStateManager', () => {
       (game as any).lastUpdate = Date.now() - 1000;
       game.update();
 
-      // Hamlet should have gained currency from cross-tier bonus even with 0 own income
-      // Bonus: 10 * 0.001 / 2 = 0.005/s, over 1 second = 0.005
+      // Hamlet should have gained currency from patronage even with 0 own income
+      // Bonus: 2 * 10 * 0.05 / 2 = 0.5/s, over 1 second = 0.5
       expect(hamletSettlement!.currency).toBeGreaterThan(initialCurrency);
     });
   });
@@ -525,6 +491,115 @@ describe('GameStateManager', () => {
       const currencyGained = settlement.currency - initialCurrency;
       // Should gain normal income (1 * 1 = 1)
       expect(currencyGained).toBeCloseTo(1, 0);
+    });
+  });
+
+  describe('Higher tier spawning mechanics', () => {
+    it('should spawn a village after 6 hamlet completions', () => {
+      // Complete 6 hamlets
+      for (let i = 0; i < 6; i++) {
+        const settlement = game.getState().settlements.find((s) => s.tier === TierType.Hamlet);
+        expect(settlement).toBeDefined();
+        settlement!.currency = 100000;
+        settlement!.goals.forEach((goal) => {
+          goal.isCompleted = true;
+          goal.currentValue = goal.targetValue;
+        });
+        game.update();
+      }
+
+      // Should have unlocked village tier and spawned 1 village
+      expect(game.getState().unlockedTiers.has(TierType.Village)).toBe(true);
+      const villages = game.getState().settlements.filter((s) => s.tier === TierType.Village);
+      expect(villages).toHaveLength(1);
+    });
+
+    it('should not respawn higher tier settlements when completed', () => {
+      // Unlock village and spawn one
+      game.getState().unlockedTiers.add(TierType.Village);
+      game.spawnTestSettlement(TierType.Village);
+
+      const village = game.getState().settlements.find((s) => s.tier === TierType.Village);
+      expect(village).toBeDefined();
+
+      // Complete the village
+      village!.currency = 1000000;
+      village!.goals.forEach((goal) => {
+        goal.isCompleted = true;
+        goal.currentValue = goal.targetValue;
+      });
+      game.update();
+
+      // Village should not be replaced
+      const villages = game.getState().settlements.filter((s) => s.tier === TierType.Village);
+      expect(villages).toHaveLength(0);
+    });
+
+    it('should still auto-replace completed hamlets', () => {
+      const settlement = game.getState().settlements.find((s) => s.tier === TierType.Hamlet);
+      expect(settlement).toBeDefined();
+
+      settlement!.currency = 100000;
+      settlement!.goals.forEach((goal) => {
+        goal.isCompleted = true;
+        goal.currentValue = goal.targetValue;
+      });
+      game.update();
+
+      // Hamlet should be replaced
+      const hamlets = game.getState().settlements.filter((s) => s.tier === TierType.Hamlet);
+      expect(hamlets).toHaveLength(1);
+    });
+  });
+
+  describe('Repeatable research', () => {
+    it('should generate next level when terminal research is purchased', () => {
+      game.getState().researchPoints.set(TierType.Hamlet, 1000);
+
+      // Buy all 3 levels of starting income
+      game.purchaseResearch('hamlet_starting_income_1');
+      game.purchaseResearch('hamlet_starting_income_2');
+      game.purchaseResearch('hamlet_starting_income_3');
+
+      // Should have generated hamlet_starting_income_4
+      const nextLevel = game.getState().research.find((r) => r.id === 'hamlet_starting_income_4');
+      expect(nextLevel).toBeDefined();
+      expect(nextLevel!.cost).toBe(150); // 50 * 3
+      expect(nextLevel!.prerequisite).toBe('hamlet_starting_income_3');
+      expect(nextLevel!.effect.type).toBe('starting_income');
+    });
+
+    it('should not generate next level for parallel_slots', () => {
+      game.getState().researchPoints.set(TierType.Hamlet, 100000);
+
+      // Buy all hamlet parallel slot research
+      game.purchaseResearch('hamlet_parallel_2');
+      game.purchaseResearch('hamlet_parallel_3');
+      game.purchaseResearch('hamlet_parallel_4');
+      game.purchaseResearch('hamlet_parallel_5');
+      game.purchaseResearch('hamlet_parallel_6');
+
+      // Should NOT have generated hamlet_parallel_7
+      const nextLevel = game.getState().research.find((r) => r.id === 'hamlet_parallel_7');
+      expect(nextLevel).toBeUndefined();
+    });
+
+    it('should escalate cost 3x for each repeatable level', () => {
+      game.getState().researchPoints.set(TierType.Hamlet, 100000);
+
+      game.purchaseResearch('hamlet_cost_reduction_1');
+      game.purchaseResearch('hamlet_cost_reduction_2');
+      game.purchaseResearch('hamlet_cost_reduction_3');
+
+      const level4 = game.getState().research.find((r) => r.id === 'hamlet_cost_reduction_4');
+      expect(level4).toBeDefined();
+      expect(level4!.cost).toBe(675); // 225 * 3
+
+      game.purchaseResearch('hamlet_cost_reduction_4');
+
+      const level5 = game.getState().research.find((r) => r.id === 'hamlet_cost_reduction_5');
+      expect(level5).toBeDefined();
+      expect(level5!.cost).toBe(2025); // 675 * 3
     });
   });
 });
