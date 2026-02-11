@@ -15,7 +15,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_growth_2',
     name: 'Crown of Growth II',
     description: '+25% income to all settlements',
-    cost: 3,
+    cost: 2,
     tier: TierType.Village,
     effect: { type: 'prestige_income_multiplier', value: 0.25 },
     purchased: false,
@@ -25,7 +25,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_growth_3',
     name: 'Crown of Growth III',
     description: '+40% income to all settlements',
-    cost: 7,
+    cost: 4,
     tier: TierType.Village,
     effect: { type: 'prestige_income_multiplier', value: 0.4 },
     purchased: false,
@@ -46,7 +46,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_industry_2',
     name: 'Crown of Industry II',
     description: '-15% all building costs',
-    cost: 3,
+    cost: 2,
     tier: TierType.Town,
     effect: { type: 'prestige_cost_reduction', value: 0.85 },
     purchased: false,
@@ -56,7 +56,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_industry_3',
     name: 'Crown of Industry III',
     description: '-25% all building costs',
-    cost: 7,
+    cost: 4,
     tier: TierType.Town,
     effect: { type: 'prestige_cost_reduction', value: 0.75 },
     purchased: false,
@@ -77,7 +77,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_knowledge_2',
     name: 'Crown of Knowledge II',
     description: '+10 research points per settlement completion',
-    cost: 3,
+    cost: 2,
     tier: TierType.City,
     effect: { type: 'prestige_research_bonus', value: 10 },
     purchased: false,
@@ -87,7 +87,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_knowledge_3',
     name: 'Crown of Knowledge III',
     description: '+20 research points per settlement completion',
-    cost: 7,
+    cost: 4,
     tier: TierType.City,
     effect: { type: 'prestige_research_bonus', value: 20 },
     purchased: false,
@@ -108,7 +108,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_ambition_2',
     name: 'Crown of Ambition II',
     description: '-15% goal targets',
-    cost: 3,
+    cost: 2,
     tier: TierType.County,
     effect: { type: 'prestige_goal_reduction', value: 0.15 },
     purchased: false,
@@ -118,7 +118,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_ambition_3',
     name: 'Crown of Ambition III',
     description: '-20% goal targets',
-    cost: 7,
+    cost: 4,
     tier: TierType.County,
     effect: { type: 'prestige_goal_reduction', value: 0.2 },
     purchased: false,
@@ -139,7 +139,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_wealth_2',
     name: 'Crown of Wealth II',
     description: '3x starting currency for all settlements',
-    cost: 3,
+    cost: 2,
     tier: TierType.Duchy,
     effect: { type: 'prestige_starting_currency', value: 3 },
     purchased: false,
@@ -149,7 +149,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_wealth_3',
     name: 'Crown of Wealth III',
     description: '5x starting currency for all settlements',
-    cost: 7,
+    cost: 4,
     tier: TierType.Duchy,
     effect: { type: 'prestige_starting_currency', value: 5 },
     purchased: false,
@@ -170,7 +170,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_power_2',
     name: 'Crown of Power II',
     description: '+25% auto-build speed',
-    cost: 3,
+    cost: 2,
     tier: TierType.Realm,
     effect: { type: 'prestige_autobuild_speed', value: 0.25 },
     purchased: false,
@@ -205,7 +205,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_hearth_1',
     name: 'Blessing of the Hearth',
     description: '+50% Hut income',
-    cost: 2,
+    cost: 1,
     tier: TierType.Village,
     effect: { type: 'prestige_building_income_boost', value: 0.5, targetBuilding: 'hamlet_hut' },
     purchased: false,
@@ -216,7 +216,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_forgemaster_1',
     name: "Forgemaster's Legacy",
     description: '+50% Forge income',
-    cost: 2,
+    cost: 1,
     tier: TierType.Town,
     effect: { type: 'prestige_building_income_boost', value: 0.5, targetBuilding: 'town_forge' },
     purchased: false,
@@ -227,7 +227,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_academic_1',
     name: 'Academic Excellence',
     description: '+50% University income',
-    cost: 2,
+    cost: 1,
     tier: TierType.City,
     effect: {
       type: 'prestige_building_income_boost',
@@ -241,7 +241,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_bazaar_1',
     name: 'Bazaar Mastery',
     description: '+75% Grand Bazaar income',
-    cost: 4,
+    cost: 2,
     tier: TierType.City,
     effect: { type: 'prestige_building_income_boost', value: 0.75, targetBuilding: 'city_bazaar' },
     purchased: false,
@@ -251,7 +251,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_cottage_1',
     name: 'Urban Blueprint',
     description: '+40% Cottage income',
-    cost: 5,
+    cost: 3,
     tier: TierType.City,
     effect: {
       type: 'prestige_building_income_boost',
@@ -259,6 +259,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
       targetBuilding: 'village_cottage',
     },
     purchased: false,
+    prerequisite: 'prestige_academic_1',
   },
 
   // County currency → Boost County Manor
@@ -266,7 +267,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_manor_1',
     name: 'Estate Management',
     description: '+50% Manor income',
-    cost: 2,
+    cost: 1,
     tier: TierType.County,
     effect: {
       type: 'prestige_building_income_boost',
@@ -281,7 +282,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_port_1',
     name: 'Maritime Dominance',
     description: '+50% Grand Port income',
-    cost: 2,
+    cost: 1,
     tier: TierType.Duchy,
     effect: { type: 'prestige_building_income_boost', value: 0.5, targetBuilding: 'duchy_port' },
     purchased: false,
@@ -291,7 +292,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_chapel_1',
     name: 'Ducal Patronage',
     description: '+75% Chapel income',
-    cost: 3,
+    cost: 2,
     tier: TierType.Duchy,
     effect: {
       type: 'prestige_building_income_boost',
@@ -306,7 +307,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_exchange_1',
     name: 'Exchange Mastery',
     description: '+50% Grand Exchange income',
-    cost: 2,
+    cost: 1,
     tier: TierType.Realm,
     effect: {
       type: 'prestige_building_income_boost',
@@ -320,7 +321,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_workshop_1',
     name: "Realm's Blessing",
     description: '+100% Workshop income',
-    cost: 5,
+    cost: 3,
     tier: TierType.Realm,
     effect: {
       type: 'prestige_building_income_boost',
@@ -328,6 +329,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
       targetBuilding: 'hamlet_workshop',
     },
     purchased: false,
+    prerequisite: 'prestige_exchange_1',
   },
 
   // Kingdom currency → Cross-tier boost to Town Market
@@ -335,7 +337,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_market_1',
     name: 'Royal Commerce',
     description: '+100% Market income',
-    cost: 2,
+    cost: 1,
     tier: TierType.Kingdom,
     effect: { type: 'prestige_building_income_boost', value: 1.0, targetBuilding: 'town_market' },
     purchased: false,
@@ -348,7 +350,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_pastoral_1',
     name: 'Pastoral Wisdom I',
     description: 'Survival goals progress 10% faster',
-    cost: 2,
+    cost: 1,
     tier: TierType.Village,
     effect: { type: 'prestige_survival_speed', value: 0.1 },
     purchased: false,
@@ -357,7 +359,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_pastoral_2',
     name: 'Pastoral Wisdom II',
     description: 'Survival goals progress 12% faster',
-    cost: 5,
+    cost: 3,
     tier: TierType.Village,
     effect: { type: 'prestige_survival_speed', value: 0.12 },
     purchased: false,
@@ -369,7 +371,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_swift_1',
     name: 'Swift Conquest',
     description: 'Survival goals progress 15% faster',
-    cost: 2,
+    cost: 1,
     tier: TierType.County,
     effect: { type: 'prestige_survival_speed', value: 0.15 },
     purchased: false,
@@ -380,7 +382,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_oracle_speed_1',
     name: "Oracle's Swiftness",
     description: 'Survival goals progress 18% faster',
-    cost: 3,
+    cost: 2,
     tier: TierType.Realm,
     effect: { type: 'prestige_survival_speed', value: 0.18 },
     purchased: false,
@@ -404,7 +406,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_foundation_1',
     name: 'Foundation Stone I',
     description: '2 of each building have flat cost (no scaling)',
-    cost: 2,
+    cost: 1,
     tier: TierType.Town,
     effect: { type: 'prestige_flat_cost_count', value: 2 },
     purchased: false,
@@ -413,7 +415,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_foundation_2',
     name: 'Foundation Stone II',
     description: '+1 more flat cost building (no scaling)',
-    cost: 5,
+    cost: 3,
     tier: TierType.Town,
     effect: { type: 'prestige_flat_cost_count', value: 1 },
     purchased: false,
@@ -425,7 +427,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_feudal_foundation_1',
     name: 'Feudal Foundation',
     description: '+2 more flat cost buildings (no scaling)',
-    cost: 4,
+    cost: 2,
     tier: TierType.County,
     effect: { type: 'prestige_flat_cost_count', value: 2 },
     purchased: false,
@@ -449,10 +451,11 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_scaling_town_1',
     name: 'Efficient Construction',
     description: 'Reduce all building cost scaling by 0.01',
-    cost: 5,
+    cost: 3,
     tier: TierType.Town,
     effect: { type: 'prestige_cost_scaling_reduction', value: 0.01 },
     purchased: false,
+    prerequisite: 'prestige_foundation_1',
   },
 
   // City currency → Reduce cost multiplier
@@ -460,10 +463,11 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_scaling_city_1',
     name: 'Architectural Mastery',
     description: 'Reduce all building cost scaling by 0.01',
-    cost: 5,
+    cost: 3,
     tier: TierType.City,
     effect: { type: 'prestige_cost_scaling_reduction', value: 0.01 },
     purchased: false,
+    prerequisite: 'prestige_crowning_1',
   },
 
   // Duchy currency → Reduce cost multiplier
@@ -471,10 +475,11 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_scaling_duchy_1',
     name: 'Economic Reform',
     description: 'Reduce all building cost scaling by 0.015',
-    cost: 5,
+    cost: 3,
     tier: TierType.Duchy,
     effect: { type: 'prestige_cost_scaling_reduction', value: 0.015 },
     purchased: false,
+    prerequisite: 'prestige_trade_routes_1',
   },
 
   // Kingdom currency → Large cost scaling reduction
@@ -482,7 +487,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_imperial_scaling_1',
     name: 'Imperial Efficiency',
     description: 'Reduce all building cost scaling by 0.02',
-    cost: 3,
+    cost: 2,
     tier: TierType.Kingdom,
     effect: { type: 'prestige_cost_scaling_reduction', value: 0.02 },
     purchased: false,
@@ -495,7 +500,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_patron_1',
     name: 'Patron of the Arts',
     description: '+25% patronage income from higher tiers',
-    cost: 3,
+    cost: 2,
     tier: TierType.Village,
     effect: { type: 'prestige_patronage_boost', value: 0.25 },
     purchased: false,
@@ -505,7 +510,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_feudal_ties_1',
     name: 'Feudal Ties',
     description: '+40% patronage income from higher tiers',
-    cost: 3,
+    cost: 2,
     tier: TierType.County,
     effect: { type: 'prestige_patronage_boost', value: 0.4 },
     purchased: false,
@@ -515,7 +520,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_royal_patronage_1',
     name: 'Royal Patronage',
     description: '+50% patronage income from higher tiers',
-    cost: 2,
+    cost: 1,
     tier: TierType.Kingdom,
     effect: { type: 'prestige_patronage_boost', value: 0.5 },
     purchased: false,
@@ -528,7 +533,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_stipend_1',
     name: "Scholar's Stipend",
     description: '-8% research costs',
-    cost: 3,
+    cost: 2,
     tier: TierType.Town,
     effect: { type: 'prestige_research_discount', value: 0.92 },
     purchased: false,
@@ -538,7 +543,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_endowment_1',
     name: "Scholar's Endowment",
     description: '-12% research costs',
-    cost: 4,
+    cost: 3,
     tier: TierType.Realm,
     effect: { type: 'prestige_research_discount', value: 0.88 },
     purchased: false,
@@ -551,7 +556,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_settlers_cache_1',
     name: "Settler's Cache I",
     description: 'New settlements start with 2 of the cheapest building',
-    cost: 3,
+    cost: 2,
     tier: TierType.Duchy,
     effect: { type: 'prestige_free_buildings', value: 2 },
     purchased: false,
@@ -560,7 +565,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_settlers_cache_2',
     name: "Settler's Cache II",
     description: '+2 more free starting buildings',
-    cost: 6,
+    cost: 4,
     tier: TierType.Duchy,
     effect: { type: 'prestige_free_buildings', value: 2 },
     purchased: false,
@@ -584,7 +589,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_crowning_1',
     name: 'Crowning Glory',
     description: '+25% prestige currency earned on reset',
-    cost: 3,
+    cost: 2,
     tier: TierType.City,
     effect: { type: 'prestige_currency_boost', value: 0.25 },
     purchased: false,
@@ -594,7 +599,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_realm_prestige_1',
     name: 'Legacy of the Realm',
     description: '+40% prestige currency earned on reset',
-    cost: 4,
+    cost: 3,
     tier: TierType.Realm,
     effect: { type: 'prestige_currency_boost', value: 0.4 },
     purchased: false,
@@ -607,7 +612,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_master_builder_1',
     name: 'Master Builder',
     description: 'Mastery income bonus grows 25% faster per completion',
-    cost: 4,
+    cost: 3,
     tier: TierType.County,
     effect: { type: 'prestige_mastery_boost', value: 0.25 },
     purchased: false,
@@ -617,7 +622,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_eternal_mastery_1',
     name: 'Eternal Mastery',
     description: 'Mastery income bonus grows 50% faster per completion',
-    cost: 3,
+    cost: 2,
     tier: TierType.Kingdom,
     effect: { type: 'prestige_mastery_boost', value: 0.5 },
     purchased: false,
@@ -630,17 +635,18 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_synergy_1',
     name: 'Feudal Synergy',
     description: 'Production boost buildings are 20% more effective',
-    cost: 5,
+    cost: 3,
     tier: TierType.County,
     effect: { type: 'prestige_production_boost_amplifier', value: 0.2 },
     purchased: false,
+    prerequisite: 'prestige_veteran_builders_1',
   },
   // Duchy currency → Even stronger production boosts
   {
     id: 'prestige_trade_networks_1',
     name: 'Trade Networks',
     description: 'Production boost buildings are 30% more effective',
-    cost: 4,
+    cost: 3,
     tier: TierType.Duchy,
     effect: { type: 'prestige_production_boost_amplifier', value: 0.3 },
     purchased: false,
@@ -653,7 +659,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_harvest_1',
     name: 'Harvest Moon',
     description: '+75% Garden income',
-    cost: 3,
+    cost: 2,
     tier: TierType.Village,
     effect: {
       type: 'prestige_building_income_boost',
@@ -668,7 +674,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_guild_1',
     name: 'Guild Dominion',
     description: '+50% Guild Hall income',
-    cost: 4,
+    cost: 2,
     tier: TierType.Town,
     effect: {
       type: 'prestige_building_income_boost',
@@ -683,7 +689,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_cathedral_1',
     name: "Cathedral's Blessing",
     description: '+50% Cathedral income',
-    cost: 3,
+    cost: 2,
     tier: TierType.City,
     effect: {
       type: 'prestige_building_income_boost',
@@ -698,7 +704,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_plantation_1',
     name: 'Plantation Bounty',
     description: '+50% Plantation income',
-    cost: 3,
+    cost: 2,
     tier: TierType.County,
     effect: {
       type: 'prestige_building_income_boost',
@@ -713,7 +719,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_academy_1',
     name: 'Royal Academy Award',
     description: '+50% Royal Academy income',
-    cost: 4,
+    cost: 2,
     tier: TierType.Duchy,
     effect: {
       type: 'prestige_building_income_boost',
@@ -727,7 +733,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_sacred_1',
     name: 'Sacred Legacy',
     description: '+100% Shrine income',
-    cost: 3,
+    cost: 2,
     tier: TierType.Duchy,
     effect: {
       type: 'prestige_building_income_boost',
@@ -742,7 +748,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_wonder_1',
     name: 'Wonder of the World',
     description: '+75% Wonder income',
-    cost: 5,
+    cost: 3,
     tier: TierType.Realm,
     effect: {
       type: 'prestige_building_income_boost',
@@ -750,13 +756,14 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
       targetBuilding: 'realm_wonder',
     },
     purchased: false,
+    prerequisite: 'prestige_realm_scouts_1',
   },
   // Realm currency → Cross-tier boost Village Farm
   {
     id: 'prestige_agri_1',
     name: 'Agricultural Revolution',
     description: '+100% Farm income',
-    cost: 4,
+    cost: 3,
     tier: TierType.Realm,
     effect: {
       type: 'prestige_building_income_boost',
@@ -764,6 +771,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
       targetBuilding: 'village_farm',
     },
     purchased: false,
+    prerequisite: 'prestige_realm_scouts_1',
   },
 
   // Kingdom currency → Boost Kingdom Capital
@@ -785,7 +793,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_monument_1',
     name: 'Monumental Legacy',
     description: '+100% Eternal Monument income',
-    cost: 3,
+    cost: 2,
     tier: TierType.Kingdom,
     effect: {
       type: 'prestige_building_income_boost',
@@ -793,6 +801,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
       targetBuilding: 'kingdom_monument',
     },
     purchased: false,
+    prerequisite: 'prestige_destiny_1',
   },
 
   // ===== Grant specific buildings on settlement spawn =====
@@ -802,7 +811,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_shrine_keepers_1',
     name: 'Shrine Keepers',
     description: 'New Hamlets start with 2 Shrines',
-    cost: 4,
+    cost: 2,
     tier: TierType.Village,
     effect: { type: 'prestige_grant_building', value: 2, targetBuilding: 'hamlet_shrine' },
     purchased: false,
@@ -813,7 +822,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_market_founders_1',
     name: 'Market Founders',
     description: 'New Hamlets start with 2 Market Stalls',
-    cost: 3,
+    cost: 2,
     tier: TierType.Town,
     effect: { type: 'prestige_grant_building', value: 2, targetBuilding: 'hamlet_market' },
     purchased: false,
@@ -824,10 +833,11 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_herbalist_guild_1',
     name: 'Herbalist Guild',
     description: 'New Villages start with 1 Herbalist',
-    cost: 4,
+    cost: 3,
     tier: TierType.City,
     effect: { type: 'prestige_grant_building', value: 1, targetBuilding: 'village_herbalist' },
     purchased: false,
+    prerequisite: 'prestige_crown_tax_1',
   },
 
   // County currency → Towns start with Watchtower (production boost head start)
@@ -835,7 +845,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_watchtower_scouts_1',
     name: 'Watchtower Scouts',
     description: 'New Towns start with 1 Watchtower',
-    cost: 3,
+    cost: 2,
     tier: TierType.County,
     effect: { type: 'prestige_grant_building', value: 1, targetBuilding: 'town_watchtower' },
     purchased: false,
@@ -846,10 +856,11 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_observatory_builders_1',
     name: 'Observatory Builders',
     description: 'New Cities start with 1 Observatory',
-    cost: 4,
+    cost: 3,
     tier: TierType.Duchy,
     effect: { type: 'prestige_grant_building', value: 1, targetBuilding: 'city_observatory' },
     purchased: false,
+    prerequisite: 'prestige_trade_routes_1',
   },
 
   // Realm currency → Towns start with Granary (income per building head start)
@@ -857,7 +868,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_granary_network_1',
     name: 'Granary Network',
     description: 'New Towns start with 1 Granary',
-    cost: 3,
+    cost: 2,
     tier: TierType.Realm,
     effect: { type: 'prestige_grant_building', value: 1, targetBuilding: 'town_granary' },
     purchased: false,
@@ -879,10 +890,11 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_well_diggers_1',
     name: 'Well Diggers',
     description: 'New Villages start with 1 Village Well',
-    cost: 5,
+    cost: 3,
     tier: TierType.Village,
     effect: { type: 'prestige_grant_building', value: 1, targetBuilding: 'village_well' },
     purchased: false,
+    prerequisite: 'prestige_shrine_keepers_1',
   },
 
   // Duchy currency → Counties start with Courthouse (special building head start)
@@ -890,10 +902,11 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_royal_charter_1',
     name: 'Royal Charter',
     description: 'New Counties start with 1 Courthouse',
-    cost: 5,
+    cost: 3,
     tier: TierType.Duchy,
     effect: { type: 'prestige_grant_building', value: 1, targetBuilding: 'county_courthouse' },
     purchased: false,
+    prerequisite: 'prestige_trade_routes_1',
   },
 
   // Realm currency → Cities start with Trade Guild (production boost head start)
@@ -901,10 +914,11 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_merchant_league_1',
     name: 'Merchant League',
     description: 'New Cities start with 1 Trade Guild',
-    cost: 5,
+    cost: 3,
     tier: TierType.Realm,
     effect: { type: 'prestige_grant_building', value: 1, targetBuilding: 'city_trade_guild' },
     purchased: false,
+    prerequisite: 'prestige_granary_network_1',
   },
 
   // ===== Hamlet parallel slots (prestige) =====
@@ -914,7 +928,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_hamlet_parallel_6',
     name: 'Hexa Hamlet Management',
     description: 'Run 6 hamlets in parallel',
-    cost: 3,
+    cost: 2,
     tier: TierType.Town,
     effect: { type: 'prestige_parallel_slots', value: 6 },
     purchased: false,
@@ -927,7 +941,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_swift_expansion_1',
     name: 'Swift Expansion I',
     description: 'Reduces completions needed to advance tiers by 1',
-    cost: 5,
+    cost: 3,
     tier: TierType.City,
     effect: { type: 'prestige_tier_requirement_reduction', value: 1 },
     purchased: false,
@@ -937,7 +951,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_swift_expansion_2',
     name: 'Swift Expansion II',
     description: 'Reduces completions needed to advance tiers by 1 (minimum 2)',
-    cost: 5,
+    cost: 3,
     tier: TierType.Kingdom,
     effect: { type: 'prestige_tier_requirement_reduction', value: 1 },
     purchased: false,
@@ -951,7 +965,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_cottage_industry_1',
     name: 'Cottage Industry',
     description: 'Each Cottage gives +1% income to Mills',
-    cost: 4,
+    cost: 2,
     tier: TierType.Town,
     effect: {
       type: 'prestige_building_synergy',
@@ -967,7 +981,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_academic_commerce_1',
     name: 'Academic Commerce',
     description: 'Each University gives +1.5% income to Grand Bazaars',
-    cost: 4,
+    cost: 3,
     tier: TierType.City,
     effect: {
       type: 'prestige_building_synergy',
@@ -983,7 +997,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_fortress_economy_1',
     name: 'Fortress Economy',
     description: 'Each Fortress gives +2% income to Plantations',
-    cost: 4,
+    cost: 3,
     tier: TierType.County,
     effect: {
       type: 'prestige_building_synergy',
@@ -992,6 +1006,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
       targetBuilding: 'county_plantation',
     },
     purchased: false,
+    prerequisite: 'prestige_feudal_foundation_1',
   },
 
   // Duchy currency → Mints boost Royal Academies
@@ -999,7 +1014,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_minting_scholars_1',
     name: 'Minting Scholars',
     description: 'Each Mint gives +1.5% income to Royal Academies',
-    cost: 4,
+    cost: 3,
     tier: TierType.Duchy,
     effect: {
       type: 'prestige_building_synergy',
@@ -1008,6 +1023,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
       targetBuilding: 'duchy_academy',
     },
     purchased: false,
+    prerequisite: 'prestige_port_1',
   },
 
   // Realm currency → Metropolises boost Wonders
@@ -1015,7 +1031,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_metro_wonders_1',
     name: 'Metropolitan Wonders',
     description: 'Each Metropolis gives +2% income to Wonders',
-    cost: 4,
+    cost: 3,
     tier: TierType.Realm,
     effect: {
       type: 'prestige_building_synergy',
@@ -1024,6 +1040,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
       targetBuilding: 'realm_wonder',
     },
     purchased: false,
+    prerequisite: 'prestige_exchange_1',
   },
 
   // Kingdom currency → Empire Districts boost Eternal Monuments
@@ -1031,7 +1048,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     id: 'prestige_imperial_legacy_1',
     name: 'Imperial Legacy',
     description: 'Each Empire District gives +1.5% income to Eternal Monuments',
-    cost: 3,
+    cost: 2,
     tier: TierType.Kingdom,
     effect: {
       type: 'prestige_building_synergy',
@@ -1040,6 +1057,233 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
       targetBuilding: 'kingdom_monument',
     },
     purchased: false,
+  },
+
+  // ===== Cheap starter upgrades (cost 1) =====
+
+  // Village currency → Small patronage boost
+  {
+    id: 'prestige_village_tithe_1',
+    name: 'Village Tithe',
+    description: '+10% patronage income from higher tiers',
+    cost: 1,
+    tier: TierType.Village,
+    effect: { type: 'prestige_patronage_boost', value: 0.1 },
+    purchased: false,
+  },
+
+  // Town currency → Small research discount
+  {
+    id: 'prestige_apprentice_scholars_1',
+    name: 'Apprentice Scholars',
+    description: '-5% research costs',
+    cost: 1,
+    tier: TierType.Town,
+    effect: { type: 'prestige_research_discount', value: 0.95 },
+    purchased: false,
+  },
+
+  // City currency → Small prestige currency boost
+  {
+    id: 'prestige_crown_tax_1',
+    name: 'Crown Tax',
+    description: '+10% prestige currency earned on reset',
+    cost: 1,
+    tier: TierType.City,
+    effect: { type: 'prestige_currency_boost', value: 0.1 },
+    purchased: false,
+  },
+
+  // County currency → Small mastery boost
+  {
+    id: 'prestige_veteran_builders_1',
+    name: 'Veteran Builders',
+    description: 'Mastery income bonus grows 10% faster per completion',
+    cost: 1,
+    tier: TierType.County,
+    effect: { type: 'prestige_mastery_boost', value: 0.1 },
+    purchased: false,
+  },
+
+  // Duchy currency → Small production boost amplifier
+  {
+    id: 'prestige_trade_routes_1',
+    name: 'Trade Routes',
+    description: 'Production boost buildings are 10% more effective',
+    cost: 1,
+    tier: TierType.Duchy,
+    effect: { type: 'prestige_production_boost_amplifier', value: 0.1 },
+    purchased: false,
+  },
+
+  // Realm currency → Small survival speed
+  {
+    id: 'prestige_realm_scouts_1',
+    name: 'Realm Scouts',
+    description: 'Survival goals progress 8% faster',
+    cost: 1,
+    tier: TierType.Realm,
+    effect: { type: 'prestige_survival_speed', value: 0.08 },
+    purchased: false,
+  },
+
+  // Kingdom currency → Small goal reduction
+  {
+    id: 'prestige_royal_decree_1',
+    name: 'Royal Decree',
+    description: '-5% goal targets',
+    cost: 1,
+    tier: TierType.Kingdom,
+    effect: { type: 'prestige_goal_reduction', value: 0.05 },
+    purchased: false,
+  },
+
+  // ===== Tiered chain extensions (currency sinks for early tiers) =====
+
+  // Village currency → Hut income chain extension
+  {
+    id: 'prestige_hearth_2',
+    name: 'Blessing of the Hearth II',
+    description: '+100% Hut income',
+    cost: 3,
+    tier: TierType.Village,
+    effect: { type: 'prestige_building_income_boost', value: 1.0, targetBuilding: 'hamlet_hut' },
+    purchased: false,
+    prerequisite: 'prestige_hearth_1',
+  },
+
+  // Village currency → Patronage chain extension
+  {
+    id: 'prestige_patron_2',
+    name: 'Patron of the Arts II',
+    description: '+40% patronage income from higher tiers',
+    cost: 4,
+    tier: TierType.Village,
+    effect: { type: 'prestige_patronage_boost', value: 0.4 },
+    purchased: false,
+    prerequisite: 'prestige_patron_1',
+  },
+
+  // Village currency → Survival speed chain extension
+  {
+    id: 'prestige_pastoral_3',
+    name: 'Pastoral Wisdom III',
+    description: 'Survival goals progress 15% faster',
+    cost: 5,
+    tier: TierType.Village,
+    effect: { type: 'prestige_survival_speed', value: 0.15 },
+    purchased: false,
+    prerequisite: 'prestige_pastoral_2',
+  },
+
+  // Town currency → Forge income chain extension
+  {
+    id: 'prestige_forgemaster_2',
+    name: "Forgemaster's Legacy II",
+    description: '+100% Forge income',
+    cost: 3,
+    tier: TierType.Town,
+    effect: { type: 'prestige_building_income_boost', value: 1.0, targetBuilding: 'town_forge' },
+    purchased: false,
+    prerequisite: 'prestige_forgemaster_1',
+  },
+
+  // Town currency → Flat cost chain extension
+  {
+    id: 'prestige_foundation_3',
+    name: 'Foundation Stone III',
+    description: '+2 more flat cost buildings (no scaling)',
+    cost: 5,
+    tier: TierType.Town,
+    effect: { type: 'prestige_flat_cost_count', value: 2 },
+    purchased: false,
+    prerequisite: 'prestige_foundation_2',
+  },
+
+  // Town currency → Cottage synergy chain extension
+  {
+    id: 'prestige_cottage_industry_2',
+    name: 'Cottage Industry II',
+    description: 'Each Cottage gives +2% income to Mills',
+    cost: 4,
+    tier: TierType.Town,
+    effect: {
+      type: 'prestige_building_synergy',
+      value: 0.02,
+      sourceBuilding: 'village_cottage',
+      targetBuilding: 'village_mill',
+    },
+    purchased: false,
+    prerequisite: 'prestige_cottage_industry_1',
+  },
+
+  // City currency → Cathedral income chain extension
+  {
+    id: 'prestige_cathedral_2',
+    name: "Cathedral's Blessing II",
+    description: '+100% Cathedral income',
+    cost: 4,
+    tier: TierType.City,
+    effect: {
+      type: 'prestige_building_income_boost',
+      value: 1.0,
+      targetBuilding: 'city_cathedral',
+    },
+    purchased: false,
+    prerequisite: 'prestige_cathedral_1',
+  },
+
+  // City currency → Prestige currency chain extension
+  {
+    id: 'prestige_crowning_2',
+    name: 'Crowning Glory II',
+    description: '+40% prestige currency earned on reset',
+    cost: 4,
+    tier: TierType.City,
+    effect: { type: 'prestige_currency_boost', value: 0.4 },
+    purchased: false,
+    prerequisite: 'prestige_crowning_1',
+  },
+
+  // City currency → University synergy chain extension
+  {
+    id: 'prestige_academic_commerce_2',
+    name: 'Academic Commerce II',
+    description: 'Each University gives +3% income to Grand Bazaars',
+    cost: 5,
+    tier: TierType.City,
+    effect: {
+      type: 'prestige_building_synergy',
+      value: 0.03,
+      sourceBuilding: 'city_university',
+      targetBuilding: 'city_bazaar',
+    },
+    purchased: false,
+    prerequisite: 'prestige_academic_commerce_1',
+  },
+
+  // County currency → Survival speed chain extension
+  {
+    id: 'prestige_swift_2',
+    name: 'Swift Conquest II',
+    description: 'Survival goals progress 20% faster',
+    cost: 3,
+    tier: TierType.County,
+    effect: { type: 'prestige_survival_speed', value: 0.2 },
+    purchased: false,
+    prerequisite: 'prestige_swift_1',
+  },
+
+  // County currency → Patronage chain extension
+  {
+    id: 'prestige_feudal_ties_2',
+    name: 'Feudal Ties II',
+    description: '+50% patronage income from higher tiers',
+    cost: 4,
+    tier: TierType.County,
+    effect: { type: 'prestige_patronage_boost', value: 0.5 },
+    purchased: false,
+    prerequisite: 'prestige_feudal_ties_1',
   },
 ];
 
