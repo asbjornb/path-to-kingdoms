@@ -40,8 +40,10 @@ function createSettlement(tierType: TierType): Settlement {
   return settlement;
 }
 
-// Cross-tier contribution: 0.1% of higher-tier total income, halved per tier of distance
-const CROSS_TIER_RATE = 0.001;
+// Patronage: each completed higher-tier settlement gives a small flat income bonus
+// to all lower-tier settlements, scaled by the higher tier's base income and
+// decayed by tier distance. Slow but accumulates permanently.
+const PATRONAGE_PER_COMPLETION = 0.05; // fraction of higher tier's first building income
 
 // Mastery: permanent bonuses from repeated tier completions (intentionally slow)
 const MASTERY_INCOME_PER_COMPLETION = 0.005; // +0.5% income per completion
@@ -308,9 +310,9 @@ export class GameStateManager {
   }
 
   /**
-   * Calculate the cross-tier income bonus for a settlement.
-   * Higher-tier settlements contribute a small fraction of their income
-   * to all lower-tier settlements, decaying with tier distance.
+   * Calculate the patronage bonus for a settlement.
+   * Each completed settlement of a higher tier provides a small permanent
+   * income bonus, scaled by that tier's economic level and decayed by distance.
    */
   private calculateCrossTierBonus(settlement: Settlement): number {
     const settlementTierIndex = TIER_DATA.findIndex((t) => t.type === settlement.tier);
@@ -318,19 +320,17 @@ export class GameStateManager {
 
     let bonus = 0;
 
-    // Sum contributions from each higher tier
+    // Sum contributions from each higher tier's completed settlements
     for (let i = settlementTierIndex + 1; i < TIER_DATA.length; i++) {
       const higherTier = TIER_DATA[i];
       const distance = i - settlementTierIndex;
 
-      // Sum total income of all active settlements in this higher tier
-      const higherTierIncome = this.state.settlements
-        .filter((s) => s.tier === higherTier.type && !s.isComplete)
-        .reduce((sum, s) => sum + s.totalIncome, 0);
+      const completedCount = this.state.completedSettlements.get(higherTier.type) ?? 0;
+      if (completedCount === 0) continue;
 
-      if (higherTierIncome > 0) {
-        bonus += (higherTierIncome * CROSS_TIER_RATE) / Math.pow(2, distance);
-      }
+      // Base bonus scales with the higher tier's first building income
+      const tierBaseIncome = higherTier.buildings[0]?.baseIncome ?? 1;
+      bonus += (completedCount * tierBaseIncome * PATRONAGE_PER_COMPLETION) / Math.pow(2, distance);
     }
 
     return bonus;
