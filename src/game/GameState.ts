@@ -136,6 +136,38 @@ export class GameStateManager {
       newSettlement.currency += Math.floor(newSettlement.currency * achievementStartBonus);
     }
 
+    // Apply prestige free buildings: start with N of the cheapest building pre-built
+    const freeBuildings = this.getPrestigeEffect('prestige_free_buildings');
+    if (freeBuildings > 0) {
+      const tierDef = getTierByType(tierType);
+      if (tierDef && tierDef.buildings.length > 0) {
+        const cheapestBuilding = tierDef.buildings[0]; // buildings are ordered by cost
+        const currentCount = newSettlement.buildings.get(cheapestBuilding.id) ?? 0;
+        newSettlement.buildings.set(cheapestBuilding.id, currentCount + freeBuildings);
+      }
+    }
+
+    // Apply prestige grant building: add specific buildings to matching-tier settlements
+    const grantUpgrades = this.state.prestigeUpgrades.filter(
+      (u) =>
+        u.purchased &&
+        u.effect.type === 'prestige_grant_building' &&
+        u.effect.targetBuilding !== undefined,
+    );
+    for (const upgrade of grantUpgrades) {
+      const buildingId = upgrade.effect.targetBuilding ?? '';
+      // Check if this building belongs to the settlement's tier
+      if (buildingId !== '' && newSettlement.buildings.has(buildingId)) {
+        const currentCount = newSettlement.buildings.get(buildingId) ?? 0;
+        newSettlement.buildings.set(buildingId, currentCount + upgrade.effect.value);
+      }
+    }
+
+    // Recalculate income if any buildings were granted
+    if (freeBuildings > 0 || grantUpgrades.length > 0) {
+      newSettlement.totalIncome = this.calculateSettlementIncome(newSettlement);
+    }
+
     this.state.settlements.push(newSettlement);
     return newSettlement;
   }
@@ -249,9 +281,13 @@ export class GameStateManager {
   ): number {
     let costReduction = this.getResearchEffect('cost_reduction');
 
-    // Apply cost scaling reduction to the multiplier
+    // Apply cost scaling reduction to the multiplier (research + prestige)
     const scalingReduction = this.getResearchEffect('cost_scaling_reduction');
-    const adjustedMultiplier = Math.max(1.0, multiplier - scalingReduction);
+    const prestigeScalingReduction = this.getPrestigeEffect('prestige_cost_scaling_reduction');
+    const adjustedMultiplier = Math.max(
+      1.0,
+      multiplier - scalingReduction - prestigeScalingReduction,
+    );
 
     // Apply building-specific cost reduction effects
     if (settlementId !== undefined && settlementId !== '') {
@@ -267,9 +303,13 @@ export class GameStateManager {
     // Apply achievement cost reduction (multiplicative)
     const achievementCostReduction = this.getAchievementEffect('cost_reduction');
 
+    // Apply prestige flat cost: first N buildings of each type use flat cost (no scaling)
+    const flatCostCount = this.getPrestigeEffect('prestige_flat_cost_count');
+    const effectiveCount = Math.max(0, count - flatCostCount);
+
     return Math.floor(
       baseCost *
-        Math.pow(adjustedMultiplier, count) *
+        Math.pow(adjustedMultiplier, effectiveCount) *
         costReduction *
         prestigeCostReduction *
         achievementCostReduction,
@@ -349,6 +389,8 @@ export class GameStateManager {
     }
 
     // Build a map of production_boost multipliers per building ID
+    const productionBoostAmplifier =
+      1 + this.getPrestigeEffect('prestige_production_boost_amplifier');
     const productionBoosts = new Map<string, number>();
     for (const building of tierDef.buildings) {
       if (
@@ -360,14 +402,14 @@ export class GameStateManager {
         const currentBoost = productionBoosts.get(building.effect.targetBuilding) ?? 0;
         productionBoosts.set(
           building.effect.targetBuilding,
-          currentBoost + building.effect.value * boosterCount,
+          currentBoost + building.effect.value * boosterCount * productionBoostAmplifier,
         );
       }
     }
 
     let baseIncome = 0;
 
-    // Calculate base income from all buildings, applying production_boost
+    // Calculate base income from all buildings, applying production_boost and prestige building boosts
     for (const building of tierDef.buildings) {
       const count = settlement.buildings.get(building.id) ?? 0;
       let buildingIncome = building.baseIncome * count;
@@ -376,6 +418,12 @@ export class GameStateManager {
       const boost = productionBoosts.get(building.id) ?? 0;
       if (boost > 0) {
         buildingIncome *= 1 + boost;
+      }
+
+      // Apply prestige building-specific income boost
+      const prestigeBuildingBoost = this.getPrestigeBuildingBoost(building.id);
+      if (prestigeBuildingBoost > 0) {
+        buildingIncome *= 1 + prestigeBuildingBoost;
       }
 
       baseIncome += buildingIncome;
@@ -443,6 +491,10 @@ export class GameStateManager {
       bonus += (completedCount * tierBaseIncome * PATRONAGE_PER_COMPLETION) / Math.pow(2, distance);
     }
 
+    // Apply prestige patronage boost
+    const patronageBoost = 1 + this.getPrestigeEffect('prestige_patronage_boost');
+    bonus *= patronageBoost;
+
     return bonus;
   }
 
@@ -466,7 +518,8 @@ export class GameStateManager {
    */
   public getMasteryIncomeMultiplier(tier: TierType): number {
     const completions = this.getMasteryLevel(tier);
-    return 1 + completions * MASTERY_INCOME_PER_COMPLETION;
+    const masteryBoost = 1 + this.getPrestigeEffect('prestige_mastery_boost');
+    return 1 + completions * MASTERY_INCOME_PER_COMPLETION * masteryBoost;
   }
 
   /**
@@ -517,9 +570,58 @@ export class GameStateManager {
         return upgrades.reduce((mult, u) => mult * u.effect.value, 1);
       case 'prestige_autobuild_speed':
         return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+      case 'prestige_survival_speed':
+        // Additive sum (e.g., 0.2 + 0.3 = 0.5 → applied as 1 + total multiplier)
+        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+      case 'prestige_flat_cost_count':
+        // Additive sum of flat-cost building counts
+        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+      case 'prestige_cost_scaling_reduction':
+        // Additive sum (reduces cost multiplier by total)
+        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+      case 'prestige_building_income_boost':
+        // Handled per-building via getPrestigeBuildingBoost, not aggregated here
+        return 0;
+      case 'prestige_patronage_boost':
+        // Additive sum (e.g., 0.5 + 0.75 = 1.25 → applied as 1 + total multiplier)
+        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+      case 'prestige_research_discount':
+        // Multiplicative (e.g., 0.85 * 0.75 = 0.6375)
+        return upgrades.reduce((mult, u) => mult * u.effect.value, 1);
+      case 'prestige_free_buildings':
+        // Additive sum of free building counts
+        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+      case 'prestige_currency_boost':
+        // Additive sum (e.g., 0.5 + 0.75 = 1.25 → applied as 1 + total)
+        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+      case 'prestige_mastery_boost':
+        // Additive sum (e.g., 0.5 + 1.0 = 1.5 → mastery rate multiplied by 1 + total)
+        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+      case 'prestige_production_boost_amplifier':
+        // Additive sum (e.g., 0.4 + 0.6 = 1.0 → production boosts are 100% stronger)
+        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+      case 'prestige_grant_building':
+        // Handled per-building in spawnSettlement, not aggregated here
+        return 0;
       default:
         return 0;
     }
+  }
+
+  /**
+   * Get the prestige income boost for a specific building ID.
+   * Returns the additive sum of all purchased prestige_building_income_boost upgrades
+   * that target this building (e.g., 1.0 = +100% income for that building).
+   */
+  public getPrestigeBuildingBoost(buildingId: string): number {
+    return this.state.prestigeUpgrades
+      .filter(
+        (u) =>
+          u.purchased &&
+          u.effect.type === 'prestige_building_income_boost' &&
+          u.effect.targetBuilding === buildingId,
+      )
+      .reduce((sum, u) => sum + u.effect.value, 0);
   }
 
   /**
@@ -567,9 +669,11 @@ export class GameStateManager {
    */
   public getPrestigePreview(): Map<TierType, number> {
     const preview = new Map<TierType, number>();
+    const currencyBoost = 1 + this.getPrestigeEffect('prestige_currency_boost');
     for (const [tier, count] of this.state.completedSettlements.entries()) {
       if (tier === TierType.Hamlet) continue;
-      const currency = calculatePrestigeCurrency(count);
+      const baseCurrency = calculatePrestigeCurrency(count);
+      const currency = Math.floor(baseCurrency * currencyBoost);
       if (currency > 0) {
         preview.set(tier, currency);
       }
@@ -861,9 +965,11 @@ export class GameStateManager {
     // Check if tier is unlocked
     if (!this.state.unlockedTiers.has(research.tier)) return false;
 
-    // Check if player has enough research points for this tier
+    // Check if player has enough research points for this tier (apply prestige discount)
     const tierPoints = this.state.researchPoints.get(research.tier) ?? 0;
-    if (tierPoints < research.cost) return false;
+    const researchDiscount = this.getPrestigeEffect('prestige_research_discount');
+    const effectiveCost = Math.max(1, Math.floor(research.cost * researchDiscount));
+    if (tierPoints < effectiveCost) return false;
 
     // Check prerequisites
     if (research.prerequisite !== undefined && research.prerequisite !== '') {
@@ -871,8 +977,8 @@ export class GameStateManager {
       if (!prereq || !prereq.purchased) return false;
     }
 
-    // Purchase the research
-    this.state.researchPoints.set(research.tier, tierPoints - research.cost);
+    // Purchase the research (at discounted cost)
+    this.state.researchPoints.set(research.tier, tierPoints - effectiveCost);
     research.purchased = true;
 
     // Handle special research effects
@@ -1160,7 +1266,9 @@ export class GameStateManager {
             : 1;
           const incomeThreshold = avgBaseIncome * 10;
           const timeMultiplier = 1 + settlement.totalIncome / incomeThreshold;
-          newValue = Math.floor(elapsedSeconds * timeMultiplier);
+          // Apply prestige survival speed bonus
+          const survivalSpeedBonus = 1 + this.getPrestigeEffect('prestige_survival_speed');
+          newValue = Math.floor(elapsedSeconds * timeMultiplier * survivalSpeedBonus);
           completed = newValue >= effectiveTarget;
           break;
         }

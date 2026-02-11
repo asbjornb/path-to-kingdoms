@@ -108,8 +108,20 @@ export interface PrestigeUpgrade {
       | 'prestige_research_bonus'
       | 'prestige_goal_reduction'
       | 'prestige_starting_currency'
-      | 'prestige_autobuild_speed';
+      | 'prestige_autobuild_speed'
+      | 'prestige_building_income_boost'
+      | 'prestige_survival_speed'
+      | 'prestige_flat_cost_count'
+      | 'prestige_cost_scaling_reduction'
+      | 'prestige_patronage_boost'
+      | 'prestige_research_discount'
+      | 'prestige_free_buildings'
+      | 'prestige_currency_boost'
+      | 'prestige_mastery_boost'
+      | 'prestige_production_boost_amplifier'
+      | 'prestige_grant_building';
     value: number;
+    targetBuilding?: string; // For prestige_building_income_boost / prestige_grant_building
   };
   purchased: boolean;
   prerequisite?: string;
