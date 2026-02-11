@@ -133,7 +133,7 @@ export const GoalGenerator = {
     tierDef.buildings.forEach((building, i) => {
       // Cheaper buildings get higher targets, expensive buildings get lower targets
       const positionFactor = 1 - (i / buildingIndex) * 0.6; // 1.0 down to 0.4
-      const targetCount = Math.round(30 * positionFactor * difficulty);
+      const targetCount = Math.round(20 * positionFactor * difficulty);
 
       goalTemplates.push({
         type: GoalType.BuildingCount,

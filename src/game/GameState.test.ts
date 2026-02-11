@@ -91,7 +91,7 @@ describe('GameStateManager', () => {
       const secondCost = game.getBuildingCost(settlementId, 'hamlet_hut');
 
       expect(secondCost).toBeGreaterThan(firstCost!);
-      expect(secondCost).toBe(Math.floor(10 * 1.15)); // Base cost 10, multiplier 1.15
+      expect(secondCost).toBe(Math.floor(10 * 1.17)); // Base cost 10, multiplier 1.17
     });
 
     it('should not buy from non-existent settlement', () => {
