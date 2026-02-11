@@ -263,6 +263,26 @@ export class GameStateManager {
     return multiplier;
   }
 
+  /**
+   * Get the goal reduction factor for a settlement from goal_reduction buildings.
+   * Returns a multiplier (e.g., 0.85 for 15% reduction). Capped at 0.25 (75% max reduction).
+   */
+  public getGoalReductionFactor(settlement: Settlement): number {
+    const tierDef = getTierByType(settlement.tier);
+    if (!tierDef) return 1;
+
+    let totalReduction = 0;
+    for (const building of tierDef.buildings) {
+      if (building.effect?.type === 'goal_reduction') {
+        const count = settlement.buildings.get(building.id) ?? 0;
+        totalReduction += building.effect.value * count;
+      }
+    }
+
+    // Cap at 75% reduction (factor of 0.25)
+    return Math.max(0.25, 1 - totalReduction);
+  }
+
   private getBuildingCompletionBonus(settlement: Settlement): number {
     const tierDef = getTierByType(settlement.tier);
     if (!tierDef) return 0;
@@ -283,12 +303,51 @@ export class GameStateManager {
     const tierDef = getTierByType(settlement.tier);
     if (!tierDef) return 0;
 
+    // Calculate total building count for income_per_building effect
+    let totalBuildingCount = 0;
+    for (const count of settlement.buildings.values()) {
+      totalBuildingCount += count;
+    }
+
+    // Build a map of production_boost multipliers per building ID
+    const productionBoosts = new Map<string, number>();
+    for (const building of tierDef.buildings) {
+      if (
+        building.effect?.type === 'production_boost' &&
+        building.effect.targetBuilding !== undefined &&
+        building.effect.targetBuilding !== ''
+      ) {
+        const boosterCount = settlement.buildings.get(building.id) ?? 0;
+        const currentBoost = productionBoosts.get(building.effect.targetBuilding) ?? 0;
+        productionBoosts.set(
+          building.effect.targetBuilding,
+          currentBoost + building.effect.value * boosterCount,
+        );
+      }
+    }
+
     let baseIncome = 0;
 
-    // Calculate base income from all buildings
+    // Calculate base income from all buildings, applying production_boost
     for (const building of tierDef.buildings) {
       const count = settlement.buildings.get(building.id) ?? 0;
-      baseIncome += building.baseIncome * count;
+      let buildingIncome = building.baseIncome * count;
+
+      // Apply production_boost if this building is targeted
+      const boost = productionBoosts.get(building.id) ?? 0;
+      if (boost > 0) {
+        buildingIncome *= 1 + boost;
+      }
+
+      baseIncome += buildingIncome;
+    }
+
+    // Add income_per_building bonus (flat income per building in the settlement)
+    for (const building of tierDef.buildings) {
+      if (building.effect?.type === 'income_per_building') {
+        const count = settlement.buildings.get(building.id) ?? 0;
+        baseIncome += building.effect.value * totalBuildingCount * count;
+      }
     }
 
     // Add starting income bonus from research
@@ -727,39 +786,42 @@ export class GameStateManager {
 
   private updateGoalProgress(settlement: Settlement): void {
     const now = Date.now();
+    const goalReduction = this.getGoalReductionFactor(settlement);
 
     settlement.goals.forEach((goal) => {
       if (goal.isCompleted) return;
 
       let newValue = 0;
       let completed = false;
+      const effectiveTarget = goal.targetValue * goalReduction;
 
       switch (goal.type) {
         case GoalType.ReachIncome:
           newValue = settlement.totalIncome;
-          completed = newValue >= goal.targetValue;
+          completed = newValue >= effectiveTarget;
           break;
 
         case GoalType.AccumulateCurrency:
           newValue = settlement.lifetimeCurrencyEarned;
-          completed = newValue >= goal.targetValue;
+          completed = newValue >= effectiveTarget;
           break;
 
         case GoalType.CurrentCurrency:
           newValue = settlement.currency;
-          completed = newValue >= goal.targetValue;
+          completed = newValue >= effectiveTarget;
           break;
 
         case GoalType.BuildingCount:
           if (goal.buildingId !== undefined && goal.buildingId !== '') {
             newValue = settlement.buildings.get(goal.buildingId) ?? 0;
-            completed = newValue >= goal.targetValue;
+            // Building count goals use ceiling so you always need at least 1
+            completed = newValue >= Math.ceil(effectiveTarget);
           }
           break;
 
         case GoalType.Survival:
           newValue = Math.floor((now - settlement.spawnTime) / 1000); // seconds
-          completed = newValue >= goal.targetValue;
+          completed = newValue >= effectiveTarget;
           break;
       }
 

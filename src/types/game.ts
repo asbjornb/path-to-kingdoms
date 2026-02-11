@@ -19,9 +19,16 @@ export interface Building {
   costMultiplier: number;
   description?: string;
   effect?: {
-    type: 'income_multiplier' | 'cost_reduction' | 'completion_bonus';
+    type:
+      | 'income_multiplier'
+      | 'cost_reduction'
+      | 'completion_bonus'
+      | 'income_per_building'
+      | 'goal_reduction'
+      | 'production_boost';
     value: number;
     description: string;
+    targetBuilding?: string; // For production_boost - which building ID to boost
   };
 }
 
