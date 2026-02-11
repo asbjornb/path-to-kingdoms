@@ -119,8 +119,8 @@ export const TIER_DATA: TierDefinition[] = [
         description: 'A communal gathering spot that nourishes the village',
         effect: {
           type: 'income_per_building',
-          value: 3,
-          description: '+3 income for each building in the settlement',
+          value: 2,
+          description: '+2 income for each building in the settlement',
         },
       },
       {
