@@ -645,17 +645,17 @@ describe('GameStateManager', () => {
       game.purchaseResearch('hamlet_auto_hut_1');
     });
 
-    it('should auto-buy when cost is within 10% of treasury', () => {
+    it('should auto-buy when cost is within 5% of treasury', () => {
       const settlement = game.getState().settlements[0];
       // Buy first hut manually so the cap applies
       settlement.currency = 10000;
       game.buyBuilding(settlementId, 'hamlet_hut');
 
-      // Next hut costs ~11.5 (10 * 1.15). Set currency so 10% of treasury > cost.
-      // 10% of 200 = 20 > 11.5, so it should auto-buy.
-      settlement.currency = 200;
+      // Next hut costs ~11.5 (10 * 1.15). Set currency so 5% of treasury > cost.
+      // 5% of 400 = 20 > 11.5, so it should auto-buy.
+      settlement.currency = 400;
       const costBefore = game.getBuildingCost(settlementId, 'hamlet_hut')!;
-      expect(costBefore).toBeLessThan(200 * 0.1); // Verify our assumption
+      expect(costBefore).toBeLessThan(400 * 0.05); // Verify our assumption
 
       // Set the auto-build timer far in the past so it triggers immediately
       const autoResearch = game.getState().research.find((r) => r.id === 'hamlet_auto_hut_1')!;
@@ -666,7 +666,7 @@ describe('GameStateManager', () => {
       expect(settlement.buildings.get('hamlet_hut')).toBe(2);
     });
 
-    it('should NOT auto-buy when cost exceeds 10% of treasury', () => {
+    it('should NOT auto-buy when cost exceeds 5% of treasury', () => {
       const settlement = game.getState().settlements[0];
       // Buy many huts to make cost very high
       settlement.currency = 1000000;
@@ -676,13 +676,13 @@ describe('GameStateManager', () => {
       const hutCount = settlement.buildings.get('hamlet_hut')!;
       expect(hutCount).toBe(30);
 
-      // Now set treasury low so cost > 10% of treasury
+      // Now set treasury low so cost > 5% of treasury
       const nextCost = game.getBuildingCost(settlementId, 'hamlet_hut')!;
-      // Set currency so we can afford it, but it's more than 10% of treasury
-      // cost / 0.1 = treasury where cost is exactly 10%. Use slightly more than cost
-      // so we can afford it but 10% of treasury < cost.
-      settlement.currency = nextCost * 2; // cost is 50% of treasury, way over 10%
-      expect(nextCost).toBeGreaterThan(settlement.currency * 0.1);
+      // Set currency so we can afford it, but it's more than 5% of treasury
+      // cost / 0.05 = treasury where cost is exactly 5%. Use slightly more than cost
+      // so we can afford it but 5% of treasury < cost.
+      settlement.currency = nextCost * 2; // cost is 50% of treasury, way over 5%
+      expect(nextCost).toBeGreaterThan(settlement.currency * 0.05);
 
       const autoResearch = game.getState().research.find((r) => r.id === 'hamlet_auto_hut_1')!;
       game.getState().autoBuildingTimers.set(autoResearch.id, 0);
@@ -696,7 +696,7 @@ describe('GameStateManager', () => {
     it('should bypass treasury cap for the first building of a type', () => {
       const settlement = game.getState().settlements[0];
       // No huts yet (count = 0). Cost is 10, set treasury to 15.
-      // 10% of 15 = 1.5, cost (10) > 1.5, but first building should bypass cap.
+      // 5% of 15 = 0.75, cost (10) > 0.75, but first building should bypass cap.
       settlement.currency = 15;
       expect(settlement.buildings.get('hamlet_hut')).toBe(0);
 

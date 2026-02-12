@@ -58,7 +58,7 @@ const MASTERY_AUTOBUILD_HALFPOINT = 500; // completions at which auto-build spee
 // Auto-builders will only spend up to this fraction of treasury per purchase.
 // Prevents expensive buildings from draining the entire treasury in one shot.
 // The first building of each type bypasses this cap so settlements can bootstrap.
-const AUTO_BUILD_TREASURY_PCT = 0.1;
+const AUTO_BUILD_TREASURY_PCT = 0.05;
 
 export class GameStateManager {
   private state: GameState;

@@ -358,7 +358,7 @@ export class UI {
             <div class="research-item ${research.purchased ? 'purchased' : ''}">
               <h4>${research.name}</h4>
               <p>${research.description}</p>
-              ${isAutoBuilding ? '<p class="research-note">Will only spend up to 10% of treasury per purchase. First building of each type is always purchased when affordable.</p>' : ''}
+              ${isAutoBuilding ? '<p class="research-note">Will only spend up to 5% of treasury per purchase. First building of each type is always purchased when affordable.</p>' : ''}
               ${
                 !research.purchased
                   ? `
