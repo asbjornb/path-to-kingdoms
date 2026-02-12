@@ -662,8 +662,8 @@ export class GameStateManager {
         // Handled per-building in calculateSettlementIncome, not aggregated here
         return 0;
       case 'prestige_parallel_slots':
-        // Return the highest parallel slots value (absolute, not additive)
-        return upgrades.reduce((max, u) => Math.max(max, u.effect.value), 0);
+        // Additive: each prestige upgrade adds extra parallel slots
+        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
       default:
         return 0;
     }
@@ -1052,10 +1052,10 @@ export class GameStateManager {
     if (!this.state.unlockedTiers.has(TierType.Hamlet)) return;
 
     // Parallel slots come from research across multiple tiers (Hamlet, Village, Town)
-    // and from prestige upgrades — take the highest value
+    // Prestige upgrades add extra slots on top of research
     const researchSlots = this.getResearchEffect('parallel_slots');
     const prestigeSlots = this.getPrestigeEffect('prestige_parallel_slots');
-    const maxSlots = Math.max(researchSlots, prestigeSlots);
+    const maxSlots = researchSlots + prestigeSlots;
     const currentCount = this.state.settlements.filter((s) => s.tier === TierType.Hamlet).length;
     const slotsNeeded = maxSlots - currentCount;
 
