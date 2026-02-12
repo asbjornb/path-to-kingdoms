@@ -29,6 +29,35 @@ src/
 └── main.ts        # Entry point: initializes game, UI, and 100ms update loop
 ```
 
+## Key File Paths
+
+### Game Data (`src/data/`)
+
+| File | Contents |
+|------|----------|
+| `src/data/tiers.ts` | Building definitions per tier — IDs, names, base cost/income, cost multipliers, and building effects (income_multiplier, cost_reduction, completion_bonus, etc.) |
+| `src/data/research.ts` | Research upgrades — cost reduction, starting income, auto-building, tier requirement reduction. Includes repeatable research generation |
+| `src/data/prestige.ts` | Prestige upgrades — 100+ upgrades per tier with prerequisites/chains. Effects: income multipliers, cost reduction, parallel slots, free buildings, mastery boosts, etc. |
+| `src/data/achievements.ts` | Achievement definitions — tier completions, speed runs, building counts, currency thresholds, hidden/easter-egg achievements |
+| `src/data/goals.ts` | `GoalGenerator` class — procedurally creates settlement goals (ReachIncome, AccumulateCurrency, CurrentCurrency, BuildingCount, Survival) scaled by tier |
+
+### Core Logic & Types
+
+| File | Contents |
+|------|----------|
+| `src/game/GameState.ts` | Main state manager (~1600 lines) — settlements, income calculation, goal tracking, research/prestige/achievement processing, auto-building, save/load, mastery, patronage |
+| `src/types/game.ts` | All core interfaces (`Building`, `Settlement`, `ResearchUpgrade`, `PrestigeUpgrade`, `Achievement`, `Goal`, `GameState`, `SaveData`) and enums (`TierType`, `GoalType`, `BuyAmount`) |
+| `src/types/global.d.ts` | Global `window` function type declarations for UI interactions |
+
+### UI & Utilities
+
+| File | Contents |
+|------|----------|
+| `src/ui/UI.ts` | DOM-based UI rendering — tier tabs, settlement cards, building buttons, research/prestige shops, achievement modal, notifications |
+| `src/utils/format.ts` | `formatNumber()` (large number suffixes: K, M, B, T, …) and `formatIncome()` |
+| `src/styles/game.css` | All game styling |
+| `src/main.ts` | Entry point — creates GameStateManager + UI, wires up window functions, starts 100ms update loop |
+
 ## Code Style & Conventions
 
 - **Strict TypeScript**: strict mode enabled, no `any`, explicit return types required
