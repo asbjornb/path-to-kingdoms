@@ -833,7 +833,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'hamlet_parallel_4',
     name: 'Quad Hamlet Management',
     description: 'Run 4 hamlets in parallel',
-    cost: 50,
+    cost: 200,
     tier: TierType.Village,
     prerequisite: 'hamlet_parallel_3',
     effect: {
