@@ -1,5 +1,13 @@
 import { GameStateManager } from '../game/GameState';
-import { TierType, GameNotification, Settlement, Goal, GoalType, BuyAmount } from '../types/game';
+import {
+  TierType,
+  GameNotification,
+  Settlement,
+  Goal,
+  GoalType,
+  BuyAmount,
+  PrestigeUpgrade,
+} from '../types/game';
 import { TIER_DATA, getTierByType } from '../data/tiers';
 import { formatNumber, formatIncome } from '../utils/format';
 
@@ -15,6 +23,8 @@ export class UI {
   private selectedPrestigeUpgrades: Set<string> = new Set();
   private notificationContainer: HTMLElement;
   private activeNotificationIds: Set<string> = new Set();
+  private prestigeSearchQuery: string = '';
+  private prestigeShopSearchQuery: string = '';
 
   constructor(game: GameStateManager, container: HTMLElement) {
     this.game = game;
@@ -39,6 +49,7 @@ export class UI {
   public openPrestigeShop(): void {
     this.prestigeShopOpen = true;
     this.selectedPrestigeUpgrades = new Set();
+    this.prestigeShopSearchQuery = '';
   }
 
   public closePrestigeShop(): void {
@@ -48,6 +59,67 @@ export class UI {
 
   public getSelectedPrestigeUpgrades(): Set<string> {
     return this.selectedPrestigeUpgrades;
+  }
+
+  public setPrestigeSearch(query: string): void {
+    this.prestigeSearchQuery = query;
+  }
+
+  public setPrestigeShopSearch(query: string): void {
+    this.prestigeShopSearchQuery = query;
+  }
+
+  private getUpgradeBuildingTags(
+    upgrade: PrestigeUpgrade,
+  ): { tierName: string; buildingName: string }[] {
+    const tags: { tierName: string; buildingName: string }[] = [];
+    const findBuilding = (buildingId: string): void => {
+      for (const tier of TIER_DATA) {
+        const building = tier.buildings.find((b) => b.id === buildingId);
+        if (building !== undefined) {
+          tags.push({ tierName: tier.name, buildingName: building.name });
+          break;
+        }
+      }
+    };
+    if (upgrade.effect.targetBuilding !== undefined) {
+      findBuilding(upgrade.effect.targetBuilding);
+    }
+    if (upgrade.effect.sourceBuilding !== undefined) {
+      findBuilding(upgrade.effect.sourceBuilding);
+    }
+    return tags;
+  }
+
+  private getUpgradeSearchText(upgrade: PrestigeUpgrade): string {
+    const tags = this.getUpgradeBuildingTags(upgrade);
+    const tierName = upgrade.tier.charAt(0).toUpperCase() + upgrade.tier.slice(1);
+    return [
+      upgrade.name,
+      upgrade.description,
+      tierName,
+      ...tags.map((t) => `${t.tierName} ${t.buildingName}`),
+    ]
+      .join(' ')
+      .toLowerCase();
+  }
+
+  private upgradeMatchesSearch(upgrade: PrestigeUpgrade, query: string): boolean {
+    if (query === '') return true;
+    const searchText = this.getUpgradeSearchText(upgrade);
+    return query
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((t) => t.length > 0)
+      .every((term) => searchText.includes(term));
+  }
+
+  private renderUpgradeTags(upgrade: PrestigeUpgrade): string {
+    const tags = this.getUpgradeBuildingTags(upgrade);
+    if (tags.length === 0) return '';
+    return `<span class="prestige-upgrade-tags">${tags
+      .map((tag) => `<span class="prestige-upgrade-tag">${tag.tierName} ${tag.buildingName}</span>`)
+      .join('')}</span>`;
   }
 
   public togglePrestigeUpgradeSelection(upgradeId: string): void {
@@ -100,6 +172,11 @@ export class UI {
     this.isInitialized = true;
     this.lastSettlementCount = this.game.getState().settlements.length;
     this.lastSettlementIds = this.game.getState().settlements.map((s) => s.id);
+
+    const researchPanel = this.container.querySelector('.research-panel');
+    const savedResearchScroll = researchPanel !== null ? researchPanel.scrollTop : 0;
+    const prestigeModal = this.container.querySelector('.prestige-shop-modal');
+    const savedModalScroll = prestigeModal !== null ? prestigeModal.scrollTop : 0;
 
     this.container.innerHTML = `
       <div class="game-container">
@@ -174,6 +251,15 @@ export class UI {
       </div>
       ${this.renderPrestigeShopOverlay()}
     `;
+
+    const newResearchPanel = this.container.querySelector('.research-panel');
+    if (newResearchPanel !== null && savedResearchScroll > 0) {
+      newResearchPanel.scrollTop = savedResearchScroll;
+    }
+    const newPrestigeModal = this.container.querySelector('.prestige-shop-modal');
+    if (newPrestigeModal !== null && savedModalScroll > 0) {
+      newPrestigeModal.scrollTop = savedModalScroll;
+    }
   }
 
   private renderTierTabs(): string {
@@ -492,6 +578,7 @@ export class UI {
     return `
       <div class="prestige-upgrades-section">
         <h3>Prestige Shop</h3>
+        <input type="text" class="prestige-search-input" placeholder="Search upgrades..." value="${this.prestigeSearchQuery}" oninput="window.filterPrestigeUpgrades(this.value)">
         ${currencyLines.length > 0 ? `<div class="prestige-currencies">${currencyLines.join('')}</div>` : ''}
         <div class="research-list">
           ${upgrades
@@ -499,10 +586,14 @@ export class UI {
               const currency = state.prestigeCurrency.get(upgrade.tier) ?? 0;
               const canAfford = currency >= upgrade.cost;
               const tierName = upgrade.tier.charAt(0).toUpperCase() + upgrade.tier.slice(1);
+              const searchText = this.getUpgradeSearchText(upgrade);
+              const matchesSearch = this.upgradeMatchesSearch(upgrade, this.prestigeSearchQuery);
+              const upgradeTags = this.renderUpgradeTags(upgrade);
 
               return `
-              <div class="research-item prestige-item ${upgrade.purchased ? 'purchased' : ''}">
+              <div class="research-item prestige-item ${upgrade.purchased ? 'purchased' : ''}" data-search-text="${searchText}"${!matchesSearch ? ' style="display:none"' : ''}>
                 <h4>${upgrade.name}</h4>
+                ${upgradeTags}
                 <p>${upgrade.description}</p>
                 ${
                   !upgrade.purchased
@@ -639,16 +730,24 @@ export class UI {
 
           <div class="prestige-shop-upgrades">
             <h3>Available Upgrades</h3>
+            <input type="text" class="prestige-search-input" placeholder="Search upgrades..." value="${this.prestigeShopSearchQuery}" oninput="window.filterPrestigeShop(this.value)">
             ${
               purchasedUpgrades.length > 0
                 ? `
               <div class="prestige-shop-purchased">
                 ${purchasedUpgrades
                   .map((upgrade) => {
+                    const searchText = this.getUpgradeSearchText(upgrade);
+                    const matchesSearch = this.upgradeMatchesSearch(
+                      upgrade,
+                      this.prestigeShopSearchQuery,
+                    );
+                    const upgradeTags = this.renderUpgradeTags(upgrade);
                     return `
-                    <div class="prestige-shop-upgrade purchased">
+                    <div class="prestige-shop-upgrade purchased" data-search-text="${searchText}"${!matchesSearch ? ' style="display:none"' : ''}>
                       <div class="prestige-shop-upgrade-info">
                         <span class="prestige-shop-upgrade-name">${upgrade.name}</span>
+                        ${upgradeTags}
                         <span class="prestige-shop-upgrade-desc">${upgrade.description}</span>
                       </div>
                       <span class="prestige-shop-purchased-label">Owned</span>
@@ -670,12 +769,20 @@ export class UI {
                         const isSelected = this.selectedPrestigeUpgrades.has(upgrade.id);
                         const remaining = budgetByTier.get(upgrade.tier) ?? 0;
                         const canAfford = isSelected || remaining >= upgrade.cost;
+                        const searchText = this.getUpgradeSearchText(upgrade);
+                        const matchesSearch = this.upgradeMatchesSearch(
+                          upgrade,
+                          this.prestigeShopSearchQuery,
+                        );
+                        const upgradeTags = this.renderUpgradeTags(upgrade);
 
                         return `
                   <div class="prestige-shop-upgrade ${isSelected ? 'selected' : ''} ${!canAfford ? 'unaffordable' : ''}"
+                       data-search-text="${searchText}"${!matchesSearch ? ' style="display:none"' : ''}
                        onclick="window.togglePrestigeShopUpgrade('${upgrade.id}')">
                     <div class="prestige-shop-upgrade-info">
                       <span class="prestige-shop-upgrade-name">${upgrade.name}</span>
+                      ${upgradeTags}
                       <span class="prestige-shop-upgrade-desc">${upgrade.description}</span>
                     </div>
                     <div class="prestige-shop-upgrade-cost">
@@ -869,7 +976,9 @@ export class UI {
     if (countChanged || idsChanged) {
       this.lastSettlementCount = currentSettlementCount;
       this.lastSettlementIds = currentSettlementIds;
-      this.render(); // Full re-render when settlements change
+      if (!this.prestigeShopOpen) {
+        this.render(); // Full re-render when settlements change
+      }
       return;
     }
 

@@ -17,6 +17,8 @@ declare global {
     togglePrestigeShopUpgrade: (upgradeId: string) => void;
     confirmPrestige: () => void;
     purchasePrestigeUpgrade: (upgradeId: string) => void;
+    filterPrestigeUpgrades: (query: string) => void;
+    filterPrestigeShop: (query: string) => void;
     toggleAchievements: () => void;
     toggleCompactView: () => void;
     toggleGoalNotification: (tier: TierType) => void;
