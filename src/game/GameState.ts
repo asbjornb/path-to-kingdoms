@@ -1000,11 +1000,11 @@ export class GameStateManager {
   }
 
   /**
-   * Get the current tier advancement requirement (completions needed to spawn next tier).
-   * Base is 6, reduced by research, prestige, and achievements. Minimum 2.
+   * Get the tier advancement requirement (completions needed to spawn next tier).
+   * Base is 6, reduced by research (tier-scoped), prestige, and achievements. Minimum 2.
    */
-  public getTierRequirement(): number {
-    const researchReduction = this.getResearchEffect('tier_requirement_reduction');
+  public getTierRequirement(tier?: TierType): number {
+    const researchReduction = this.getResearchEffect('tier_requirement_reduction', tier);
     const prestigeReduction = this.getPrestigeEffect('prestige_tier_requirement_reduction');
     const achievementReduction = this.getAchievementEffect('tier_requirement_reduction');
     const totalReduction = researchReduction + prestigeReduction + achievementReduction;
@@ -1014,7 +1014,7 @@ export class GameStateManager {
   private checkNextTierSpawn(completedTier: TierType): void {
     const completedCount = this.state.completedSettlements.get(completedTier) ?? 0;
 
-    const requirement = this.getTierRequirement();
+    const requirement = this.getTierRequirement(completedTier);
     if (completedCount % requirement === 0) {
       const tierIndex = TIER_DATA.findIndex((t) => t.type === completedTier);
       if (tierIndex !== -1 && tierIndex < TIER_DATA.length - 1) {
