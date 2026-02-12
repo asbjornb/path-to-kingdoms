@@ -946,13 +946,13 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     effect: { type: 'prestige_tier_requirement_reduction', value: 1 },
     purchased: false,
   },
-  // Kingdom currency → Final tier requirement reduction (3→2, very expensive)
+  // Duchy currency → Final tier requirement reduction (3→2)
   {
     id: 'prestige_swift_expansion_2',
     name: 'Swift Expansion II',
     description: 'Reduces completions needed to advance tiers by 1 (minimum 2)',
-    cost: 3,
-    tier: TierType.Kingdom,
+    cost: 4,
+    tier: TierType.Duchy,
     effect: { type: 'prestige_tier_requirement_reduction', value: 1 },
     purchased: false,
     prerequisite: 'prestige_swift_expansion_1',
