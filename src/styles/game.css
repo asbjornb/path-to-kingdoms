@@ -520,6 +520,42 @@
   background: #f59e0b !important;
 }
 
+.prestige-search-input {
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 0.85rem;
+  outline: none;
+  box-sizing: border-box;
+  margin-bottom: 0.5rem;
+}
+
+.prestige-search-input:focus {
+  border-color: #f59e0b;
+}
+
+.prestige-search-input::placeholder {
+  color: #666;
+}
+
+.prestige-upgrade-tags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.prestige-upgrade-tag {
+  font-size: 0.7rem;
+  color: #d97706;
+  background: rgba(245, 158, 11, 0.1);
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+  border: 1px solid rgba(245, 158, 11, 0.15);
+}
+
 /* ===== Prestige Shop Overlay ===== */
 
 .prestige-shop-overlay {

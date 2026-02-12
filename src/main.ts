@@ -106,6 +106,36 @@ function initGame(): void {
     }
   };
 
+  window.filterPrestigeUpgrades = (query: string): void => {
+    ui.setPrestigeSearch(query);
+    const container = document.querySelector('.prestige-upgrades-section');
+    if (container === null) return;
+    const items = container.querySelectorAll('.prestige-item[data-search-text]');
+    const lowerQuery = query.toLowerCase().trim();
+    const terms = lowerQuery.split(/\s+/).filter((t) => t.length > 0);
+    items.forEach((item) => {
+      const el = item as HTMLElement;
+      const searchText = el.dataset.searchText ?? '';
+      const matches = terms.length === 0 || terms.every((term) => searchText.includes(term));
+      el.style.display = matches ? '' : 'none';
+    });
+  };
+
+  window.filterPrestigeShop = (query: string): void => {
+    ui.setPrestigeShopSearch(query);
+    const container = document.querySelector('.prestige-shop-upgrades');
+    if (container === null) return;
+    const items = container.querySelectorAll('[data-search-text]');
+    const lowerQuery = query.toLowerCase().trim();
+    const terms = lowerQuery.split(/\s+/).filter((t) => t.length > 0);
+    items.forEach((item) => {
+      const el = item as HTMLElement;
+      const searchText = el.dataset.searchText ?? '';
+      const matches = terms.length === 0 || terms.every((term) => searchText.includes(term));
+      el.style.display = matches ? '' : 'none';
+    });
+  };
+
   window.toggleAchievements = (): void => {
     ui.toggleAchievements();
     ui.render();
