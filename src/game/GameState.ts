@@ -55,6 +55,11 @@ const MASTERY_INCOME_PER_COMPLETION = 0.005; // +0.5% income per completion
 const MASTERY_STARTING_CURRENCY_FACTOR = 0.1; // completions * baseCurrency * this
 const MASTERY_AUTOBUILD_HALFPOINT = 500; // completions at which auto-build speed reaches 50%
 
+// Auto-builders will only spend up to this fraction of treasury per purchase.
+// Prevents expensive buildings from draining the entire treasury in one shot.
+// The first building of each type bypasses this cap so settlements can bootstrap.
+const AUTO_BUILD_TREASURY_PCT = 0.1;
+
 export class GameStateManager {
   private state: GameState;
   private lastUpdate: number = Date.now();
@@ -1295,6 +1300,12 @@ export class GameStateManager {
         for (const settlement of tierSettlements) {
           const cost = this.getBuildingCost(settlement.id, buildingId);
           if (cost !== null && settlement.currency >= cost) {
+            // Treasury cap: skip if cost exceeds X% of treasury, unless it's the
+            // first building of this type (so settlements can always bootstrap).
+            const currentCount = settlement.buildings.get(buildingId) ?? 0;
+            if (currentCount > 0 && cost > settlement.currency * AUTO_BUILD_TREASURY_PCT) {
+              continue;
+            }
             // Try to buy the building
             if (this.buyBuilding(settlement.id, buildingId)) {
               // Update the timer for this research

@@ -353,14 +353,16 @@ export class UI {
           .map((research) => {
             const canAfford = tierResearchPoints >= research.cost;
 
+            const isAutoBuilding = research.effect.type === 'auto_building';
             return `
             <div class="research-item ${research.purchased ? 'purchased' : ''}">
               <h4>${research.name}</h4>
               <p>${research.description}</p>
+              ${isAutoBuilding ? '<p class="research-note">Will only spend up to 10% of treasury per purchase. First building of each type is always purchased when affordable.</p>' : ''}
               ${
                 !research.purchased
                   ? `
-                <button 
+                <button
                   class="research-btn ${!canAfford ? 'disabled' : ''}"
                   onclick="window.purchaseResearch('${research.id}')"
                   ${!canAfford ? 'disabled' : ''}
