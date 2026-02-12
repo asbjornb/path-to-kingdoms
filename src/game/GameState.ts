@@ -1125,7 +1125,7 @@ export class GameStateManager {
   /**
    * After purchasing a research item, check if it's the terminal item in its chain.
    * If so, generate a more expensive next level (research is uncapped, just gets pricier).
-   * parallel_slots is excluded (hamlet slots capped at 6).
+   * parallel_slots is excluded (research slots are capped; prestige can add more).
    */
   private maybeGenerateNextResearchLevel(purchased: ResearchUpgrade): void {
     // parallel_slots is capped, don't generate more
