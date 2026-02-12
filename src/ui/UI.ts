@@ -213,9 +213,11 @@ export class UI {
       } else if (isUnlocked) {
         const tierIndex = TIER_DATA.findIndex((t) => t.type === this.selectedTier);
         const prevTierName = tierIndex > 0 ? TIER_DATA[tierIndex - 1].name : 'previous tier';
-        return `<div class="empty-message">Complete 6 ${prevTierName}s to earn a new settlement here.</div>`;
+        const req = this.game.getTierRequirement();
+        return `<div class="empty-message">Complete ${req} ${prevTierName}s to earn a new settlement here.</div>`;
       } else {
-        return '<div class="empty-message">Complete 6 of the previous tier to unlock this tier.</div>';
+        const req = this.game.getTierRequirement();
+        return `<div class="empty-message">Complete ${req} of the previous tier to unlock this tier.</div>`;
       }
     }
 
@@ -778,17 +780,18 @@ export class UI {
   private renderTierProgress(): string {
     const state = this.game.getState();
     const completedCount = state.completedSettlements.get(this.selectedTier) ?? 0;
-    const progressToNext = completedCount % 6;
-    const nextTierUnlocks = 6 - progressToNext;
+    const requirement = this.game.getTierRequirement();
+    const progressToNext = completedCount % requirement;
+    const nextTierUnlocks = requirement - progressToNext;
 
     return `
       <div class="progress-info">
         <span class="completed-count">${completedCount} completed</span>
-        <span class="next-unlock">${nextTierUnlocks === 6 ? '' : `${nextTierUnlocks} more for next tier`}</span>
+        <span class="next-unlock">${nextTierUnlocks === requirement ? '' : `${nextTierUnlocks} more for next tier`}</span>
       </div>
       <div class="tier-progress-bar">
-        <div class="tier-progress-fill" style="width: ${(progressToNext / 6) * 100}%"></div>
-        <span class="tier-progress-text">${progressToNext} / 6</span>
+        <div class="tier-progress-fill" style="width: ${(progressToNext / requirement) * 100}%"></div>
+        <span class="tier-progress-text">${progressToNext} / ${requirement}</span>
       </div>
     `;
   }
