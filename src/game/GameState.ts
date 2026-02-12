@@ -937,13 +937,8 @@ export class GameStateManager {
       return upgrades.reduce((mult, upgrade) => mult * (upgrade.effect.value ?? 1), 1);
     }
     if (type === 'parallel_slots') {
-      if (tier !== undefined) {
-        // Return the highest parallel slots research for this tier
-        return upgrades.reduce((max, upgrade) => Math.max(max, upgrade.effect.value ?? 0), 1);
-      } else {
-        // Return the highest across all tiers for general parallel slots
-        return upgrades.reduce((max, upgrade) => Math.max(max, upgrade.effect.value ?? 0), 1);
-      }
+      // Additive: each parallel_slots research adds extra slots
+      return upgrades.reduce((sum, upgrade) => sum + (upgrade.effect.value ?? 0), 0);
     }
     return upgrades.reduce((sum, upgrade) => sum + (upgrade.effect.value ?? 0), 0);
   }
@@ -1051,11 +1046,11 @@ export class GameStateManager {
     // Higher tiers are earned by completing N of the tier below, not auto-spawned.
     if (!this.state.unlockedTiers.has(TierType.Hamlet)) return;
 
-    // Parallel slots come from research across multiple tiers (Hamlet, Village, Town)
-    // Prestige upgrades add extra slots on top of research
+    // Base slot of 1 (always have at least 1 hamlet)
+    // Research and prestige each add extra slots on top
     const researchSlots = this.getResearchEffect('parallel_slots');
     const prestigeSlots = this.getPrestigeEffect('prestige_parallel_slots');
-    const maxSlots = researchSlots + prestigeSlots;
+    const maxSlots = 1 + researchSlots + prestigeSlots;
     const currentCount = this.state.settlements.filter((s) => s.tier === TierType.Hamlet).length;
     const slotsNeeded = maxSlots - currentCount;
 
