@@ -1121,6 +1121,8 @@ export class GameStateManager {
   private maybeGenerateNextResearchLevel(purchased: ResearchUpgrade): void {
     // parallel_slots is capped, don't generate more
     if (purchased.effect.type === 'parallel_slots') return;
+    // tier_requirement_reduction is a one-time purchase per tier
+    if (purchased.effect.type === 'tier_requirement_reduction') return;
 
     // Check if there's already an unpurchased successor in the same chain
     const hasSameChainSuccessor = this.state.research.some(
@@ -1551,8 +1553,9 @@ export class GameStateManager {
           : { ...def, purchased: false };
       });
       // Also include dynamically generated repeatable research not in canonical data
+      // Skip stale tier_requirement_reduction levels (was incorrectly repeatable before)
       for (const saved of savedResearch) {
-        if (!canonicalIds.has(saved.id)) {
+        if (!canonicalIds.has(saved.id) && saved.effect.type !== 'tier_requirement_reduction') {
           research.push(saved);
         }
       }
