@@ -9,6 +9,7 @@ const RESEARCH_COSTS = {
   startingIncome: [5, 15, 50],
   foundationPlanning: 50,
   autoBuilding: [15, 30, 45, 75, 100, 200],
+  expansionEfficiency: 500,
 };
 
 // ===== Auto-building generator =====
@@ -58,6 +59,27 @@ function generateFoundationPlanning(
       tier,
       effect: {
         type: 'flat_cost_count',
+        value: 1,
+      },
+      purchased: false,
+    }),
+  );
+}
+
+// ===== Expansion efficiency generator =====
+
+function generateExpansionEfficiency(
+  tiers: { tier: TierType; prefix: string }[],
+): ResearchUpgrade[] {
+  return tiers.map(
+    ({ tier, prefix }): ResearchUpgrade => ({
+      id: `${prefix}_expansion_efficiency_1`,
+      name: 'Expansion Efficiency',
+      description: `Reduces ${prefix} completions needed to advance tiers by 1 (6→5)`,
+      cost: RESEARCH_COSTS.expansionEfficiency,
+      tier,
+      effect: {
+        type: 'tier_requirement_reduction',
         value: 1,
       },
       purchased: false,
@@ -978,20 +1000,17 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
   // City Automation
   ...generateAutoBuilding(TierType.City, 'city', CITY_AUTO_BUILDINGS),
 
-  // ===== TIER REQUIREMENT REDUCTION =====
+  // ===== TIER REQUIREMENT REDUCTION (per-tier, tier-scoped) =====
 
-  {
-    id: 'hamlet_expansion_efficiency_1',
-    name: 'Expansion Efficiency',
-    description: 'Reduces completions needed to advance tiers by 1 (6→5)',
-    cost: 500,
-    tier: TierType.Hamlet,
-    effect: {
-      type: 'tier_requirement_reduction',
-      value: 1,
-    },
-    purchased: false,
-  },
+  ...generateExpansionEfficiency([
+    { tier: TierType.Hamlet, prefix: 'hamlet' },
+    { tier: TierType.Village, prefix: 'village' },
+    { tier: TierType.Town, prefix: 'town' },
+    { tier: TierType.City, prefix: 'city' },
+    { tier: TierType.County, prefix: 'county' },
+    { tier: TierType.Duchy, prefix: 'duchy' },
+    { tier: TierType.Realm, prefix: 'realm' },
+  ]),
 
   // ===== FOUNDATION PLANNING (per-tier, tier-scoped) =====
 

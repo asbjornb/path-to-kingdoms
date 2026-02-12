@@ -1000,11 +1000,11 @@ export class GameStateManager {
   }
 
   /**
-   * Get the current tier advancement requirement (completions needed to spawn next tier).
-   * Base is 6, reduced by research, prestige, and achievements. Minimum 2.
+   * Get the tier advancement requirement (completions needed to spawn next tier).
+   * Base is 6, reduced by research (tier-scoped), prestige, and achievements. Minimum 2.
    */
-  public getTierRequirement(): number {
-    const researchReduction = this.getResearchEffect('tier_requirement_reduction');
+  public getTierRequirement(tier?: TierType): number {
+    const researchReduction = this.getResearchEffect('tier_requirement_reduction', tier);
     const prestigeReduction = this.getPrestigeEffect('prestige_tier_requirement_reduction');
     const achievementReduction = this.getAchievementEffect('tier_requirement_reduction');
     const totalReduction = researchReduction + prestigeReduction + achievementReduction;
@@ -1014,7 +1014,7 @@ export class GameStateManager {
   private checkNextTierSpawn(completedTier: TierType): void {
     const completedCount = this.state.completedSettlements.get(completedTier) ?? 0;
 
-    const requirement = this.getTierRequirement();
+    const requirement = this.getTierRequirement(completedTier);
     if (completedCount % requirement === 0) {
       const tierIndex = TIER_DATA.findIndex((t) => t.type === completedTier);
       if (tierIndex !== -1 && tierIndex < TIER_DATA.length - 1) {
@@ -1121,6 +1121,8 @@ export class GameStateManager {
   private maybeGenerateNextResearchLevel(purchased: ResearchUpgrade): void {
     // parallel_slots is capped, don't generate more
     if (purchased.effect.type === 'parallel_slots') return;
+    // tier_requirement_reduction is a one-time purchase per tier
+    if (purchased.effect.type === 'tier_requirement_reduction') return;
 
     // Check if there's already an unpurchased successor in the same chain
     const hasSameChainSuccessor = this.state.research.some(
@@ -1556,8 +1558,9 @@ export class GameStateManager {
           : { ...def, purchased: false };
       });
       // Also include dynamically generated repeatable research not in canonical data
+      // Skip stale tier_requirement_reduction levels (was incorrectly repeatable before)
       for (const saved of savedResearch) {
-        if (!canonicalIds.has(saved.id)) {
+        if (!canonicalIds.has(saved.id) && saved.effect.type !== 'tier_requirement_reduction') {
           research.push(saved);
         }
       }
