@@ -295,7 +295,7 @@ export class UI {
                     onclick="window.buyBuilding('${settlement.id}', '${building.id}')"
                     ${!canAfford ? 'disabled' : ''}
                   >
-                    ${label} (${formatNumber(cost)})
+                    ${label} (<span class="buy-cost">${formatNumber(cost)}</span>)
                   </button>
                 </div>
                 <div class="building-details">
@@ -953,7 +953,7 @@ export class UI {
 
         // Update cached cost attribute and button text
         button.setAttribute('data-cost', cost.toString());
-        button.innerHTML = `${label} (${formatNumber(cost)})`;
+        button.innerHTML = `${label} (<span class="buy-cost">${formatNumber(cost)}</span>)`;
 
         if (canAfford && button.disabled === true) {
           button.disabled = false;
