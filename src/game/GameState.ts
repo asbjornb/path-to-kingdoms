@@ -683,7 +683,7 @@ export class GameStateManager {
   /**
    * Get aggregate achievement bonus for a given type.
    */
-  public getAchievementEffect(type: Achievement['bonus']['type']): number {
+  public getAchievementEffect(type: Achievement['bonus']['type'], tier?: TierType): number {
     const achievements = this.state.achievements.filter((a) => a.unlocked && a.bonus.type === type);
     switch (type) {
       case 'income_multiplier':
@@ -695,7 +695,11 @@ export class GameStateManager {
       case 'starting_currency':
         return achievements.reduce((sum, a) => sum + a.bonus.value, 0);
       case 'tier_requirement_reduction':
-        return achievements.reduce((sum, a) => sum + a.bonus.value, 0);
+        // Per-tier achievements (bonus.tier set) only apply to their specific tier;
+        // global achievements (no bonus.tier) always apply
+        return achievements
+          .filter((a) => a.bonus.tier === undefined || a.bonus.tier === tier)
+          .reduce((sum, a) => sum + a.bonus.value, 0);
       case 'building_synergy':
         // Handled per-building in calculateSettlementIncome, not aggregated here
         return 0;
@@ -1006,7 +1010,7 @@ export class GameStateManager {
   public getTierRequirement(tier?: TierType): number {
     const researchReduction = this.getResearchEffect('tier_requirement_reduction', tier);
     const prestigeReduction = this.getPrestigeEffect('prestige_tier_requirement_reduction');
-    const achievementReduction = this.getAchievementEffect('tier_requirement_reduction');
+    const achievementReduction = this.getAchievementEffect('tier_requirement_reduction', tier);
     const totalReduction = researchReduction + prestigeReduction + achievementReduction;
     return Math.max(2, 6 - totalReduction);
   }
@@ -1220,9 +1224,9 @@ export class GameStateManager {
       case 'cost_scaling_reduction':
         return `Reduces building cost scaling by improving multipliers`;
       case 'tier_requirement_reduction': {
-        const current = this.getTierRequirement();
+        const current = this.getTierRequirement(base.tier);
         const next = Math.max(2, current - (effect.value ?? 1));
-        return `Reduces completions needed to advance tiers by ${effect.value ?? 1} (${current}→${next})`;
+        return `Reduces ${base.tier} completions needed to advance tiers by ${effect.value ?? 1} (${current}→${next})`;
       }
       default:
         return base.description;

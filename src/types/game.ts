@@ -162,6 +162,7 @@ export interface Achievement {
       | 'building_synergy';
     value: number;
     description: string;
+    tier?: TierType; // For tier_requirement_reduction - scopes the reduction to a specific tier
     sourceBuildingId?: string; // For building_synergy - source building providing the bonus
     targetBuildingId?: string; // For building_synergy - target building receiving the bonus
   };

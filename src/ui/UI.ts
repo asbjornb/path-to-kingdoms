@@ -212,11 +212,14 @@ export class UI {
         return '<div class="empty-message">Settlements auto-spawn when you unlock parallel slots!</div>';
       } else if (isUnlocked) {
         const tierIndex = TIER_DATA.findIndex((t) => t.type === this.selectedTier);
+        const prevTier = tierIndex > 0 ? TIER_DATA[tierIndex - 1].type : this.selectedTier;
         const prevTierName = tierIndex > 0 ? TIER_DATA[tierIndex - 1].name : 'previous tier';
-        const req = this.game.getTierRequirement();
+        const req = this.game.getTierRequirement(prevTier);
         return `<div class="empty-message">Complete ${req} ${prevTierName}s to earn a new settlement here.</div>`;
       } else {
-        const req = this.game.getTierRequirement();
+        const tierIndex = TIER_DATA.findIndex((t) => t.type === this.selectedTier);
+        const prevTier = tierIndex > 0 ? TIER_DATA[tierIndex - 1].type : this.selectedTier;
+        const req = this.game.getTierRequirement(prevTier);
         return `<div class="empty-message">Complete ${req} of the previous tier to unlock this tier.</div>`;
       }
     }
@@ -780,7 +783,7 @@ export class UI {
   private renderTierProgress(): string {
     const state = this.game.getState();
     const completedCount = state.completedSettlements.get(this.selectedTier) ?? 0;
-    const requirement = this.game.getTierRequirement();
+    const requirement = this.game.getTierRequirement(this.selectedTier);
     const progressToNext = completedCount % requirement;
     const nextTierUnlocks = requirement - progressToNext;
 
