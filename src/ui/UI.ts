@@ -467,8 +467,15 @@ export class UI {
       upgrades = upgrades.filter((u) => !u.purchased);
     }
 
-    // Sort by cost ascending so cheapest upgrades appear first
-    upgrades.sort((a, b) => a.cost - b.cost);
+    // Sort affordable upgrades first, then by cost ascending within each group
+    upgrades.sort((a, b) => {
+      const aCurrency = state.prestigeCurrency.get(a.tier) ?? 0;
+      const bCurrency = state.prestigeCurrency.get(b.tier) ?? 0;
+      const aAffordable = a.purchased || aCurrency >= a.cost;
+      const bAffordable = b.purchased || bCurrency >= b.cost;
+      if (aAffordable !== bAffordable) return aAffordable ? -1 : 1;
+      return a.cost - b.cost;
+    });
 
     if (upgrades.length === 0 && !showCompleted) return '';
 
@@ -545,22 +552,6 @@ export class UI {
       }
     }
 
-    // Show all prestige upgrades (filtering by prerequisites as before, but also
-    // considering selected upgrades as "virtually purchased" for prerequisite checks)
-    const upgrades = state.prestigeUpgrades
-      .filter((upgrade) => {
-        if (upgrade.purchased) return false;
-        if (upgrade.prerequisite === undefined || upgrade.prerequisite === '') return true;
-        const prereq = state.prestigeUpgrades.find((u) => u.id === upgrade.prerequisite);
-        return (
-          prereq !== undefined && (prereq.purchased || this.selectedPrestigeUpgrades.has(prereq.id))
-        );
-      })
-      .sort((a, b) => a.cost - b.cost);
-
-    // Also show already-purchased upgrades for context
-    const purchasedUpgrades = state.prestigeUpgrades.filter((u) => u.purchased);
-
     // Calculate remaining budget per tier
     const budgetByTier = new Map<TierType, number>();
     for (const tier of TIER_DATA) {
@@ -577,6 +568,29 @@ export class UI {
       budgetByTier.set(tier.type, current + earned - selectedCost);
     }
 
+    // Show all prestige upgrades (filtering by prerequisites as before, but also
+    // considering selected upgrades as "virtually purchased" for prerequisite checks)
+    const upgrades = state.prestigeUpgrades
+      .filter((upgrade) => {
+        if (upgrade.purchased) return false;
+        if (upgrade.prerequisite === undefined || upgrade.prerequisite === '') return true;
+        const prereq = state.prestigeUpgrades.find((u) => u.id === upgrade.prerequisite);
+        return (
+          prereq !== undefined && (prereq.purchased || this.selectedPrestigeUpgrades.has(prereq.id))
+        );
+      })
+      .sort((a, b) => {
+        const aBudget = budgetByTier.get(a.tier) ?? 0;
+        const bBudget = budgetByTier.get(b.tier) ?? 0;
+        const aAffordable = aBudget >= a.cost;
+        const bAffordable = bBudget >= b.cost;
+        if (aAffordable !== bAffordable) return aAffordable ? -1 : 1;
+        return a.cost - b.cost;
+      });
+
+    // Also show already-purchased upgrades for context
+    const purchasedUpgrades = state.prestigeUpgrades.filter((u) => u.purchased);
+
     return `
       <div class="prestige-shop-overlay" id="prestige-shop-overlay">
         <div class="prestige-shop-modal">
@@ -586,8 +600,30 @@ export class UI {
           </div>
 
           <div class="prestige-shop-description">
-            <p>Prestige will reset your settlements, research, and mastery progress.</p>
             <p>Select upgrades below to purchase when you prestige, or prestige without buying anything.</p>
+            <details class="prestige-info-details">
+              <summary>What happens when you prestige?</summary>
+              <div class="prestige-info-lists">
+                <div class="prestige-info-lost">
+                  <strong>Reset:</strong>
+                  <ul>
+                    <li>All settlements</li>
+                    <li>All research purchases</li>
+                    <li>Research points</li>
+                    <li>Mastery progress</li>
+                    <li>Unlocked tiers (back to Hamlet)</li>
+                  </ul>
+                </div>
+                <div class="prestige-info-kept">
+                  <strong>Kept:</strong>
+                  <ul>
+                    <li>Crowns (prestige currency)</li>
+                    <li>Purchased prestige upgrades</li>
+                    <li>Achievements</li>
+                  </ul>
+                </div>
+              </div>
+            </details>
           </div>
 
           ${
