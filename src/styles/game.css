@@ -288,6 +288,12 @@
   text-align: right;
 }
 
+.buy-cost {
+  display: inline-block;
+  min-width: 5ch;
+  text-align: right;
+}
+
 .buy-btn:hover:not(.disabled) {
   background: #2563eb;
 }
