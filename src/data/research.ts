@@ -1,7 +1,357 @@
 import { ResearchUpgrade, TierType } from '../types/game';
 
+// Shared research costs — all tiers use the same costs as Hamlet (the baseline).
+// Later tiers are already harder by virtue of being harder to reach, so
+// research costs should not scale up.
+const RESEARCH_COSTS = {
+  costReduction: [25, 75, 225],
+  scalingReduction: [50, 150, 450],
+  startingIncome: [5, 15, 50],
+  foundationPlanning: 50,
+  autoBuilding: [15, 30, 45, 75, 100, 200],
+};
+
+// ===== Auto-building generator =====
+
+interface AutoBuildingSpec {
+  buildingId: string;
+  name: string;
+  description: string;
+  interval: number;
+  prerequisite?: string;
+}
+
+function generateAutoBuilding(
+  tier: TierType,
+  prefix: string,
+  buildings: AutoBuildingSpec[],
+): ResearchUpgrade[] {
+  return buildings.map(
+    (b, i): ResearchUpgrade => ({
+      id: `${prefix}_auto_${b.buildingId.replace(`${prefix}_`, '')}_1`,
+      name: b.name,
+      description: b.description,
+      cost: RESEARCH_COSTS.autoBuilding[i],
+      tier,
+      ...(b.prerequisite != null ? { prerequisite: b.prerequisite } : {}),
+      effect: {
+        type: 'auto_building',
+        buildingId: b.buildingId,
+        interval: b.interval,
+      },
+      purchased: false,
+    }),
+  );
+}
+
+// ===== Foundation planning generator =====
+
+function generateFoundationPlanning(
+  tiers: { tier: TierType; prefix: string }[],
+): ResearchUpgrade[] {
+  return tiers.map(
+    ({ tier, prefix }): ResearchUpgrade => ({
+      id: `${prefix}_foundation_planning_1`,
+      name: 'Foundation Planning',
+      description: '1 of each building type has flat cost (no scaling)',
+      cost: RESEARCH_COSTS.foundationPlanning,
+      tier,
+      effect: {
+        type: 'flat_cost_count',
+        value: 1,
+      },
+      purchased: false,
+    }),
+  );
+}
+
+// ===== Per-tier auto-building configs =====
+
+const VILLAGE_AUTO_BUILDINGS: AutoBuildingSpec[] = [
+  {
+    buildingId: 'village_cottage',
+    name: 'Automated Cottage Construction',
+    description: 'Automatically buys 1 cottage every 45 seconds',
+    interval: 45000,
+  },
+  {
+    buildingId: 'village_farm',
+    name: 'Automated Farm Development',
+    description: 'Automatically buys 1 farm every 90 seconds',
+    interval: 90000,
+    prerequisite: 'village_auto_cottage_1',
+  },
+  {
+    buildingId: 'village_mill',
+    name: 'Automated Mill Operation',
+    description: 'Automatically buys 1 mill every 60 seconds',
+    interval: 60000,
+    prerequisite: 'village_auto_farm_1',
+  },
+  {
+    buildingId: 'village_chapel',
+    name: 'Automated Chapel Construction',
+    description: 'Automatically buys 1 chapel every 90 seconds',
+    interval: 90000,
+    prerequisite: 'village_auto_cottage_1',
+  },
+  {
+    buildingId: 'village_well',
+    name: 'Automated Well Digging',
+    description: 'Automatically buys 1 village well every 120 seconds',
+    interval: 120000,
+    prerequisite: 'village_auto_mill_1',
+  },
+  {
+    buildingId: 'village_herbalist',
+    name: 'Automated Herbalist Setup',
+    description: 'Automatically buys 1 herbalist every 150 seconds',
+    interval: 150000,
+    prerequisite: 'village_auto_chapel_1',
+  },
+];
+
+const TOWN_AUTO_BUILDINGS: AutoBuildingSpec[] = [
+  {
+    buildingId: 'town_house',
+    name: 'Automated House Construction',
+    description: 'Automatically buys 1 town house every 45 seconds',
+    interval: 45000,
+  },
+  {
+    buildingId: 'town_market',
+    name: 'Automated Market Construction',
+    description: 'Automatically buys 1 market every 60 seconds',
+    interval: 60000,
+    prerequisite: 'town_auto_house_1',
+  },
+  {
+    buildingId: 'town_forge',
+    name: 'Automated Forge Construction',
+    description: 'Automatically buys 1 forge every 90 seconds',
+    interval: 90000,
+    prerequisite: 'town_auto_house_1',
+  },
+  {
+    buildingId: 'town_guild',
+    name: 'Automated Guild Construction',
+    description: 'Automatically buys 1 guild hall every 120 seconds',
+    interval: 120000,
+    prerequisite: 'town_auto_market_1',
+  },
+  {
+    buildingId: 'town_watchtower',
+    name: 'Automated Watchtower Construction',
+    description: 'Automatically buys 1 watchtower every 150 seconds',
+    interval: 150000,
+    prerequisite: 'town_auto_forge_1',
+  },
+  {
+    buildingId: 'town_granary',
+    name: 'Automated Granary Construction',
+    description: 'Automatically buys 1 granary every 180 seconds',
+    interval: 180000,
+    prerequisite: 'town_auto_guild_1',
+  },
+];
+
+const CITY_AUTO_BUILDINGS: AutoBuildingSpec[] = [
+  {
+    buildingId: 'city_apartment',
+    name: 'Automated Apartment Construction',
+    description: 'Automatically buys 1 apartment every 45 seconds',
+    interval: 45000,
+  },
+  {
+    buildingId: 'city_bazaar',
+    name: 'Automated Bazaar Construction',
+    description: 'Automatically buys 1 grand bazaar every 60 seconds',
+    interval: 60000,
+    prerequisite: 'city_auto_apartment_1',
+  },
+  {
+    buildingId: 'city_university',
+    name: 'Automated University Construction',
+    description: 'Automatically buys 1 university every 90 seconds',
+    interval: 90000,
+    prerequisite: 'city_auto_apartment_1',
+  },
+  {
+    buildingId: 'city_cathedral',
+    name: 'Automated Cathedral Construction',
+    description: 'Automatically buys 1 cathedral every 120 seconds',
+    interval: 120000,
+    prerequisite: 'city_auto_bazaar_1',
+  },
+  {
+    buildingId: 'city_observatory',
+    name: 'Automated Observatory Construction',
+    description: 'Automatically buys 1 observatory every 150 seconds',
+    interval: 150000,
+    prerequisite: 'city_auto_university_1',
+  },
+  {
+    buildingId: 'city_trade_guild',
+    name: 'Automated Trade Guild Construction',
+    description: 'Automatically buys 1 trade guild every 180 seconds',
+    interval: 180000,
+    prerequisite: 'city_auto_cathedral_1',
+  },
+];
+
+const COUNTY_AUTO_BUILDINGS: AutoBuildingSpec[] = [
+  {
+    buildingId: 'county_manor',
+    name: 'Automated Manor Construction',
+    description: 'Automatically buys 1 manor every 45 seconds',
+    interval: 45000,
+  },
+  {
+    buildingId: 'county_plantation',
+    name: 'Automated Plantation Development',
+    description: 'Automatically buys 1 plantation every 60 seconds',
+    interval: 60000,
+    prerequisite: 'county_auto_manor_1',
+  },
+  {
+    buildingId: 'county_fortress',
+    name: 'Automated Fortress Construction',
+    description: 'Automatically buys 1 fortress every 90 seconds',
+    interval: 90000,
+    prerequisite: 'county_auto_manor_1',
+  },
+  {
+    buildingId: 'county_courthouse',
+    name: 'Automated Courthouse Construction',
+    description: 'Automatically buys 1 courthouse every 120 seconds',
+    interval: 120000,
+    prerequisite: 'county_auto_plantation_1',
+  },
+  {
+    buildingId: 'county_tax_office',
+    name: 'Automated Tax Office Construction',
+    description: 'Automatically buys 1 tax office every 150 seconds',
+    interval: 150000,
+    prerequisite: 'county_auto_fortress_1',
+  },
+];
+
+const DUCHY_AUTO_BUILDINGS: AutoBuildingSpec[] = [
+  {
+    buildingId: 'duchy_palace',
+    name: 'Automated Palace Construction',
+    description: 'Automatically buys 1 palace every 45 seconds',
+    interval: 45000,
+  },
+  {
+    buildingId: 'duchy_port',
+    name: 'Automated Port Construction',
+    description: 'Automatically buys 1 grand port every 60 seconds',
+    interval: 60000,
+    prerequisite: 'duchy_auto_palace_1',
+  },
+  {
+    buildingId: 'duchy_academy',
+    name: 'Automated Academy Construction',
+    description: 'Automatically buys 1 royal academy every 90 seconds',
+    interval: 90000,
+    prerequisite: 'duchy_auto_palace_1',
+  },
+  {
+    buildingId: 'duchy_mint',
+    name: 'Automated Mint Construction',
+    description: 'Automatically buys 1 mint every 120 seconds',
+    interval: 120000,
+    prerequisite: 'duchy_auto_port_1',
+  },
+  {
+    buildingId: 'duchy_fleet',
+    name: 'Automated Fleet Construction',
+    description: 'Automatically buys 1 merchant fleet every 150 seconds',
+    interval: 150000,
+    prerequisite: 'duchy_auto_academy_1',
+  },
+];
+
+const REALM_AUTO_BUILDINGS: AutoBuildingSpec[] = [
+  {
+    buildingId: 'realm_citadel',
+    name: 'Automated Citadel Construction',
+    description: 'Automatically buys 1 citadel every 45 seconds',
+    interval: 45000,
+  },
+  {
+    buildingId: 'realm_metropolis',
+    name: 'Automated Metropolis Construction',
+    description: 'Automatically buys 1 metropolis every 60 seconds',
+    interval: 60000,
+    prerequisite: 'realm_auto_citadel_1',
+  },
+  {
+    buildingId: 'realm_wonder',
+    name: 'Automated Wonder Construction',
+    description: 'Automatically buys 1 wonder every 90 seconds',
+    interval: 90000,
+    prerequisite: 'realm_auto_citadel_1',
+  },
+  {
+    buildingId: 'realm_oracle',
+    name: 'Automated Oracle Construction',
+    description: 'Automatically buys 1 oracle every 120 seconds',
+    interval: 120000,
+    prerequisite: 'realm_auto_metropolis_1',
+  },
+  {
+    buildingId: 'realm_exchange',
+    name: 'Automated Exchange Construction',
+    description: 'Automatically buys 1 grand exchange every 150 seconds',
+    interval: 150000,
+    prerequisite: 'realm_auto_wonder_1',
+  },
+];
+
+const KINGDOM_AUTO_BUILDINGS: AutoBuildingSpec[] = [
+  {
+    buildingId: 'kingdom_capital',
+    name: 'Automated Capital Construction',
+    description: 'Automatically buys 1 capital every 45 seconds',
+    interval: 45000,
+  },
+  {
+    buildingId: 'kingdom_empire',
+    name: 'Automated Empire District Construction',
+    description: 'Automatically buys 1 empire district every 60 seconds',
+    interval: 60000,
+    prerequisite: 'kingdom_auto_capital_1',
+  },
+  {
+    buildingId: 'kingdom_monument',
+    name: 'Automated Monument Construction',
+    description: 'Automatically buys 1 eternal monument every 90 seconds',
+    interval: 90000,
+    prerequisite: 'kingdom_auto_capital_1',
+  },
+  {
+    buildingId: 'kingdom_treasury',
+    name: 'Automated Treasury Construction',
+    description: 'Automatically buys 1 royal treasury every 120 seconds',
+    interval: 120000,
+    prerequisite: 'kingdom_auto_empire_1',
+  },
+  {
+    buildingId: 'kingdom_records',
+    name: 'Automated Records Construction',
+    description: 'Automatically buys 1 hall of records every 150 seconds',
+    interval: 150000,
+    prerequisite: 'kingdom_auto_monument_1',
+  },
+];
+
+// ===== RESEARCH DATA =====
+
 export const RESEARCH_DATA: ResearchUpgrade[] = [
-  // Hamlet Research
+  // ===== HAMLET RESEARCH =====
+
   {
     id: 'hamlet_parallel_2',
     name: 'Dual Hamlet Management',
@@ -34,7 +384,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'hamlet_starting_income_1',
     name: 'Better Starting Resources',
     description: '+5 starting income for new hamlets',
-    cost: 5,
+    cost: RESEARCH_COSTS.startingIncome[0],
     tier: TierType.Hamlet,
     effect: {
       type: 'starting_income',
@@ -46,7 +396,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'hamlet_starting_income_2',
     name: 'Improved Starting Resources',
     description: '+10 starting income for new hamlets',
-    cost: 15,
+    cost: RESEARCH_COSTS.startingIncome[1],
     tier: TierType.Hamlet,
     prerequisite: 'hamlet_starting_income_1',
     effect: {
@@ -59,7 +409,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'hamlet_starting_income_3',
     name: 'Advanced Starting Resources',
     description: '+20 starting income for new hamlets',
-    cost: 50,
+    cost: RESEARCH_COSTS.startingIncome[2],
     tier: TierType.Hamlet,
     prerequisite: 'hamlet_starting_income_2',
     effect: {
@@ -79,7 +429,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     effect: {
       type: 'auto_building',
       buildingId: 'hamlet_hut',
-      interval: 30000, // 30 seconds in milliseconds
+      interval: 30000,
     },
     purchased: false,
   },
@@ -93,7 +443,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     effect: {
       type: 'auto_building',
       buildingId: 'hamlet_hut',
-      interval: 20000, // 20 seconds
+      interval: 20000,
     },
     purchased: false,
   },
@@ -107,7 +457,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     effect: {
       type: 'auto_building',
       buildingId: 'hamlet_hut',
-      interval: 10000, // 10 seconds
+      interval: 10000,
     },
     purchased: false,
   },
@@ -121,7 +471,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     effect: {
       type: 'auto_building',
       buildingId: 'hamlet_garden',
-      interval: 60000, // 60 seconds
+      interval: 60000,
     },
     purchased: false,
   },
@@ -135,7 +485,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     effect: {
       type: 'auto_building',
       buildingId: 'hamlet_garden',
-      interval: 40000, // 40 seconds
+      interval: 40000,
     },
     purchased: false,
   },
@@ -149,7 +499,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     effect: {
       type: 'auto_building',
       buildingId: 'hamlet_garden',
-      interval: 20000, // 20 seconds
+      interval: 20000,
     },
     purchased: false,
   },
@@ -163,7 +513,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     effect: {
       type: 'auto_building',
       buildingId: 'hamlet_workshop',
-      interval: 90000, // 90 seconds
+      interval: 90000,
     },
     purchased: false,
   },
@@ -177,7 +527,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     effect: {
       type: 'auto_building',
       buildingId: 'hamlet_workshop',
-      interval: 60000, // 60 seconds
+      interval: 60000,
     },
     purchased: false,
   },
@@ -191,7 +541,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     effect: {
       type: 'auto_building',
       buildingId: 'hamlet_workshop',
-      interval: 30000, // 30 seconds
+      interval: 30000,
     },
     purchased: false,
   },
@@ -202,11 +552,11 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     description: 'Automatically buys 1 shrine every 120 seconds',
     cost: 75,
     tier: TierType.Hamlet,
-    prerequisite: 'hamlet_auto_hut_1', // Requires basic hut automation first
+    prerequisite: 'hamlet_auto_hut_1',
     effect: {
       type: 'auto_building',
       buildingId: 'hamlet_shrine',
-      interval: 120000, // 120 seconds
+      interval: 120000,
     },
     purchased: false,
   },
@@ -220,7 +570,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     effect: {
       type: 'auto_building',
       buildingId: 'hamlet_shrine',
-      interval: 80000, // 80 seconds
+      interval: 80000,
     },
     purchased: false,
   },
@@ -234,7 +584,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     effect: {
       type: 'auto_building',
       buildingId: 'hamlet_shrine',
-      interval: 40000, // 40 seconds
+      interval: 40000,
     },
     purchased: false,
   },
@@ -245,11 +595,11 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     description: 'Automatically buys 1 market stall every 150 seconds',
     cost: 100,
     tier: TierType.Hamlet,
-    prerequisite: 'hamlet_auto_garden_1', // Requires basic garden automation first
+    prerequisite: 'hamlet_auto_garden_1',
     effect: {
       type: 'auto_building',
       buildingId: 'hamlet_market',
-      interval: 150000, // 150 seconds
+      interval: 150000,
     },
     purchased: false,
   },
@@ -263,7 +613,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     effect: {
       type: 'auto_building',
       buildingId: 'hamlet_market',
-      interval: 100000, // 100 seconds
+      interval: 100000,
     },
     purchased: false,
   },
@@ -277,7 +627,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     effect: {
       type: 'auto_building',
       buildingId: 'hamlet_market',
-      interval: 50000, // 50 seconds
+      interval: 50000,
     },
     purchased: false,
   },
@@ -288,11 +638,11 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     description: 'Automatically buys 1 library every 300 seconds',
     cost: 200,
     tier: TierType.Hamlet,
-    prerequisite: 'hamlet_auto_workshop_1', // Requires basic workshop automation first
+    prerequisite: 'hamlet_auto_workshop_1',
     effect: {
       type: 'auto_building',
       buildingId: 'hamlet_library',
-      interval: 300000, // 300 seconds (5 minutes)
+      interval: 300000,
     },
     purchased: false,
   },
@@ -306,7 +656,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     effect: {
       type: 'auto_building',
       buildingId: 'hamlet_library',
-      interval: 200000, // 200 seconds
+      interval: 200000,
     },
     purchased: false,
   },
@@ -320,7 +670,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     effect: {
       type: 'auto_building',
       buildingId: 'hamlet_library',
-      interval: 120000, // 120 seconds (2 minutes)
+      interval: 120000,
     },
     purchased: false,
   },
@@ -330,11 +680,11 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'hamlet_cost_reduction_1',
     name: 'Efficient Construction I',
     description: 'Reduces all building costs by 5%',
-    cost: 25,
+    cost: RESEARCH_COSTS.costReduction[0],
     tier: TierType.Hamlet,
     effect: {
       type: 'cost_reduction',
-      value: 0.95, // 5% reduction (multiply by 0.95)
+      value: 0.95,
     },
     purchased: false,
   },
@@ -342,12 +692,12 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'hamlet_cost_reduction_2',
     name: 'Efficient Construction II',
     description: 'Reduces all building costs by 10%',
-    cost: 75,
+    cost: RESEARCH_COSTS.costReduction[1],
     tier: TierType.Hamlet,
     prerequisite: 'hamlet_cost_reduction_1',
     effect: {
       type: 'cost_reduction',
-      value: 0.9, // 10% reduction (multiply by 0.90)
+      value: 0.9,
     },
     purchased: false,
   },
@@ -355,12 +705,12 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'hamlet_cost_reduction_3',
     name: 'Efficient Construction III',
     description: 'Reduces all building costs by 15%',
-    cost: 225,
+    cost: RESEARCH_COSTS.costReduction[2],
     tier: TierType.Hamlet,
     prerequisite: 'hamlet_cost_reduction_2',
     effect: {
       type: 'cost_reduction',
-      value: 0.85, // 15% reduction (multiply by 0.85)
+      value: 0.85,
     },
     purchased: false,
   },
@@ -370,11 +720,11 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'hamlet_scaling_reduction_1',
     name: 'Bulk Production I',
     description: 'Reduces building cost scaling by improving multipliers',
-    cost: 50,
+    cost: RESEARCH_COSTS.scalingReduction[0],
     tier: TierType.Hamlet,
     effect: {
       type: 'cost_scaling_reduction',
-      value: 0.02, // Reduces multiplier by 0.02 (e.g., 1.15 becomes 1.13)
+      value: 0.02,
     },
     purchased: false,
   },
@@ -382,12 +732,12 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'hamlet_scaling_reduction_2',
     name: 'Bulk Production II',
     description: 'Further reduces building cost scaling multipliers',
-    cost: 150,
+    cost: RESEARCH_COSTS.scalingReduction[1],
     tier: TierType.Hamlet,
     prerequisite: 'hamlet_scaling_reduction_1',
     effect: {
       type: 'cost_scaling_reduction',
-      value: 0.04, // Additional 0.02 reduction (total 0.04)
+      value: 0.04,
     },
     purchased: false,
   },
@@ -395,12 +745,12 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'hamlet_scaling_reduction_3',
     name: 'Bulk Production III',
     description: 'Maximizes bulk production efficiency for cost scaling',
-    cost: 450,
+    cost: RESEARCH_COSTS.scalingReduction[2],
     tier: TierType.Hamlet,
     prerequisite: 'hamlet_scaling_reduction_2',
     effect: {
       type: 'cost_scaling_reduction',
-      value: 0.06, // Additional 0.02 reduction (total 0.06)
+      value: 0.06,
     },
     purchased: false,
   },
@@ -412,7 +762,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'village_starting_income_1',
     name: 'Village Foundation Funds',
     description: '+50 starting income for new villages',
-    cost: 50,
+    cost: RESEARCH_COSTS.startingIncome[0],
     tier: TierType.Village,
     effect: {
       type: 'starting_income',
@@ -424,7 +774,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'village_starting_income_2',
     name: 'Enhanced Village Resources',
     description: '+150 starting income for new villages',
-    cost: 150,
+    cost: RESEARCH_COSTS.startingIncome[1],
     tier: TierType.Village,
     prerequisite: 'village_starting_income_1',
     effect: {
@@ -439,7 +789,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'village_cost_reduction_1',
     name: 'Village Construction Efficiency',
     description: 'Reduces all village building costs by 8%',
-    cost: 100,
+    cost: RESEARCH_COSTS.costReduction[0],
     tier: TierType.Village,
     effect: {
       type: 'cost_reduction',
@@ -451,7 +801,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'village_cost_reduction_2',
     name: 'Advanced Village Engineering',
     description: 'Reduces all village building costs by 16%',
-    cost: 300,
+    cost: RESEARCH_COSTS.costReduction[1],
     tier: TierType.Village,
     prerequisite: 'village_cost_reduction_1',
     effect: {
@@ -461,41 +811,29 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     purchased: false,
   },
 
-  // Village Automation (Basic buildings only)
+  // Village Cost Scaling Reduction
   {
-    id: 'village_auto_cottage_1',
-    name: 'Automated Cottage Construction',
-    description: 'Automatically buys 1 cottage every 45 seconds',
-    cost: 75,
+    id: 'village_scaling_reduction_1',
+    name: 'Village Bulk Production I',
+    description: 'Reduces village building cost scaling',
+    cost: RESEARCH_COSTS.scalingReduction[0],
     tier: TierType.Village,
     effect: {
-      type: 'auto_building',
-      buildingId: 'village_cottage',
-      interval: 45000,
+      type: 'cost_scaling_reduction',
+      value: 0.02,
     },
     purchased: false,
   },
-  {
-    id: 'village_auto_farm_1',
-    name: 'Automated Farm Development',
-    description: 'Automatically buys 1 farm every 90 seconds',
-    cost: 150,
-    tier: TierType.Village,
-    prerequisite: 'village_auto_cottage_1',
-    effect: {
-      type: 'auto_building',
-      buildingId: 'village_farm',
-      interval: 90000,
-    },
-    purchased: false,
-  },
+
+  // Village Automation
+  ...generateAutoBuilding(TierType.Village, 'village', VILLAGE_AUTO_BUILDINGS),
 
   // Village → Hamlet parallel slot upgrade
   {
     id: 'hamlet_parallel_4',
     name: 'Quad Hamlet Management',
     description: 'Run 4 hamlets in parallel',
-    cost: 250,
+    cost: 50,
     tier: TierType.Village,
     prerequisite: 'hamlet_parallel_3',
     effect: {
@@ -512,7 +850,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'town_starting_income_1',
     name: 'Town Development Fund',
     description: '+500 starting income for new towns',
-    cost: 150,
+    cost: RESEARCH_COSTS.startingIncome[0],
     tier: TierType.Town,
     effect: {
       type: 'starting_income',
@@ -524,7 +862,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'town_starting_income_2',
     name: 'Major Town Investment',
     description: '+1500 starting income for new towns',
-    cost: 450,
+    cost: RESEARCH_COSTS.startingIncome[1],
     tier: TierType.Town,
     prerequisite: 'town_starting_income_1',
     effect: {
@@ -539,7 +877,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'town_cost_reduction_1',
     name: 'Town Planning Expertise',
     description: 'Reduces all town building costs by 10%',
-    cost: 250,
+    cost: RESEARCH_COSTS.costReduction[0],
     tier: TierType.Town,
     effect: {
       type: 'cost_reduction',
@@ -551,7 +889,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'town_cost_reduction_2',
     name: 'Master Town Engineering',
     description: 'Reduces all town building costs by 20%',
-    cost: 750,
+    cost: RESEARCH_COSTS.costReduction[1],
     tier: TierType.Town,
     prerequisite: 'town_cost_reduction_1',
     effect: {
@@ -566,7 +904,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'town_scaling_reduction_1',
     name: 'Town Mass Production',
     description: 'Reduces town building cost scaling',
-    cost: 300,
+    cost: RESEARCH_COSTS.scalingReduction[0],
     tier: TierType.Town,
     effect: {
       type: 'cost_scaling_reduction',
@@ -575,12 +913,15 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     purchased: false,
   },
 
+  // Town Automation
+  ...generateAutoBuilding(TierType.Town, 'town', TOWN_AUTO_BUILDINGS),
+
   // Town → Hamlet parallel slot upgrade
   {
     id: 'hamlet_parallel_5',
     name: 'Penta Hamlet Management',
     description: 'Run 5 hamlets in parallel',
-    cost: 500,
+    cost: 50,
     tier: TierType.Town,
     prerequisite: 'hamlet_parallel_4',
     effect: {
@@ -597,7 +938,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'city_starting_income_1',
     name: 'City Development Grant',
     description: '+5000 starting income for new cities',
-    cost: 400,
+    cost: RESEARCH_COSTS.startingIncome[0],
     tier: TierType.City,
     effect: {
       type: 'starting_income',
@@ -611,7 +952,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'city_cost_reduction_1',
     name: 'Metropolitan Efficiency',
     description: 'Reduces all city building costs by 12%',
-    cost: 600,
+    cost: RESEARCH_COSTS.costReduction[0],
     tier: TierType.City,
     effect: {
       type: 'cost_reduction',
@@ -625,7 +966,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'city_scaling_reduction_1',
     name: 'Urban Industrial Complex',
     description: 'Reduces city building cost scaling',
-    cost: 800,
+    cost: RESEARCH_COSTS.scalingReduction[0],
     tier: TierType.City,
     effect: {
       type: 'cost_scaling_reduction',
@@ -634,9 +975,11 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     purchased: false,
   },
 
+  // City Automation
+  ...generateAutoBuilding(TierType.City, 'city', CITY_AUTO_BUILDINGS),
+
   // ===== TIER REQUIREMENT REDUCTION =====
 
-  // Hamlet Research → Reduce completions needed to spawn next tier
   {
     id: 'hamlet_expansion_efficiency_1',
     name: 'Expansion Efficiency',
@@ -652,125 +995,24 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
 
   // ===== FOUNDATION PLANNING (per-tier, tier-scoped) =====
 
-  {
-    id: 'hamlet_foundation_planning_1',
-    name: 'Foundation Planning',
-    description: '1 of each building type has flat cost (no scaling)',
-    cost: 50,
-    tier: TierType.Hamlet,
-    effect: {
-      type: 'flat_cost_count',
-      value: 1,
-    },
-    purchased: false,
-  },
-  {
-    id: 'village_foundation_planning_1',
-    name: 'Foundation Planning',
-    description: '1 of each building type has flat cost (no scaling)',
-    cost: 200,
-    tier: TierType.Village,
-    effect: {
-      type: 'flat_cost_count',
-      value: 1,
-    },
-    purchased: false,
-  },
-  {
-    id: 'town_foundation_planning_1',
-    name: 'Foundation Planning',
-    description: '1 of each building type has flat cost (no scaling)',
-    cost: 500,
-    tier: TierType.Town,
-    effect: {
-      type: 'flat_cost_count',
-      value: 1,
-    },
-    purchased: false,
-  },
-  {
-    id: 'city_foundation_planning_1',
-    name: 'Foundation Planning',
-    description: '1 of each building type has flat cost (no scaling)',
-    cost: 1200,
-    tier: TierType.City,
-    effect: {
-      type: 'flat_cost_count',
-      value: 1,
-    },
-    purchased: false,
-  },
-  {
-    id: 'county_foundation_planning_1',
-    name: 'Foundation Planning',
-    description: '1 of each building type has flat cost (no scaling)',
-    cost: 3000,
-    tier: TierType.County,
-    effect: {
-      type: 'flat_cost_count',
-      value: 1,
-    },
-    purchased: false,
-  },
-  {
-    id: 'duchy_foundation_planning_1',
-    name: 'Foundation Planning',
-    description: '1 of each building type has flat cost (no scaling)',
-    cost: 7000,
-    tier: TierType.Duchy,
-    effect: {
-      type: 'flat_cost_count',
-      value: 1,
-    },
-    purchased: false,
-  },
-  {
-    id: 'realm_foundation_planning_1',
-    name: 'Foundation Planning',
-    description: '1 of each building type has flat cost (no scaling)',
-    cost: 15000,
-    tier: TierType.Realm,
-    effect: {
-      type: 'flat_cost_count',
-      value: 1,
-    },
-    purchased: false,
-  },
-  {
-    id: 'kingdom_foundation_planning_1',
-    name: 'Foundation Planning',
-    description: '1 of each building type has flat cost (no scaling)',
-    cost: 35000,
-    tier: TierType.Kingdom,
-    effect: {
-      type: 'flat_cost_count',
-      value: 1,
-    },
-    purchased: false,
-  },
+  ...generateFoundationPlanning([
+    { tier: TierType.Hamlet, prefix: 'hamlet' },
+    { tier: TierType.Village, prefix: 'village' },
+    { tier: TierType.Town, prefix: 'town' },
+    { tier: TierType.City, prefix: 'city' },
+    { tier: TierType.County, prefix: 'county' },
+    { tier: TierType.Duchy, prefix: 'duchy' },
+    { tier: TierType.Realm, prefix: 'realm' },
+    { tier: TierType.Kingdom, prefix: 'kingdom' },
+  ]),
 
-  // ===== ADDITIONAL TIER RESEARCH (cost reduction & scaling) =====
+  // ===== COUNTY RESEARCH =====
 
-  // Village Cost Scaling Reduction
-  {
-    id: 'village_scaling_reduction_1',
-    name: 'Village Bulk Production I',
-    description: 'Reduces village building cost scaling',
-    cost: 150,
-    tier: TierType.Village,
-    effect: {
-      type: 'cost_scaling_reduction',
-      value: 0.02,
-    },
-    purchased: false,
-  },
-
-  // County Research
   {
     id: 'county_cost_reduction_1',
     name: 'County Construction Efficiency I',
     description: 'Reduces all county building costs by 15%',
-    cost: 1500,
+    cost: RESEARCH_COSTS.costReduction[0],
     tier: TierType.County,
     effect: {
       type: 'cost_reduction',
@@ -782,7 +1024,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'county_scaling_reduction_1',
     name: 'County Mass Production I',
     description: 'Reduces county building cost scaling',
-    cost: 2000,
+    cost: RESEARCH_COSTS.scalingReduction[0],
     tier: TierType.County,
     effect: {
       type: 'cost_scaling_reduction',
@@ -791,12 +1033,16 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     purchased: false,
   },
 
-  // Duchy Research
+  // County Automation
+  ...generateAutoBuilding(TierType.County, 'county', COUNTY_AUTO_BUILDINGS),
+
+  // ===== DUCHY RESEARCH =====
+
   {
     id: 'duchy_cost_reduction_1',
     name: 'Ducal Engineering I',
     description: 'Reduces all duchy building costs by 18%',
-    cost: 3500,
+    cost: RESEARCH_COSTS.costReduction[0],
     tier: TierType.Duchy,
     effect: {
       type: 'cost_reduction',
@@ -808,7 +1054,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'duchy_scaling_reduction_1',
     name: 'Ducal Mass Production I',
     description: 'Reduces duchy building cost scaling',
-    cost: 5000,
+    cost: RESEARCH_COSTS.scalingReduction[0],
     tier: TierType.Duchy,
     effect: {
       type: 'cost_scaling_reduction',
@@ -817,12 +1063,16 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     purchased: false,
   },
 
-  // Realm Research
+  // Duchy Automation
+  ...generateAutoBuilding(TierType.Duchy, 'duchy', DUCHY_AUTO_BUILDINGS),
+
+  // ===== REALM RESEARCH =====
+
   {
     id: 'realm_cost_reduction_1',
     name: 'Realm Engineering I',
     description: 'Reduces all realm building costs by 20%',
-    cost: 8000,
+    cost: RESEARCH_COSTS.costReduction[0],
     tier: TierType.Realm,
     effect: {
       type: 'cost_reduction',
@@ -834,7 +1084,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'realm_scaling_reduction_1',
     name: 'Realm Mass Production I',
     description: 'Reduces realm building cost scaling',
-    cost: 12000,
+    cost: RESEARCH_COSTS.scalingReduction[0],
     tier: TierType.Realm,
     effect: {
       type: 'cost_scaling_reduction',
@@ -843,12 +1093,16 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     purchased: false,
   },
 
-  // Kingdom Research
+  // Realm Automation
+  ...generateAutoBuilding(TierType.Realm, 'realm', REALM_AUTO_BUILDINGS),
+
+  // ===== KINGDOM RESEARCH =====
+
   {
     id: 'kingdom_cost_reduction_1',
     name: 'Royal Engineering I',
     description: 'Reduces all kingdom building costs by 22%',
-    cost: 20000,
+    cost: RESEARCH_COSTS.costReduction[0],
     tier: TierType.Kingdom,
     effect: {
       type: 'cost_reduction',
@@ -860,7 +1114,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     id: 'kingdom_scaling_reduction_1',
     name: 'Royal Mass Production I',
     description: 'Reduces kingdom building cost scaling',
-    cost: 30000,
+    cost: RESEARCH_COSTS.scalingReduction[0],
     tier: TierType.Kingdom,
     effect: {
       type: 'cost_scaling_reduction',
@@ -868,4 +1122,7 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     },
     purchased: false,
   },
+
+  // Kingdom Automation
+  ...generateAutoBuilding(TierType.Kingdom, 'kingdom', KINGDOM_AUTO_BUILDINGS),
 ];
