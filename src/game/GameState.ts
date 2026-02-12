@@ -1217,6 +1217,11 @@ export class GameStateManager {
       }
       case 'cost_scaling_reduction':
         return `Reduces building cost scaling by improving multipliers`;
+      case 'tier_requirement_reduction': {
+        const current = this.getTierRequirement();
+        const next = Math.max(2, current - (effect.value ?? 1));
+        return `Reduces completions needed to advance tiers by ${effect.value ?? 1} (${current}→${next})`;
+      }
       default:
         return base.description;
     }
