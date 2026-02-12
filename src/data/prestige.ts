@@ -927,10 +927,10 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
   {
     id: 'prestige_hamlet_parallel_6',
     name: 'Hexa Hamlet Management',
-    description: 'Run 6 hamlets in parallel',
+    description: '+1 extra hamlet parallel slot',
     cost: 2,
     tier: TierType.Town,
-    effect: { type: 'prestige_parallel_slots', value: 6 },
+    effect: { type: 'prestige_parallel_slots', value: 1 },
     purchased: false,
   },
 
