@@ -286,12 +286,14 @@
   display: inline-block;
   min-width: 3ch;
   text-align: right;
+  pointer-events: none;
 }
 
 .buy-cost {
   display: inline-block;
   min-width: 5ch;
   text-align: right;
+  pointer-events: none;
 }
 
 .buy-btn:hover:not(.disabled) {
