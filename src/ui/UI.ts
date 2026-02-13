@@ -380,7 +380,7 @@ export class UI {
           ${
             goal !== undefined
               ? `<div class="goal-display ${goal.isCompleted ? 'completed' : ''}">
-            <span class="goal-description">${goal.description}</span>
+            <span class="goal-description">${this.formatGoalDescription(goal, settlement)}</span>
             <span class="goal-progress">${goalProgress}</span>
           </div>`
               : ''
@@ -1061,6 +1061,39 @@ export class UI {
     return `${formatNumber(goal.currentValue)}/${formatNumber(effectiveTarget)}`;
   }
 
+  private formatGoalDescription(goal: Goal, settlement: Settlement): string {
+    const reductionFactor = this.game.getGoalReductionFactor(settlement);
+    const effectiveTarget =
+      goal.type === GoalType.BuildingCount
+        ? Math.ceil(goal.targetValue * reductionFactor)
+        : goal.targetValue * reductionFactor;
+
+    switch (goal.type) {
+      case GoalType.ReachIncome:
+        return `Reach ${formatNumber(effectiveTarget)} income per second`;
+      case GoalType.AccumulateCurrency:
+        return `Earn ${formatNumber(effectiveTarget)} total currency`;
+      case GoalType.CurrentCurrency:
+        return `Have ${formatNumber(effectiveTarget)} currency at once`;
+      case GoalType.CurrencySpent:
+        return `Spend ${formatNumber(effectiveTarget)} currency on buildings`;
+      case GoalType.TotalBuildings:
+        return `Own ${formatNumber(effectiveTarget)} total buildings`;
+      case GoalType.Survival: {
+        const targetMinutes = Math.floor(effectiveTarget / 60);
+        return `Prosper for ${targetMinutes} minutes`;
+      }
+      case GoalType.BuildingCount: {
+        const tierDef = getTierByType(settlement.tier);
+        const building = tierDef?.buildings.find((b) => b.id === goal.buildingId);
+        const buildingName = building !== undefined ? building.name : 'buildings';
+        return `Build ${effectiveTarget} ${buildingName}s`;
+      }
+      default:
+        return goal.description;
+    }
+  }
+
   public update(): void {
     if (!this.isInitialized) return;
 
@@ -1162,6 +1195,11 @@ export class UI {
       if (goal !== undefined) {
         const goalDisplay = settlementEl.querySelector('.goal-display');
         const goalProgressText = settlementEl.querySelector('.goal-progress');
+        const goalDescriptionText = settlementEl.querySelector('.goal-description');
+
+        if (goalDescriptionText !== null) {
+          goalDescriptionText.textContent = this.formatGoalDescription(goal, settlement);
+        }
 
         if (goalProgressText !== null) {
           goalProgressText.textContent = this.formatGoalProgress(goal, settlement);
