@@ -27,11 +27,14 @@ export class UI {
   private activeNotificationIds: Set<string> = new Set();
   private prestigeSearchQuery: string = '';
   private prestigeShopSearchQuery: string = '';
+  private holdBuyTimer: ReturnType<typeof setTimeout> | null = null;
+  private holdBuyInterval: ReturnType<typeof setInterval> | null = null;
 
   constructor(game: GameStateManager, container: HTMLElement) {
     this.game = game;
     this.container = container;
     this.notificationContainer = this.createNotificationContainer();
+    this.setupHoldToBuy();
   }
 
   private createNotificationContainer(): HTMLElement {
@@ -42,6 +45,51 @@ export class UI {
     el.className = 'notification-container';
     document.body.appendChild(el);
     return el;
+  }
+
+  private setupHoldToBuy(): void {
+    const INITIAL_DELAY = 400;
+    const REPEAT_INTERVAL = 100;
+
+    this.container.addEventListener('pointerdown', (e: PointerEvent) => {
+      const btn = (e.target as HTMLElement).closest('.buy-btn');
+      if (!(btn instanceof HTMLButtonElement) || btn.disabled) return;
+
+      const settlementId = btn.getAttribute('data-settlement');
+      const buildingId = btn.getAttribute('data-building');
+      if (settlementId === null || buildingId === null) return;
+
+      // Immediate buy on first press
+      window.buyBuilding(settlementId, buildingId);
+
+      // After initial delay, start repeating
+      this.holdBuyTimer = setTimeout(() => {
+        this.holdBuyInterval = setInterval(() => {
+          window.buyBuilding(settlementId, buildingId);
+        }, REPEAT_INTERVAL);
+      }, INITIAL_DELAY);
+    });
+
+    document.addEventListener('pointerup', () => this.stopHoldBuy());
+    document.addEventListener('pointercancel', () => this.stopHoldBuy());
+
+    // Prevent context menu on long-press of buy buttons (mobile)
+    this.container.addEventListener('contextmenu', (e: Event) => {
+      if ((e.target as HTMLElement).closest('.buy-btn') !== null) {
+        e.preventDefault();
+      }
+    });
+  }
+
+  private stopHoldBuy(): void {
+    if (this.holdBuyTimer !== null) {
+      window.clearTimeout(this.holdBuyTimer);
+      this.holdBuyTimer = null;
+    }
+    if (this.holdBuyInterval !== null) {
+      window.clearInterval(this.holdBuyInterval);
+      this.holdBuyInterval = null;
+    }
   }
 
   public isPrestigeShopOpen(): boolean {
@@ -393,7 +441,6 @@ export class UI {
                     data-settlement="${settlement.id}"
                     data-building="${building.id}"
                     data-cost="${cost}"
-                    onclick="window.buyBuilding('${settlement.id}', '${building.id}')"
                     ${!canAfford ? 'disabled' : ''}
                   >
                     ${label} (<span class="buy-cost">${formatNumber(cost)}</span>)
