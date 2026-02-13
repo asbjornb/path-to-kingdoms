@@ -25,14 +25,14 @@ import { GoalGenerator } from '../data/goals';
 // Building-count goals scale the max up based on the building's cost
 // (see computeGoalMaxMinutes).
 const TIER_BOUNDS: Record<TierType, { minMinutes: number; maxMinutes: number }> = {
-  [TierType.Hamlet]: { minMinutes: 1, maxMinutes: 20 },
-  [TierType.Village]: { minMinutes: 1, maxMinutes: 12 },
-  [TierType.Town]: { minMinutes: 1, maxMinutes: 15 },
-  [TierType.City]: { minMinutes: 1, maxMinutes: 18 },
-  [TierType.County]: { minMinutes: 1, maxMinutes: 25 },
-  [TierType.Duchy]: { minMinutes: 1, maxMinutes: 40 },
-  [TierType.Realm]: { minMinutes: 1, maxMinutes: 15 },
-  [TierType.Kingdom]: { minMinutes: 1, maxMinutes: 25 },
+  [TierType.Hamlet]: { minMinutes: 5, maxMinutes: 20 },
+  [TierType.Village]: { minMinutes: 7, maxMinutes: 23 },
+  [TierType.Town]: { minMinutes: 9, maxMinutes: 26 },
+  [TierType.City]: { minMinutes: 11, maxMinutes: 29 },
+  [TierType.County]: { minMinutes: 13, maxMinutes: 32 },
+  [TierType.Duchy]: { minMinutes: 15, maxMinutes: 35 },
+  [TierType.Realm]: { minMinutes: 17, maxMinutes: 38 },
+  [TierType.Kingdom]: { minMinutes: 19, maxMinutes: 41 },
 };
 
 /**
