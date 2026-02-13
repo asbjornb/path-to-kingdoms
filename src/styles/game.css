@@ -327,6 +327,9 @@
   background: #2a2a2a;
   border-radius: 4px;
   border: 1px solid #333;
+  position: sticky;
+  top: -1rem;
+  z-index: 10;
 }
 
 .research-header {
