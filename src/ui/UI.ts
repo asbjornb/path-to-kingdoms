@@ -27,6 +27,7 @@ export class UI {
   private activeNotificationIds: Set<string> = new Set();
   private prestigeSearchQuery: string = '';
   private prestigeShopSearchQuery: string = '';
+  private lastButtonUpdateTime: number = 0;
 
   constructor(game: GameStateManager, container: HTMLElement) {
     this.game = game;
@@ -533,11 +534,7 @@ export class UI {
     buyAmount: BuyAmount,
   ): { cost: number; qty: number } {
     if (buyAmount === 'max') {
-      const qty = this.game.getMaxAffordable(settlement.id, buildingId);
-      const cost =
-        qty > 0
-          ? (this.game.getBulkBuyCost(settlement.id, buildingId, qty) ?? 0)
-          : (this.game.getBuildingCost(settlement.id, buildingId) ?? 0);
+      const { count: qty, cost } = this.game.getMaxAffordableWithCost(settlement.id, buildingId);
       return { cost, qty };
     }
     const cost = this.game.getBulkBuyCost(settlement.id, buildingId, buyAmount) ?? 0;
@@ -1074,6 +1071,14 @@ export class UI {
       }
     }
 
+    // Throttle building button updates (expensive due to getMaxAffordable calculations)
+    // Currency/income/goal text updates run every tick; button cost/state updates every 500ms
+    const now = Date.now();
+    const shouldUpdateButtons = now - this.lastButtonUpdateTime >= 500;
+    if (shouldUpdateButtons) {
+      this.lastButtonUpdateTime = now;
+    }
+
     // Update settlement-specific values
     const settlements = this.game
       .getState()
@@ -1084,7 +1089,7 @@ export class UI {
       const settlementEl = settlementElements[index] as HTMLElement;
       if (settlementEl === null || settlementEl === undefined) return;
 
-      // Update currency and income values
+      // Update currency and income values (every tick — cheap text updates)
       const currencyEl = settlementEl.querySelector('.settlement-stat .stat-value');
       const statValues = settlementEl.querySelectorAll('.settlement-stat .stat-value');
       const incomeEl = statValues.length > 1 ? statValues[1] : null;
@@ -1133,66 +1138,70 @@ export class UI {
         }
       }
 
-      // Update building counts and button states
-      const buyAmount = this.game.getBuyAmount();
-      const buildingButtons = settlementEl.querySelectorAll('.buy-btn');
-      buildingButtons.forEach((button) => {
-        if (!(button instanceof HTMLButtonElement)) return;
-        const settlementId = button.getAttribute('data-settlement');
-        const buildingId = button.getAttribute('data-building');
-        if (settlementId === null || buildingId === null) return;
+      // Update building counts and button states (throttled — every 500ms)
+      if (shouldUpdateButtons) {
+        const buyAmount = this.game.getBuyAmount();
+        const buildingButtons = settlementEl.querySelectorAll('.buy-btn');
+        buildingButtons.forEach((button) => {
+          if (!(button instanceof HTMLButtonElement)) return;
+          const settlementId = button.getAttribute('data-settlement');
+          const buildingId = button.getAttribute('data-building');
+          if (settlementId === null || buildingId === null) return;
 
-        // Update building count in the building name
-        const buildingEl = button.closest('.building');
-        const buildingNameEl = buildingEl?.querySelector('.building-name');
-        if (buildingNameEl !== null && buildingNameEl !== undefined) {
-          const currentCount = settlement.buildings.get(buildingId) ?? 0;
-          const buildingName = buildingNameEl.textContent?.split(' (')[0] ?? '';
-          buildingNameEl.textContent = `${buildingName} (${currentCount})`;
-        }
+          // Update building count in the building name
+          const buildingEl = button.closest('.building');
+          const buildingNameEl = buildingEl?.querySelector('.building-name');
+          if (buildingNameEl !== null && buildingNameEl !== undefined) {
+            const currentCount = settlement.buildings.get(buildingId) ?? 0;
+            const buildingName = buildingNameEl.textContent?.split(' (')[0] ?? '';
+            buildingNameEl.textContent = `${buildingName} (${currentCount})`;
+          }
 
-        // Calculate cost and quantity based on buy amount
-        const { cost, qty } = this.getDisplayCostAndQty(settlement, buildingId, buyAmount);
-        const canAfford = qty > 0 && settlement.currency >= cost;
+          // Calculate cost and quantity based on buy amount
+          const { cost, qty } = this.getDisplayCostAndQty(settlement, buildingId, buyAmount);
+          const canAfford = qty > 0 && settlement.currency >= cost;
 
-        const label =
-          buyAmount === 'max'
-            ? `Buy Max (<span class="buy-qty">${qty}</span>)`
-            : buyAmount > 1
-              ? `Buy ${qty}x`
-              : 'Buy';
+          const label =
+            buyAmount === 'max'
+              ? `Buy Max (<span class="buy-qty">${qty}</span>)`
+              : buyAmount > 1
+                ? `Buy ${qty}x`
+                : 'Buy';
 
-        // Update cached cost attribute and button text
-        button.setAttribute('data-cost', cost.toString());
-        button.innerHTML = `${label} (<span class="buy-cost">${formatNumber(cost)}</span>)`;
+          // Update cached cost attribute and button text
+          button.setAttribute('data-cost', cost.toString());
+          button.innerHTML = `${label} (<span class="buy-cost">${formatNumber(cost)}</span>)`;
 
-        if (canAfford && button.disabled === true) {
-          button.disabled = false;
-          button.classList.remove('disabled');
-        } else if (!canAfford && button.disabled === false) {
-          button.disabled = true;
-          button.classList.add('disabled');
-        }
-      });
-    });
-
-    // Update research button states
-    const researchButtons = document.querySelectorAll('.research-btn');
-    researchButtons.forEach((button) => {
-      if (!(button instanceof HTMLButtonElement)) return;
-      const costText = button.textContent?.match(/\((\d+)\s+points\)/);
-      if (costText && costText[1]) {
-        const cost = parseInt(costText[1]);
-        const canAfford = this.game.getResearchPoints(this.selectedTier) >= cost;
-
-        if (canAfford && button.disabled === true) {
-          button.disabled = false;
-          button.classList.remove('disabled');
-        } else if (!canAfford && button.disabled === false) {
-          button.disabled = true;
-          button.classList.add('disabled');
-        }
+          if (canAfford && button.disabled === true) {
+            button.disabled = false;
+            button.classList.remove('disabled');
+          } else if (!canAfford && button.disabled === false) {
+            button.disabled = true;
+            button.classList.add('disabled');
+          }
+        });
       }
     });
+
+    // Update research button states (throttled alongside building buttons)
+    if (shouldUpdateButtons) {
+      const researchButtons = document.querySelectorAll('.research-btn');
+      researchButtons.forEach((button) => {
+        if (!(button instanceof HTMLButtonElement)) return;
+        const costText = button.textContent?.match(/\((\d+)\s+points\)/);
+        if (costText && costText[1]) {
+          const cost = parseInt(costText[1]);
+          const canAfford = this.game.getResearchPoints(this.selectedTier) >= cost;
+
+          if (canAfford && button.disabled === true) {
+            button.disabled = false;
+            button.classList.remove('disabled');
+          } else if (!canAfford && button.disabled === false) {
+            button.disabled = true;
+            button.classList.add('disabled');
+          }
+        }
+      });
+    }
   }
 }
