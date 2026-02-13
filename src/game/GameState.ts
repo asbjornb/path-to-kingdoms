@@ -77,6 +77,10 @@ export class GameStateManager {
     string,
     { count: number; totalCost: number; threshold: number; buildingCount: number }
   > = new Map();
+  /** Pre-filtered list of purchased prestige upgrades, rebuilt on purchase/load. */
+  private purchasedPrestigeUpgrades: PrestigeUpgrade[] = [];
+  /** Pre-filtered list of unlocked achievements, rebuilt on unlock/load. */
+  private unlockedAchievements: Achievement[] = [];
 
   constructor() {
     // Initialize state first
@@ -84,6 +88,7 @@ export class GameStateManager {
 
     // Try to load existing save, otherwise use the initialized state
     if (!this.loadGame()) {
+      this.rebuildPurchasedCaches();
       this.autospawnSettlements();
     }
 
@@ -164,11 +169,8 @@ export class GameStateManager {
     }
 
     // Apply prestige grant building: add specific buildings to matching-tier settlements
-    const grantUpgrades = this.state.prestigeUpgrades.filter(
-      (u) =>
-        u.purchased &&
-        u.effect.type === 'prestige_grant_building' &&
-        u.effect.targetBuilding !== undefined,
+    const grantUpgrades = this.purchasedPrestigeUpgrades.filter(
+      (u) => u.effect.type === 'prestige_grant_building' && u.effect.targetBuilding !== undefined,
     );
     for (const upgrade of grantUpgrades) {
       const buildingId = upgrade.effect.targetBuilding ?? '';
@@ -503,9 +505,8 @@ export class GameStateManager {
     }
 
     // Add synergy bonuses from unlocked achievements
-    for (const achievement of this.state.achievements) {
+    for (const achievement of this.unlockedAchievements) {
       if (
-        achievement.unlocked &&
         achievement.bonus.type === 'building_synergy' &&
         achievement.bonus.sourceBuildingId !== undefined &&
         achievement.bonus.targetBuildingId !== undefined
@@ -522,9 +523,8 @@ export class GameStateManager {
     }
 
     // Add synergy bonuses from purchased prestige upgrades
-    for (const upgrade of this.state.prestigeUpgrades) {
+    for (const upgrade of this.purchasedPrestigeUpgrades) {
       if (
-        upgrade.purchased &&
         upgrade.effect.type === 'prestige_building_synergy' &&
         upgrade.effect.sourceBuilding !== undefined &&
         upgrade.effect.targetBuilding !== undefined
@@ -667,9 +667,8 @@ export class GameStateManager {
     }
 
     // Add achievement synergy boosts
-    for (const achievement of this.state.achievements) {
+    for (const achievement of this.unlockedAchievements) {
       if (
-        achievement.unlocked &&
         achievement.bonus.type === 'building_synergy' &&
         achievement.bonus.targetBuildingId === buildingId &&
         achievement.bonus.sourceBuildingId !== undefined
@@ -680,9 +679,8 @@ export class GameStateManager {
     }
 
     // Add prestige synergy boosts
-    for (const upgrade of this.state.prestigeUpgrades) {
+    for (const upgrade of this.purchasedPrestigeUpgrades) {
       if (
-        upgrade.purchased &&
         upgrade.effect.type === 'prestige_building_synergy' &&
         upgrade.effect.targetBuilding === buildingId &&
         upgrade.effect.sourceBuilding !== undefined
@@ -757,9 +755,7 @@ export class GameStateManager {
     const cached = this.effectCache.get(cacheKey);
     if (cached !== undefined) return cached;
 
-    const upgrades = this.state.prestigeUpgrades.filter(
-      (u) => u.purchased && u.effect.type === type,
-    );
+    const upgrades = this.purchasedPrestigeUpgrades.filter((u) => u.effect.type === type);
     let result: number;
     switch (type) {
       case 'prestige_income_multiplier':
@@ -857,10 +853,9 @@ export class GameStateManager {
     const cached = this.effectCache.get(cacheKey);
     if (cached !== undefined) return cached;
 
-    const result = this.state.prestigeUpgrades
+    const result = this.purchasedPrestigeUpgrades
       .filter(
         (u) =>
-          u.purchased &&
           u.effect.type === 'prestige_building_income_boost' &&
           u.effect.targetBuilding === buildingId,
       )
@@ -878,7 +873,7 @@ export class GameStateManager {
     const cached = this.effectCache.get(cacheKey);
     if (cached !== undefined) return cached;
 
-    const achievements = this.state.achievements.filter((a) => a.unlocked && a.bonus.type === type);
+    const achievements = this.unlockedAchievements.filter((a) => a.bonus.type === type);
     let result: number;
     switch (type) {
       case 'income_multiplier':
@@ -1029,6 +1024,7 @@ export class GameStateManager {
     // Purchase
     this.state.prestigeCurrency.set(upgrade.tier, currency - upgrade.cost);
     upgrade.purchased = true;
+    this.purchasedPrestigeUpgrades.push(upgrade);
 
     // If parallel slots prestige was purchased, spawn new hamlets
     if (upgrade.effect.type === 'prestige_parallel_slots') {
@@ -1126,6 +1122,7 @@ export class GameStateManager {
       if (conditionMet) {
         this.addNotification('achievement_unlocked', `Achievement: ${achievement.name}`);
         achievement.unlocked = true;
+        this.unlockedAchievements.push(achievement);
         this.clearEffectCache();
         this.invalidateMaxAffordableCache();
       }
@@ -1507,6 +1504,15 @@ export class GameStateManager {
 
   private clearEffectCache(): void {
     this.effectCache.clear();
+  }
+
+  /**
+   * Rebuild the pre-filtered purchased/unlocked lists from full state arrays.
+   * Called after bulk state changes (init, load, import).
+   */
+  private rebuildPurchasedCaches(): void {
+    this.purchasedPrestigeUpgrades = this.state.prestigeUpgrades.filter((u) => u.purchased);
+    this.unlockedAchievements = this.state.achievements.filter((a) => a.unlocked);
   }
 
   /**
@@ -1924,6 +1930,7 @@ export class GameStateManager {
 
       this.clearEffectCache();
       this.invalidateMaxAffordableCache();
+      this.rebuildPurchasedCaches();
       console.warn(
         `Game loaded successfully from ${new Date(saveData.timestamp).toLocaleString()}`,
       );
