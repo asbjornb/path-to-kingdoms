@@ -1,16 +1,17 @@
 import { Goal, GoalType, TierType } from '../types/game';
 import { TIER_DATA } from './tiers';
 
-// Tier difficulty multiplier: each tier is slightly harder relative to its economic baseline
+// Tier difficulty multiplier: calibrated primarily for AccumulateCurrency (the most linear
+// goal type). Other goal types apply their own dampening to account for nonlinear scaling.
 const TIER_DIFFICULTY: Record<TierType, number> = {
-  [TierType.Hamlet]: 1.0,
-  [TierType.Village]: 1.1,
-  [TierType.Town]: 1.2,
-  [TierType.City]: 1.3,
-  [TierType.County]: 1.4,
-  [TierType.Duchy]: 1.5,
-  [TierType.Realm]: 1.6,
-  [TierType.Kingdom]: 1.7,
+  [TierType.Hamlet]: 1.2,
+  [TierType.Village]: 3.0,
+  [TierType.Town]: 3.5,
+  [TierType.City]: 3.8,
+  [TierType.County]: 3.5,
+  [TierType.Duchy]: 3.5,
+  [TierType.Realm]: 8.5,
+  [TierType.Kingdom]: 6.0,
 };
 
 export const GoalGenerator = {
@@ -52,20 +53,28 @@ export const GoalGenerator = {
     const costScale = this.getCostScale(tierType);
     const difficulty = TIER_DIFFICULTY[tierType];
 
+    // Per-goal-type difficulty dampening: different goal types have very different
+    // time-vs-target relationships. ReachIncome is highly nonlinear (exponential
+    // building costs), while AccumulateCurrency is roughly linear.
+    const incomeDifficulty = Math.pow(difficulty, 0.55);
+    const currentCurrencyDifficulty = Math.pow(difficulty, 0.55);
+    const survivalScale = 1 + Math.log10(Math.max(incomeScale, 1)) * 0.15;
+
     const templates: Array<{
       type: GoalType;
       baseValue: number;
       description: string;
       buildingId?: string;
     }> = [
-      // Income goals (scaled by tier income level and difficulty)
+      // Income goals: dampened difficulty (^0.55) because reaching high sustained income
+      // requires exponentially more expensive buildings
       {
         type: GoalType.ReachIncome,
-        baseValue: Math.round(500 * incomeScale * difficulty),
+        baseValue: Math.round(500 * incomeScale * incomeDifficulty),
         description: 'Reach {value} income per second',
       },
 
-      // Lifetime currency goals (scaled by tier cost level and difficulty)
+      // Lifetime currency goals: linear difficulty (main tuning target)
       {
         type: GoalType.AccumulateCurrency,
         baseValue: Math.round(100000 * costScale * difficulty),
@@ -77,37 +86,49 @@ export const GoalGenerator = {
         description: 'Earn {value} total currency',
       },
 
-      // Current currency goals (scaled by tier cost level and difficulty)
+      // Current currency goals: dampened (^0.55) since hoarding is harder
+      // than accumulating over time, especially at high tiers
       {
         type: GoalType.CurrentCurrency,
-        baseValue: Math.round(10000 * costScale * difficulty),
+        baseValue: Math.round(10000 * costScale * currentCurrencyDifficulty),
         description: 'Have {value} currency at once',
       },
       {
         type: GoalType.CurrentCurrency,
-        baseValue: Math.round(20000 * costScale * difficulty),
+        baseValue: Math.round(20000 * costScale * currentCurrencyDifficulty),
         description: 'Have {value} currency at once',
       },
 
       // Prosperity goals (time-based, accelerated by income)
+      // Log-based income scaling compensates for income-driven acceleration at higher tiers
       {
         type: GoalType.Survival,
-        baseValue: Math.round(600 * difficulty),
+        baseValue: Math.round(600 * survivalScale * difficulty),
         description: 'Prosper for {minutes} minutes',
       },
       {
         type: GoalType.Survival,
-        baseValue: Math.round(900 * difficulty),
+        baseValue: Math.round(900 * survivalScale * difficulty),
         description: 'Prosper for {minutes} minutes',
       },
     ];
 
-    // Building count goals (one for each building type, scaled by difficulty)
+    // Building count goals (one for each building type)
+    // Base count of 30 with position factor (1.5x for cheapest, 0.4x for most expensive).
+    // Difficulty is heavily dampened (^0.15) since building costs grow exponentially.
+    // Cost multiplier adjustment: buildings with aggressive cost scaling (1.25+) get reduced
+    // targets, scaled by position factor so cheap buildings aren't unnecessarily penalized.
+    const buildingDifficulty = Math.pow(difficulty, 0.15);
     const buildingIndex = tierDef.buildings.length;
     tierDef.buildings.forEach((building, i) => {
-      // Cheaper buildings get higher targets, expensive buildings get lower targets
-      const positionFactor = 1 - (i / buildingIndex) * 0.6; // 1.0 down to 0.4
-      const targetCount = Math.round(30 * positionFactor * difficulty);
+      const positionFactor = 1.5 - (i / buildingIndex) * 1.1; // 1.5 down to 0.4
+      // Scale cost multiplier penalty by position: high-position expensive buildings
+      // get stronger reduction, low-position ones barely affected
+      const costMultAdjust = Math.pow(1.15 / building.costMultiplier, positionFactor * 2.5);
+      const targetCount = Math.max(
+        10,
+        Math.round(30 * positionFactor * buildingDifficulty * costMultAdjust),
+      );
 
       templates.push({
         type: GoalType.BuildingCount,
