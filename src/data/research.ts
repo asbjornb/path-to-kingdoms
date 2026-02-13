@@ -1209,14 +1209,14 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
   // ===== STARTING CAPITAL (per-tier, infinitely repeatable) =====
 
   ...generateStartingCapital([
-    { tier: TierType.Hamlet, prefix: 'hamlet', value: 5 },
-    { tier: TierType.Village, prefix: 'village', value: 50 },
-    { tier: TierType.Town, prefix: 'town', value: 500 },
-    { tier: TierType.City, prefix: 'city', value: 5000 },
-    { tier: TierType.County, prefix: 'county', value: 50000 },
-    { tier: TierType.Duchy, prefix: 'duchy', value: 500000 },
-    { tier: TierType.Realm, prefix: 'realm', value: 5000000 },
-    { tier: TierType.Kingdom, prefix: 'kingdom', value: 50000000 },
+    { tier: TierType.Hamlet, prefix: 'hamlet', value: 50 },
+    { tier: TierType.Village, prefix: 'village', value: 500 },
+    { tier: TierType.Town, prefix: 'town', value: 5000 },
+    { tier: TierType.City, prefix: 'city', value: 50000 },
+    { tier: TierType.County, prefix: 'county', value: 500000 },
+    { tier: TierType.Duchy, prefix: 'duchy', value: 5000000 },
+    { tier: TierType.Realm, prefix: 'realm', value: 50000000 },
+    { tier: TierType.Kingdom, prefix: 'kingdom', value: 500000000 },
   ]),
 
   // ===== STARTING BUILDINGS (per-tier, capped chain) =====
