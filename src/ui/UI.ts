@@ -1062,13 +1062,36 @@ export class UI {
   }
 
   private formatGoalDescription(goal: Goal, settlement: Settlement): string {
-    if (goal.type === GoalType.Survival) {
-      const reductionFactor = this.game.getGoalReductionFactor(settlement);
-      const effectiveTarget = goal.targetValue * reductionFactor;
-      const targetMinutes = Math.floor(effectiveTarget / 60);
-      return `Prosper for ${targetMinutes} minutes`;
+    const reductionFactor = this.game.getGoalReductionFactor(settlement);
+    const effectiveTarget =
+      goal.type === GoalType.BuildingCount
+        ? Math.ceil(goal.targetValue * reductionFactor)
+        : goal.targetValue * reductionFactor;
+
+    switch (goal.type) {
+      case GoalType.ReachIncome:
+        return `Reach ${formatNumber(effectiveTarget)} income per second`;
+      case GoalType.AccumulateCurrency:
+        return `Earn ${formatNumber(effectiveTarget)} total currency`;
+      case GoalType.CurrentCurrency:
+        return `Have ${formatNumber(effectiveTarget)} currency at once`;
+      case GoalType.CurrencySpent:
+        return `Spend ${formatNumber(effectiveTarget)} currency on buildings`;
+      case GoalType.TotalBuildings:
+        return `Own ${formatNumber(effectiveTarget)} total buildings`;
+      case GoalType.Survival: {
+        const targetMinutes = Math.floor(effectiveTarget / 60);
+        return `Prosper for ${targetMinutes} minutes`;
+      }
+      case GoalType.BuildingCount: {
+        const tierDef = getTierByType(settlement.tier);
+        const building = tierDef?.buildings.find((b) => b.id === goal.buildingId);
+        const buildingName = building !== undefined ? building.name : 'buildings';
+        return `Build ${effectiveTarget} ${buildingName}s`;
+      }
+      default:
+        return goal.description;
     }
-    return goal.description;
   }
 
   public update(): void {
