@@ -25,14 +25,14 @@ import { GoalGenerator } from '../data/goals';
 // Building-count goals scale the max up based on the building's cost
 // (see computeGoalMaxMinutes).
 const TIER_BOUNDS: Record<TierType, { minMinutes: number; maxMinutes: number }> = {
-  [TierType.Hamlet]: { minMinutes: 1, maxMinutes: 20 },
-  [TierType.Village]: { minMinutes: 1, maxMinutes: 12 },
-  [TierType.Town]: { minMinutes: 1, maxMinutes: 15 },
-  [TierType.City]: { minMinutes: 1, maxMinutes: 18 },
-  [TierType.County]: { minMinutes: 1, maxMinutes: 25 },
-  [TierType.Duchy]: { minMinutes: 1, maxMinutes: 40 },
-  [TierType.Realm]: { minMinutes: 1, maxMinutes: 15 },
-  [TierType.Kingdom]: { minMinutes: 1, maxMinutes: 25 },
+  [TierType.Hamlet]: { minMinutes: 5, maxMinutes: 20 },
+  [TierType.Village]: { minMinutes: 7, maxMinutes: 23 },
+  [TierType.Town]: { minMinutes: 9, maxMinutes: 26 },
+  [TierType.City]: { minMinutes: 11, maxMinutes: 29 },
+  [TierType.County]: { minMinutes: 13, maxMinutes: 32 },
+  [TierType.Duchy]: { minMinutes: 15, maxMinutes: 35 },
+  [TierType.Realm]: { minMinutes: 17, maxMinutes: 38 },
+  [TierType.Kingdom]: { minMinutes: 19, maxMinutes: 41 },
 };
 
 /**
@@ -81,102 +81,11 @@ interface SimResult {
 const allResults: SimResult[] = [];
 
 /**
- * Build every goal template for a tier (mirrors GoalGenerator logic) so we
- * can test each one deterministically instead of relying on random selection.
+ * Get every goal template for a tier directly from GoalGenerator so the
+ * test stays in sync with the actual game goals automatically.
  */
 function allGoalTemplatesForTier(tierType: TierType): Goal[] {
-  const tierDef = TIER_DATA.find((t) => t.type === tierType);
-  if (!tierDef) return [];
-
-  const incomeScale = GoalGenerator.getTierScale(tierType);
-  const costScale = GoalGenerator.getCostScale(tierType);
-  const TIER_DIFFICULTY: Record<TierType, number> = {
-    [TierType.Hamlet]: 1.0,
-    [TierType.Village]: 1.1,
-    [TierType.Town]: 1.2,
-    [TierType.City]: 1.3,
-    [TierType.County]: 1.4,
-    [TierType.Duchy]: 1.5,
-    [TierType.Realm]: 1.6,
-    [TierType.Kingdom]: 1.7,
-  };
-  const difficulty = TIER_DIFFICULTY[tierType];
-
-  const fmt = (n: number): string => {
-    if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
-    if (n >= 1_000) return (n / 1_000).toFixed(1) + 'K';
-    return n.toString();
-  };
-
-  const templates: Array<{
-    type: GoalType;
-    baseValue: number;
-    description: string;
-    buildingId?: string;
-  }> = [];
-
-  // Income goals
-  for (const mult of [100, 250, 500]) {
-    const val = Math.round(mult * incomeScale * difficulty);
-    templates.push({
-      type: GoalType.ReachIncome,
-      baseValue: val,
-      description: `Reach ${fmt(val)} income/s`,
-    });
-  }
-
-  // Accumulate currency goals
-  for (const mult of [12000, 40000, 120000]) {
-    const val = Math.round(mult * costScale * difficulty);
-    templates.push({
-      type: GoalType.AccumulateCurrency,
-      baseValue: val,
-      description: `Earn ${fmt(val)} total`,
-    });
-  }
-
-  // Current currency goals
-  for (const mult of [3000, 7500, 15000]) {
-    const val = Math.round(mult * costScale * difficulty);
-    templates.push({
-      type: GoalType.CurrentCurrency,
-      baseValue: val,
-      description: `Have ${fmt(val)} on hand`,
-    });
-  }
-
-  // Survival goals
-  for (const baseSec of [300, 600, 900]) {
-    const val = Math.round(baseSec * difficulty);
-    templates.push({
-      type: GoalType.Survival,
-      baseValue: val,
-      description: `Prosper for ${Math.floor(val / 60)} min`,
-    });
-  }
-
-  // Building count goals
-  const buildingCount = tierDef.buildings.length;
-  tierDef.buildings.forEach((building, i) => {
-    const positionFactor = 1 - (i / buildingCount) * 0.6;
-    const targetCount = Math.round(30 * positionFactor * difficulty);
-    templates.push({
-      type: GoalType.BuildingCount,
-      baseValue: targetCount,
-      description: `Build ${targetCount} ${building.name}s`,
-      buildingId: building.id,
-    });
-  });
-
-  return templates.map((t, idx) => ({
-    id: `sim_goal_${idx}`,
-    type: t.type,
-    description: t.description,
-    targetValue: t.baseValue,
-    currentValue: 0,
-    isCompleted: false,
-    buildingId: t.buildingId,
-  }));
+  return GoalGenerator.getAllGoalTemplates(tierType);
 }
 
 /**

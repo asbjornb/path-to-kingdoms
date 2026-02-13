@@ -44,32 +44,21 @@ export const GoalGenerator = {
     return tierFirstCost / hamletFirstCost;
   },
 
-  generateRandomGoals(tierType: TierType, count: number = 1): Goal[] {
-    const goals: Goal[] = [];
+  getAllGoalTemplates(tierType: TierType): Goal[] {
     const tierDef = TIER_DATA.find((t) => t.type === tierType);
-    if (!tierDef) return goals;
+    if (!tierDef) return [];
 
     const incomeScale = this.getTierScale(tierType);
     const costScale = this.getCostScale(tierType);
     const difficulty = TIER_DIFFICULTY[tierType];
 
-    const goalTemplates: Array<{
+    const templates: Array<{
       type: GoalType;
       baseValue: number;
       description: string;
       buildingId?: string;
     }> = [
       // Income goals (scaled by tier income level and difficulty)
-      {
-        type: GoalType.ReachIncome,
-        baseValue: Math.round(100 * incomeScale * difficulty),
-        description: 'Reach {value} income per second',
-      },
-      {
-        type: GoalType.ReachIncome,
-        baseValue: Math.round(250 * incomeScale * difficulty),
-        description: 'Reach {value} income per second',
-      },
       {
         type: GoalType.ReachIncome,
         baseValue: Math.round(500 * incomeScale * difficulty),
@@ -79,43 +68,28 @@ export const GoalGenerator = {
       // Lifetime currency goals (scaled by tier cost level and difficulty)
       {
         type: GoalType.AccumulateCurrency,
-        baseValue: Math.round(12000 * costScale * difficulty),
+        baseValue: Math.round(100000 * costScale * difficulty),
         description: 'Earn {value} total currency',
       },
       {
         type: GoalType.AccumulateCurrency,
-        baseValue: Math.round(40000 * costScale * difficulty),
-        description: 'Earn {value} total currency',
-      },
-      {
-        type: GoalType.AccumulateCurrency,
-        baseValue: Math.round(120000 * costScale * difficulty),
+        baseValue: Math.round(150000 * costScale * difficulty),
         description: 'Earn {value} total currency',
       },
 
       // Current currency goals (scaled by tier cost level and difficulty)
       {
         type: GoalType.CurrentCurrency,
-        baseValue: Math.round(3000 * costScale * difficulty),
+        baseValue: Math.round(10000 * costScale * difficulty),
         description: 'Have {value} currency at once',
       },
       {
         type: GoalType.CurrentCurrency,
-        baseValue: Math.round(7500 * costScale * difficulty),
-        description: 'Have {value} currency at once',
-      },
-      {
-        type: GoalType.CurrentCurrency,
-        baseValue: Math.round(15000 * costScale * difficulty),
+        baseValue: Math.round(20000 * costScale * difficulty),
         description: 'Have {value} currency at once',
       },
 
       // Prosperity goals (time-based, accelerated by income)
-      {
-        type: GoalType.Survival,
-        baseValue: Math.round(300 * difficulty),
-        description: 'Prosper for {minutes} minutes',
-      },
       {
         type: GoalType.Survival,
         baseValue: Math.round(600 * difficulty),
@@ -135,7 +109,7 @@ export const GoalGenerator = {
       const positionFactor = 1 - (i / buildingIndex) * 0.6; // 1.0 down to 0.4
       const targetCount = Math.round(30 * positionFactor * difficulty);
 
-      goalTemplates.push({
+      templates.push({
         type: GoalType.BuildingCount,
         baseValue: targetCount,
         description: `Build ${targetCount} ${building.name}s`,
@@ -143,24 +117,21 @@ export const GoalGenerator = {
       });
     });
 
-    // Randomly select unique goals
-    const shuffled = [...goalTemplates].sort(() => Math.random() - 0.5);
-    const selectedTemplates = shuffled.slice(0, count);
+    return templates.map((t) => ({
+      id: `goal_${this.goalCounter++}`,
+      type: t.type,
+      description: this.formatDescription(t.description, t.baseValue),
+      targetValue: t.baseValue,
+      currentValue: 0,
+      isCompleted: false,
+      buildingId: t.buildingId,
+    }));
+  },
 
-    for (const template of selectedTemplates) {
-      const goal: Goal = {
-        id: `goal_${this.goalCounter++}`,
-        type: template.type,
-        description: this.formatDescription(template.description, template.baseValue),
-        targetValue: template.baseValue,
-        currentValue: 0,
-        isCompleted: false,
-        buildingId: template.buildingId,
-      };
-      goals.push(goal);
-    }
-
-    return goals;
+  generateRandomGoals(tierType: TierType, count: number = 1): Goal[] {
+    const allTemplates = this.getAllGoalTemplates(tierType);
+    const shuffled = [...allTemplates].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, count);
   },
 
   formatDescription(description: string, value: number): string {
