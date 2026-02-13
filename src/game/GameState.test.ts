@@ -604,16 +604,17 @@ describe('GameStateManager', () => {
 
     it('should not generate next level for parallel_slots', () => {
       game.getState().researchPoints.set(TierType.Hamlet, 100000);
+      game.getState().researchPoints.set(TierType.Village, 100000);
+      game.getState().researchPoints.set(TierType.Town, 100000);
 
       // Buy all hamlet parallel slot research
       game.purchaseResearch('hamlet_parallel_2');
       game.purchaseResearch('hamlet_parallel_3');
-      game.purchaseResearch('hamlet_parallel_4');
-      game.purchaseResearch('hamlet_parallel_5');
-      game.purchaseResearch('hamlet_parallel_6');
+      game.purchaseResearch('hamlet_parallel_4'); // Village tier
+      game.purchaseResearch('hamlet_parallel_5'); // Town tier
 
-      // Should NOT have generated hamlet_parallel_7
-      const nextLevel = game.getState().research.find((r) => r.id === 'hamlet_parallel_7');
+      // Should NOT have generated hamlet_parallel_6 (6th slot is prestige-only)
+      const nextLevel = game.getState().research.find((r) => r.id === 'hamlet_parallel_6');
       expect(nextLevel).toBeUndefined();
     });
 

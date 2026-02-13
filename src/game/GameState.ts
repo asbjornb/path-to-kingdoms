@@ -1792,7 +1792,11 @@ export class GameStateManager {
       });
       // Also include dynamically generated repeatable research not in canonical data
       // Skip stale research types from old saves
-      const staleResearchTypes = new Set(['tier_requirement_reduction', 'cost_scaling_reduction']);
+      const staleResearchTypes = new Set([
+        'tier_requirement_reduction',
+        'cost_scaling_reduction',
+        'parallel_slots',
+      ]);
       for (const saved of savedResearch) {
         if (!canonicalIds.has(saved.id) && !staleResearchTypes.has(saved.effect.type)) {
           research.push(saved);
