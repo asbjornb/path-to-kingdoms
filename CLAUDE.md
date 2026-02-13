@@ -72,6 +72,12 @@ src/
 
 Tests cover game mechanics, data consistency, balance simulation, UI rendering, and utilities. Run `npm run test:run` for a single pass. Test files are allowed relaxed lint rules (`any`, non-null assertions, console).
 
+To check only balance simulation failures (much faster than running the full suite):
+
+```bash
+npx vitest run balance-sim --reporter=verbose
+```
+
 ## Deployment
 
 GitHub Pages via GitHub Actions. Builds on push to `main`. Base path is `/path-to-kingdoms/`.
