@@ -10,7 +10,7 @@ function showUpdateBanner(): void {
   banner.className = 'version-update-banner';
   banner.innerHTML = `
     <span>A new version is available.</span>
-    <button onclick="location.reload()">Refresh</button>
+    <button onclick="window.saveGame(); location.reload()">Refresh</button>
   `;
   document.body.prepend(banner);
 }

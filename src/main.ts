@@ -157,10 +157,13 @@ function initGame(): void {
   };
 
   window.saveGame = (): void => {
-    if (game.saveGame()) {
-      alert('Game saved successfully!');
-    } else {
-      alert('Failed to save game!');
+    const success = game.saveGame();
+    const btn = document.querySelector<HTMLButtonElement>('button.save-btn');
+    if (btn) {
+      btn.classList.remove('save-flash-success', 'save-flash-fail');
+      // Force reflow so re-adding the class restarts the animation
+      void btn.offsetWidth;
+      btn.classList.add(success ? 'save-flash-success' : 'save-flash-fail');
     }
   };
 
