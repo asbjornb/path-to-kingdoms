@@ -10,6 +10,7 @@ import {
   ResearchUpgrade,
 } from '../types/game';
 import { TIER_DATA, getTierByType } from '../data/tiers';
+import { getPrestigeUpgradeCost } from '../data/prestige';
 import { formatNumber, formatIncome } from '../utils/format';
 import { getAppVersion } from '../version';
 
@@ -637,31 +638,39 @@ export class UI {
         break;
       }
     }
-    // Also show if any prestige upgrades have been purchased
-    const hasPurchased = state.prestigeUpgrades.some((u) => u.purchased);
+    // Also show if any prestige upgrades have been purchased (or levelled)
+    const hasPurchased = state.prestigeUpgrades.some(
+      (u) => u.purchased || (u.repeatable === true && (u.level ?? 0) > 0),
+    );
     if (!hasAnyCurrency && !hasPurchased) return '';
 
     // Show all prestige upgrades, filtering by prerequisites
     let upgrades = state.prestigeUpgrades.filter((upgrade) => {
       if (upgrade.prerequisite === undefined || upgrade.prerequisite === '') return true;
       const prereq = state.prestigeUpgrades.find((u) => u.id === upgrade.prerequisite);
-      return prereq !== undefined && prereq.purchased;
+      if (!prereq) return false;
+      // For repeatable prerequisites, require level > 0; otherwise require purchased
+      return prereq.repeatable === true ? (prereq.level ?? 0) > 0 : prereq.purchased;
     });
 
-    // Hide purchased ones unless show completed is on
+    // Hide purchased ones unless show completed is on (repeatable always stay visible)
     const showCompleted = this.game.isShowCompletedResearchEnabled();
     if (!showCompleted) {
-      upgrades = upgrades.filter((u) => !u.purchased);
+      upgrades = upgrades.filter((u) => !u.purchased || u.repeatable === true);
     }
 
     // Sort affordable upgrades first, then by cost ascending within each group
     upgrades.sort((a, b) => {
       const aCurrency = state.prestigeCurrency.get(a.tier) ?? 0;
       const bCurrency = state.prestigeCurrency.get(b.tier) ?? 0;
-      const aAffordable = a.purchased || aCurrency >= a.cost;
-      const bAffordable = b.purchased || bCurrency >= b.cost;
+      const aCost = getPrestigeUpgradeCost(a);
+      const bCost = getPrestigeUpgradeCost(b);
+      const aDone = a.purchased && a.repeatable !== true;
+      const bDone = b.purchased && b.repeatable !== true;
+      const aAffordable = aDone || aCurrency >= aCost;
+      const bAffordable = bDone || bCurrency >= bCost;
       if (aAffordable !== bAffordable) return aAffordable ? -1 : 1;
-      return a.cost - b.cost;
+      return aCost - bCost;
     });
 
     if (upgrades.length === 0 && !showCompleted) return '';
@@ -684,27 +693,35 @@ export class UI {
         <div class="research-list">
           ${upgrades
             .map((upgrade) => {
+              const actualCost = getPrestigeUpgradeCost(upgrade);
               const currency = state.prestigeCurrency.get(upgrade.tier) ?? 0;
-              const canAfford = currency >= upgrade.cost;
+              const canAfford = currency >= actualCost;
               const tierName = upgrade.tier.charAt(0).toUpperCase() + upgrade.tier.slice(1);
               const searchText = this.getUpgradeSearchText(upgrade);
               const matchesSearch = this.upgradeMatchesSearch(upgrade, this.prestigeSearchQuery);
               const upgradeTags = this.renderUpgradeTags(upgrade);
+              const isRepeatable = upgrade.repeatable === true;
+              const level = upgrade.level ?? 0;
+              const levelBadge =
+                isRepeatable && level > 0
+                  ? `<span class="prestige-level-badge">Lv.${level}</span>`
+                  : '';
+              const isDone = upgrade.purchased && !isRepeatable;
 
               return `
-              <div class="research-item prestige-item ${upgrade.purchased ? 'purchased' : ''}" data-search-text="${searchText}"${!matchesSearch ? ' style="display:none"' : ''}>
-                <h4>${upgrade.name}</h4>
+              <div class="research-item prestige-item ${isDone ? 'purchased' : ''} ${isRepeatable ? 'repeatable' : ''}" data-search-text="${searchText}"${!matchesSearch ? ' style="display:none"' : ''}>
+                <h4>${upgrade.name} ${levelBadge}</h4>
                 ${upgradeTags}
                 <p>${upgrade.description}</p>
                 ${
-                  !upgrade.purchased
+                  !isDone
                     ? `
                   <button
                     class="research-btn prestige-upgrade-btn ${!canAfford ? 'disabled' : ''}"
                     onclick="window.purchasePrestigeUpgrade('${upgrade.id}')"
                     ${!canAfford ? 'disabled' : ''}
                   >
-                    ${upgrade.cost} ${tierName} Crowns
+                    ${actualCost} ${tierName} Crowns
                   </button>
                 `
                     : '<span class="purchased-label">Purchased</span>'
@@ -754,7 +771,7 @@ export class UI {
       for (const selectedId of this.selectedPrestigeUpgrades) {
         const sel = state.prestigeUpgrades.find((u) => u.id === selectedId);
         if (sel && sel.tier === tier.type) {
-          selectedCost += sel.cost;
+          selectedCost += getPrestigeUpgradeCost(sel);
         }
       }
       budgetByTier.set(tier.type, current + earned - selectedCost);
@@ -762,26 +779,34 @@ export class UI {
 
     // Show all prestige upgrades (filtering by prerequisites as before, but also
     // considering selected upgrades as "virtually purchased" for prerequisite checks)
+    const isPrereqMet = (prereqId: string): boolean => {
+      const prereq = state.prestigeUpgrades.find((u) => u.id === prereqId);
+      if (!prereq) return false;
+      if (this.selectedPrestigeUpgrades.has(prereq.id)) return true;
+      return prereq.repeatable === true ? (prereq.level ?? 0) > 0 : prereq.purchased;
+    };
     const upgrades = state.prestigeUpgrades
       .filter((upgrade) => {
-        if (upgrade.purchased) return false;
+        // Non-repeatable purchased upgrades go in the "owned" section
+        if (upgrade.purchased && upgrade.repeatable !== true) return false;
         if (upgrade.prerequisite === undefined || upgrade.prerequisite === '') return true;
-        const prereq = state.prestigeUpgrades.find((u) => u.id === upgrade.prerequisite);
-        return (
-          prereq !== undefined && (prereq.purchased || this.selectedPrestigeUpgrades.has(prereq.id))
-        );
+        return isPrereqMet(upgrade.prerequisite);
       })
       .sort((a, b) => {
         const aBudget = budgetByTier.get(a.tier) ?? 0;
         const bBudget = budgetByTier.get(b.tier) ?? 0;
-        const aAffordable = this.selectedPrestigeUpgrades.has(a.id) || aBudget >= a.cost;
-        const bAffordable = this.selectedPrestigeUpgrades.has(b.id) || bBudget >= b.cost;
+        const aCost = getPrestigeUpgradeCost(a);
+        const bCost = getPrestigeUpgradeCost(b);
+        const aAffordable = this.selectedPrestigeUpgrades.has(a.id) || aBudget >= aCost;
+        const bAffordable = this.selectedPrestigeUpgrades.has(b.id) || bBudget >= bCost;
         if (aAffordable !== bAffordable) return aAffordable ? -1 : 1;
-        return a.cost - b.cost;
+        return aCost - bCost;
       });
 
-    // Also show already-purchased upgrades for context
-    const purchasedUpgrades = state.prestigeUpgrades.filter((u) => u.purchased);
+    // Also show already-purchased one-time upgrades for context
+    const purchasedUpgrades = state.prestigeUpgrades.filter(
+      (u) => u.purchased && u.repeatable !== true,
+    );
 
     return `
       <div class="prestige-shop-overlay" id="prestige-shop-overlay">
@@ -865,29 +890,36 @@ export class UI {
                 upgrades.length > 0
                   ? upgrades
                       .map((upgrade) => {
+                        const actualCost = getPrestigeUpgradeCost(upgrade);
                         const tierName =
                           upgrade.tier.charAt(0).toUpperCase() + upgrade.tier.slice(1);
                         const isSelected = this.selectedPrestigeUpgrades.has(upgrade.id);
                         const remaining = budgetByTier.get(upgrade.tier) ?? 0;
-                        const canAfford = isSelected || remaining >= upgrade.cost;
+                        const canAfford = isSelected || remaining >= actualCost;
                         const searchText = this.getUpgradeSearchText(upgrade);
                         const matchesSearch = this.upgradeMatchesSearch(
                           upgrade,
                           this.prestigeShopSearchQuery,
                         );
                         const upgradeTags = this.renderUpgradeTags(upgrade);
+                        const isRepeatable = upgrade.repeatable === true;
+                        const level = upgrade.level ?? 0;
+                        const levelBadge =
+                          isRepeatable && level > 0
+                            ? ` <span class="prestige-level-badge">Lv.${level}</span>`
+                            : '';
 
                         return `
-                  <div class="prestige-shop-upgrade ${isSelected ? 'selected' : ''} ${!canAfford ? 'unaffordable' : ''}"
+                  <div class="prestige-shop-upgrade ${isSelected ? 'selected' : ''} ${!canAfford ? 'unaffordable' : ''} ${isRepeatable ? 'repeatable' : ''}"
                        data-search-text="${searchText}"${!matchesSearch ? ' style="display:none"' : ''}
                        onclick="window.togglePrestigeShopUpgrade('${upgrade.id}')">
                     <div class="prestige-shop-upgrade-info">
-                      <span class="prestige-shop-upgrade-name">${upgrade.name}</span>
+                      <span class="prestige-shop-upgrade-name">${upgrade.name}${levelBadge}</span>
                       ${upgradeTags}
                       <span class="prestige-shop-upgrade-desc">${upgrade.description}</span>
                     </div>
                     <div class="prestige-shop-upgrade-cost">
-                      <span class="prestige-shop-cost-amount">${upgrade.cost} ${tierName} Crown${upgrade.cost !== 1 ? 's' : ''}</span>
+                      <span class="prestige-shop-cost-amount">${actualCost} ${tierName} Crown${actualCost !== 1 ? 's' : ''}</span>
                       ${isSelected ? '<span class="prestige-shop-selected-badge">Selected</span>' : ''}
                     </div>
                   </div>
