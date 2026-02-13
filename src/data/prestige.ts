@@ -358,10 +358,10 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
   {
     id: 'prestige_pastoral_2',
     name: 'Pastoral Wisdom II',
-    description: 'Survival goals progress 12% faster',
+    description: 'Survival goals progress 15% faster',
     cost: 3,
     tier: TierType.Village,
-    effect: { type: 'prestige_survival_speed', value: 0.12 },
+    effect: { type: 'prestige_survival_speed', value: 0.15 },
     purchased: false,
     prerequisite: 'prestige_pastoral_1',
   },
@@ -381,10 +381,10 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
   {
     id: 'prestige_oracle_speed_1',
     name: "Oracle's Swiftness",
-    description: 'Survival goals progress 18% faster',
+    description: 'Survival goals progress 20% faster',
     cost: 2,
     tier: TierType.Realm,
-    effect: { type: 'prestige_survival_speed', value: 0.18 },
+    effect: { type: 'prestige_survival_speed', value: 0.2 },
     purchased: false,
   },
 
@@ -474,10 +474,10 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
   {
     id: 'prestige_scaling_duchy_1',
     name: 'Economic Reform',
-    description: 'Reduce all building cost scaling by 0.015',
+    description: 'Reduce all building cost scaling by 0.02',
     cost: 3,
     tier: TierType.Duchy,
-    effect: { type: 'prestige_cost_scaling_reduction', value: 0.015 },
+    effect: { type: 'prestige_cost_scaling_reduction', value: 0.02 },
     purchased: false,
     prerequisite: 'prestige_trade_routes_1',
   },
@@ -532,20 +532,20 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
   {
     id: 'prestige_stipend_1',
     name: "Scholar's Stipend",
-    description: '-8% research costs',
+    description: '-10% research costs',
     cost: 2,
     tier: TierType.Town,
-    effect: { type: 'prestige_research_discount', value: 0.92 },
+    effect: { type: 'prestige_research_discount', value: 0.9 },
     purchased: false,
   },
   // Realm currency → Even cheaper research
   {
     id: 'prestige_endowment_1',
     name: "Scholar's Endowment",
-    description: '-12% research costs',
+    description: '-15% research costs',
     cost: 3,
     tier: TierType.Realm,
-    effect: { type: 'prestige_research_discount', value: 0.88 },
+    effect: { type: 'prestige_research_discount', value: 0.85 },
     purchased: false,
   },
 
@@ -980,12 +980,12 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
   {
     id: 'prestige_academic_commerce_1',
     name: 'Academic Commerce',
-    description: 'Each University gives +1.5% income to Grand Bazaars',
+    description: 'Each University gives +2% income to Grand Bazaars',
     cost: 3,
     tier: TierType.City,
     effect: {
       type: 'prestige_building_synergy',
-      value: 0.015,
+      value: 0.02,
       sourceBuilding: 'city_university',
       targetBuilding: 'city_bazaar',
     },
@@ -1013,12 +1013,12 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
   {
     id: 'prestige_minting_scholars_1',
     name: 'Minting Scholars',
-    description: 'Each Mint gives +1.5% income to Royal Academies',
+    description: 'Each Mint gives +2% income to Royal Academies',
     cost: 3,
     tier: TierType.Duchy,
     effect: {
       type: 'prestige_building_synergy',
-      value: 0.015,
+      value: 0.02,
       sourceBuilding: 'duchy_mint',
       targetBuilding: 'duchy_academy',
     },
@@ -1047,12 +1047,12 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
   {
     id: 'prestige_imperial_legacy_1',
     name: 'Imperial Legacy',
-    description: 'Each Empire District gives +1.5% income to Eternal Monuments',
+    description: 'Each Empire District gives +2% income to Eternal Monuments',
     cost: 2,
     tier: TierType.Kingdom,
     effect: {
       type: 'prestige_building_synergy',
-      value: 0.015,
+      value: 0.02,
       sourceBuilding: 'kingdom_empire',
       targetBuilding: 'kingdom_monument',
     },
@@ -1120,10 +1120,10 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
   {
     id: 'prestige_realm_scouts_1',
     name: 'Realm Scouts',
-    description: 'Survival goals progress 8% faster',
+    description: 'Survival goals progress 10% faster',
     cost: 1,
     tier: TierType.Realm,
-    effect: { type: 'prestige_survival_speed', value: 0.08 },
+    effect: { type: 'prestige_survival_speed', value: 0.1 },
     purchased: false,
   },
 

@@ -5,12 +5,12 @@ import { TIER_DATA } from './tiers';
 // goal type). Other goal types apply their own dampening to account for nonlinear scaling.
 const TIER_DIFFICULTY: Record<TierType, number> = {
   [TierType.Hamlet]: 1.2,
-  [TierType.Village]: 3.8,
+  [TierType.Village]: 4.0,
   [TierType.Town]: 4.0,
   [TierType.City]: 4.5,
   [TierType.County]: 3.5,
   [TierType.Duchy]: 3.5,
-  [TierType.Realm]: 9.5,
+  [TierType.Realm]: 10.0,
   [TierType.Kingdom]: 6.0,
 };
 
@@ -18,14 +18,14 @@ const TIER_DIFFICULTY: Record<TierType, number> = {
 // exponentially and each tier has different effect synergies (goal_reduction, income_per_building)
 // that dramatically change how fast buildings can be bought.
 const BUILDING_TIER_SCALE: Record<TierType, number> = {
-  [TierType.Hamlet]: 1.05,
+  [TierType.Hamlet]: 1.0,
   [TierType.Village]: 1.85,
   [TierType.Town]: 1.35,
   [TierType.City]: 1.9,
   [TierType.County]: 1.33,
   [TierType.Duchy]: 1.4,
-  [TierType.Realm]: 2.45,
-  [TierType.Kingdom]: 1.38,
+  [TierType.Realm]: 2.5,
+  [TierType.Kingdom]: 1.4,
 };
 
 export const GoalGenerator = {

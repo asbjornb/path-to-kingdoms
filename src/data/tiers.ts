@@ -10,14 +10,14 @@ export const TIER_DATA: TierDefinition[] = [
         name: 'Hut',
         baseCost: 10,
         baseIncome: 1,
-        costMultiplier: 1.17,
+        costMultiplier: 1.15,
       },
       {
         id: 'hamlet_garden',
         name: 'Garden',
         baseCost: 50,
         baseIncome: 3,
-        costMultiplier: 1.24,
+        costMultiplier: 1.25,
       },
       {
         id: 'hamlet_workshop',
@@ -43,7 +43,7 @@ export const TIER_DATA: TierDefinition[] = [
         name: 'Market Stall',
         baseCost: 150,
         baseIncome: 4,
-        costMultiplier: 1.24,
+        costMultiplier: 1.25,
         effect: {
           type: 'cost_reduction',
           value: 0.02,
@@ -55,7 +55,7 @@ export const TIER_DATA: TierDefinition[] = [
         name: 'Small Library',
         baseCost: 500,
         baseIncome: 5,
-        costMultiplier: 1.48,
+        costMultiplier: 1.5,
         effect: {
           type: 'completion_bonus',
           value: 2,
@@ -175,8 +175,8 @@ export const TIER_DATA: TierDefinition[] = [
         costMultiplier: 1.3,
         effect: {
           type: 'income_per_building',
-          value: 18,
-          description: '+18 income for each building in the settlement',
+          value: 20,
+          description: '+20 income for each building in the settlement',
         },
       },
     ],
@@ -233,9 +233,9 @@ export const TIER_DATA: TierDefinition[] = [
         costMultiplier: 1.3,
         effect: {
           type: 'production_boost',
-          value: 0.12,
+          value: 0.1,
           targetBuilding: 'city_bazaar',
-          description: '+12% Grand Bazaar income per trade guild',
+          description: '+10% Grand Bazaar income per trade guild',
         },
       },
     ],
@@ -427,8 +427,8 @@ export const TIER_DATA: TierDefinition[] = [
         costMultiplier: 1.25,
         effect: {
           type: 'income_multiplier',
-          value: 0.034,
-          description: '+3.4% income from all buildings per treasury',
+          value: 0.035,
+          description: '+3.5% income from all buildings per treasury',
         },
       },
       {
