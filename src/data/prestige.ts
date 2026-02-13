@@ -1285,6 +1285,192 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     purchased: false,
     prerequisite: 'prestige_feudal_ties_1',
   },
+
+  // ===== Repeatable prestige sinks (2 per tier) =====
+  // These provide small bonuses per level with escalating costs.
+  // Cost formula: baseCost + currentLevel (so level 0 costs baseCost, level 1 costs baseCost+1, etc.)
+
+  // Village sinks
+  {
+    id: 'prestige_sink_village_income',
+    name: 'Tithe Collector',
+    description: '+2% income to all settlements per level',
+    cost: 2,
+    tier: TierType.Village,
+    effect: { type: 'prestige_income_multiplier', value: 0.02 },
+    purchased: false,
+    prerequisite: 'prestige_growth_1',
+    repeatable: true,
+    level: 0,
+  },
+  {
+    id: 'prestige_sink_village_survival',
+    name: 'Pastoral Endurance',
+    description: '+3% survival goal speed per level',
+    cost: 2,
+    tier: TierType.Village,
+    effect: { type: 'prestige_survival_speed', value: 0.03 },
+    purchased: false,
+    prerequisite: 'prestige_pastoral_1',
+    repeatable: true,
+    level: 0,
+  },
+
+  // Town sinks
+  {
+    id: 'prestige_sink_town_flat_cost',
+    name: 'Guild Coffers',
+    description: '+1 flat cost building (no scaling) per level',
+    cost: 2,
+    tier: TierType.Town,
+    effect: { type: 'prestige_flat_cost_count', value: 1 },
+    purchased: false,
+    prerequisite: 'prestige_foundation_1',
+    repeatable: true,
+    level: 0,
+  },
+  {
+    id: 'prestige_sink_town_scaling',
+    name: 'Efficient Guilds',
+    description: '-0.005 building cost scaling per level',
+    cost: 3,
+    tier: TierType.Town,
+    effect: { type: 'prestige_cost_scaling_reduction', value: 0.005 },
+    purchased: false,
+    prerequisite: 'prestige_scaling_town_1',
+    repeatable: true,
+    level: 0,
+  },
+
+  // City sinks
+  {
+    id: 'prestige_sink_city_currency',
+    name: 'Crown Mint',
+    description: '+5% prestige currency earned on reset per level',
+    cost: 2,
+    tier: TierType.City,
+    effect: { type: 'prestige_currency_boost', value: 0.05 },
+    purchased: false,
+    prerequisite: 'prestige_crown_tax_1',
+    repeatable: true,
+    level: 0,
+  },
+  {
+    id: 'prestige_sink_city_research',
+    name: 'Research Patronage',
+    description: '+3 research points per completion per level',
+    cost: 2,
+    tier: TierType.City,
+    effect: { type: 'prestige_research_bonus', value: 3 },
+    purchased: false,
+    prerequisite: 'prestige_knowledge_1',
+    repeatable: true,
+    level: 0,
+  },
+
+  // County sinks
+  {
+    id: 'prestige_sink_county_goals',
+    name: 'Ambitious Drive',
+    description: '-2% goal targets per level',
+    cost: 2,
+    tier: TierType.County,
+    effect: { type: 'prestige_goal_reduction', value: 0.02 },
+    purchased: false,
+    prerequisite: 'prestige_ambition_1',
+    repeatable: true,
+    level: 0,
+  },
+  {
+    id: 'prestige_sink_county_mastery',
+    name: 'Mastery Practice',
+    description: '+5% mastery growth per level',
+    cost: 2,
+    tier: TierType.County,
+    effect: { type: 'prestige_mastery_boost', value: 0.05 },
+    purchased: false,
+    prerequisite: 'prestige_veteran_builders_1',
+    repeatable: true,
+    level: 0,
+  },
+
+  // Duchy sinks
+  {
+    id: 'prestige_sink_duchy_production',
+    name: 'Trade Empire',
+    description: '+5% production boost effectiveness per level',
+    cost: 2,
+    tier: TierType.Duchy,
+    effect: { type: 'prestige_production_boost_amplifier', value: 0.05 },
+    purchased: false,
+    prerequisite: 'prestige_trade_routes_1',
+    repeatable: true,
+    level: 0,
+  },
+  {
+    id: 'prestige_sink_duchy_patronage',
+    name: 'Noble Connections',
+    description: '+5% patronage income per level',
+    cost: 2,
+    tier: TierType.Duchy,
+    effect: { type: 'prestige_patronage_boost', value: 0.05 },
+    purchased: false,
+    prerequisite: 'prestige_wealth_1',
+    repeatable: true,
+    level: 0,
+  },
+
+  // Realm sinks
+  {
+    id: 'prestige_sink_realm_autobuild',
+    name: 'Realm Efficiency',
+    description: '+3% auto-build speed per level',
+    cost: 2,
+    tier: TierType.Realm,
+    effect: { type: 'prestige_autobuild_speed', value: 0.03 },
+    purchased: false,
+    prerequisite: 'prestige_power_1',
+    repeatable: true,
+    level: 0,
+  },
+  {
+    id: 'prestige_sink_realm_research',
+    name: 'Arcane Scholarship',
+    description: '-3% research costs per level',
+    cost: 3,
+    tier: TierType.Realm,
+    effect: { type: 'prestige_research_discount', value: 0.97 },
+    purchased: false,
+    prerequisite: 'prestige_endowment_1',
+    repeatable: true,
+    level: 0,
+  },
+
+  // Kingdom sinks
+  {
+    id: 'prestige_sink_kingdom_income',
+    name: 'Eternal Prosperity',
+    description: '+3% income to all settlements per level',
+    cost: 2,
+    tier: TierType.Kingdom,
+    effect: { type: 'prestige_income_multiplier', value: 0.03 },
+    purchased: false,
+    prerequisite: 'prestige_destiny_1',
+    repeatable: true,
+    level: 0,
+  },
+  {
+    id: 'prestige_sink_kingdom_goals',
+    name: 'Royal Ambition',
+    description: '-3% goal targets per level',
+    cost: 2,
+    tier: TierType.Kingdom,
+    effect: { type: 'prestige_goal_reduction', value: 0.03 },
+    purchased: false,
+    prerequisite: 'prestige_royal_decree_1',
+    repeatable: true,
+    level: 0,
+  },
 ];
 
 /**
@@ -1294,4 +1480,13 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
 export function calculatePrestigeCurrency(completions: number): number {
   if (completions <= 0) return 0;
   return Math.floor(Math.sqrt(completions));
+}
+
+/**
+ * Get the actual cost of a prestige upgrade, accounting for repeatable level scaling.
+ * Repeatable upgrades cost baseCost + currentLevel (so each level costs 1 more).
+ */
+export function getPrestigeUpgradeCost(upgrade: PrestigeUpgrade): number {
+  if (upgrade.repeatable !== true) return upgrade.cost;
+  return upgrade.cost + (upgrade.level ?? 0);
 }
