@@ -1382,6 +1382,73 @@ export class GameStateManager {
     }
   }
 
+  /**
+   * Returns a short comparison hint for an unpurchased research upgrade,
+   * showing the player what they currently have so they can judge value.
+   */
+  public getResearchComparisonHint(research: ResearchUpgrade): string {
+    if (research.purchased) return '';
+
+    switch (research.effect.type) {
+      case 'auto_building': {
+        const baseInterval = research.effect.interval;
+        if (baseInterval === undefined || baseInterval === 0) return '';
+
+        // Calculate effective interval for this upgrade (with speed bonuses)
+        const speedBonus = this.getMasteryAutoBuildSpeed(research.tier);
+        const prestigeSpeedBonus = this.getPrestigeEffect('prestige_autobuild_speed');
+        const totalSpeedBonus = Math.min(0.9, speedBonus + prestigeSpeedBonus);
+        const effectiveSeconds = Math.round((baseInterval * (1 - totalSpeedBonus)) / 1000);
+
+        // Find existing purchased auto-builders for the same building
+        const existing = this.state.research.filter(
+          (r) =>
+            r.purchased &&
+            r.effect.type === 'auto_building' &&
+            r.effect.buildingId === research.effect.buildingId,
+        );
+
+        const parts: string[] = [];
+        if (effectiveSeconds !== Math.round(baseInterval / 1000)) {
+          parts.push(`${effectiveSeconds}s with bonuses`);
+        }
+        if (existing.length > 0) {
+          const intervals = existing.map((r) => r.effect.interval ?? Infinity);
+          const bestBase = Math.min(...intervals);
+          const bestEffective = Math.round((bestBase * (1 - totalSpeedBonus)) / 1000);
+          parts.push(`current best: ${bestEffective}s`);
+        }
+        return parts.length > 0 ? `(${parts.join(', ')})` : '';
+      }
+
+      case 'cost_reduction': {
+        const currentMult = this.getResearchEffect('cost_reduction', research.tier);
+        const currentPct = Math.round((1 - currentMult) * 100);
+        if (currentPct === 0) return '';
+        const newMult = currentMult * (research.effect.value ?? 1);
+        const newPct = Math.round((1 - newMult) * 100);
+        return `(currently ${currentPct}% → ${newPct}% total)`;
+      }
+
+      case 'starting_income': {
+        const current = this.getResearchEffect('starting_income', research.tier);
+        if (current === 0) return '';
+        return `(currently +${current})`;
+      }
+
+      case 'flat_cost_count': {
+        const researchFlat = this.getResearchEffect('flat_cost_count', research.tier);
+        const prestigeFlat = this.getPrestigeEffect('prestige_flat_cost_count');
+        const current = researchFlat + prestigeFlat;
+        if (current === 0) return '';
+        return `(currently ${current})`;
+      }
+
+      default:
+        return '';
+    }
+  }
+
   private clearEffectCache(): void {
     this.effectCache.clear();
   }

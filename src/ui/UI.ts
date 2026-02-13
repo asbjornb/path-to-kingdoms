@@ -493,13 +493,14 @@ export class UI {
               </div>`;
             }
 
+            const hint = this.game.getResearchComparisonHint(research);
             return `
             <div class="research-item">
               <div class="research-item-top">
                 <span class="research-item-name">${research.name}</span>
                 <span class="research-cost">${research.cost} pts</span>
               </div>
-              <p class="research-desc">${research.description}</p>
+              <p class="research-desc">${research.description}${hint !== '' ? ` <span class="research-hint">${hint}</span>` : ''}</p>
               <button
                 class="research-btn ${!canAfford ? 'disabled' : ''}"
                 onclick="window.purchaseResearch('${research.id}')"
