@@ -14,7 +14,11 @@ import {
 import { TIER_DATA, getTierByType } from '../data/tiers';
 import { RESEARCH_DATA } from '../data/research';
 import { GoalGenerator } from '../data/goals';
-import { PRESTIGE_UPGRADES, calculatePrestigeCurrency } from '../data/prestige';
+import {
+  PRESTIGE_UPGRADES,
+  calculatePrestigeCurrency,
+  getPrestigeUpgradeCost,
+} from '../data/prestige';
 import { ACHIEVEMENTS_DATA } from '../data/achievements';
 
 function createSettlement(tierType: TierType): Settlement {
@@ -784,40 +788,49 @@ export class GameStateManager {
     if (cached !== undefined) return cached;
 
     const upgrades = this.purchasedPrestigeUpgrades.filter((u) => u.effect.type === type);
+
+    // Helper: effective level for a prestige upgrade (1 for one-time, level for repeatable)
+    const lvl = (u: PrestigeUpgrade): number => (u.repeatable === true ? (u.level ?? 0) : 1);
+    // Additive aggregation: value * level per upgrade
+    const additive = (acc: number, u: PrestigeUpgrade): number => acc + u.effect.value * lvl(u);
+    // Multiplicative aggregation: value^level per upgrade
+    const multiplicative = (acc: number, u: PrestigeUpgrade): number =>
+      acc * Math.pow(u.effect.value, lvl(u));
+
     let result: number;
     switch (type) {
       case 'prestige_income_multiplier':
         // Additive sum (e.g., 0.15 + 0.25 = 0.40 → applied as 1 + total)
-        result = upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        result = upgrades.reduce(additive, 0);
         break;
       case 'prestige_cost_reduction':
         // Multiplicative (e.g., 0.90 * 0.85 = 0.765)
-        result = upgrades.reduce((mult, u) => mult * u.effect.value, 1);
+        result = upgrades.reduce(multiplicative, 1);
         break;
       case 'prestige_research_bonus':
-        result = upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        result = upgrades.reduce(additive, 0);
         break;
       case 'prestige_goal_reduction':
-        result = upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        result = upgrades.reduce(additive, 0);
         break;
       case 'prestige_starting_currency':
         // Multiplicative (e.g., 2 * 3 = 6x)
-        result = upgrades.reduce((mult, u) => mult * u.effect.value, 1);
+        result = upgrades.reduce(multiplicative, 1);
         break;
       case 'prestige_autobuild_speed':
-        result = upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        result = upgrades.reduce(additive, 0);
         break;
       case 'prestige_survival_speed':
         // Additive sum (e.g., 0.2 + 0.3 = 0.5 → applied as 1 + total multiplier)
-        result = upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        result = upgrades.reduce(additive, 0);
         break;
       case 'prestige_flat_cost_count':
         // Additive sum of flat-cost building counts
-        result = upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        result = upgrades.reduce(additive, 0);
         break;
       case 'prestige_cost_scaling_reduction':
         // Additive sum (reduces cost multiplier by total)
-        result = upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        result = upgrades.reduce(additive, 0);
         break;
       case 'prestige_building_income_boost':
         // Handled per-building via getPrestigeBuildingBoost, not aggregated here
@@ -825,27 +838,27 @@ export class GameStateManager {
         break;
       case 'prestige_patronage_boost':
         // Additive sum (e.g., 0.5 + 0.75 = 1.25 → applied as 1 + total multiplier)
-        result = upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        result = upgrades.reduce(additive, 0);
         break;
       case 'prestige_research_discount':
         // Multiplicative (e.g., 0.85 * 0.75 = 0.6375)
-        result = upgrades.reduce((mult, u) => mult * u.effect.value, 1);
+        result = upgrades.reduce(multiplicative, 1);
         break;
       case 'prestige_free_buildings':
         // Additive sum of free building counts
-        result = upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        result = upgrades.reduce(additive, 0);
         break;
       case 'prestige_currency_boost':
         // Additive sum (e.g., 0.5 + 0.75 = 1.25 → applied as 1 + total)
-        result = upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        result = upgrades.reduce(additive, 0);
         break;
       case 'prestige_mastery_boost':
         // Additive sum (e.g., 0.5 + 1.0 = 1.5 → mastery rate multiplied by 1 + total)
-        result = upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        result = upgrades.reduce(additive, 0);
         break;
       case 'prestige_production_boost_amplifier':
         // Additive sum (e.g., 0.4 + 0.6 = 1.0 → production boosts are 100% stronger)
-        result = upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        result = upgrades.reduce(additive, 0);
         break;
       case 'prestige_grant_building':
         // Handled per-building in spawnSettlement, not aggregated here
@@ -853,7 +866,7 @@ export class GameStateManager {
         break;
       case 'prestige_tier_requirement_reduction':
         // Additive sum (reduces tier advancement requirement)
-        result = upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        result = upgrades.reduce(additive, 0);
         break;
       case 'prestige_building_synergy':
         // Handled per-building in calculateSettlementIncome, not aggregated here
@@ -861,7 +874,7 @@ export class GameStateManager {
         break;
       case 'prestige_parallel_slots':
         // Additive: each prestige upgrade adds extra parallel slots
-        result = upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        result = upgrades.reduce(additive, 0);
         break;
       default:
         result = 0;
@@ -1037,22 +1050,37 @@ export class GameStateManager {
     this.clearEffectCache();
     this.invalidateMaxAffordableCache();
     const upgrade = this.state.prestigeUpgrades.find((u) => u.id === upgradeId);
-    if (!upgrade || upgrade.purchased) return false;
+    if (!upgrade) return false;
+
+    // Non-repeatable upgrades can only be purchased once
+    if (upgrade.repeatable !== true && upgrade.purchased) return false;
 
     // Check prerequisite
     if (upgrade.prerequisite !== undefined && upgrade.prerequisite !== '') {
       const prereq = this.state.prestigeUpgrades.find((u) => u.id === upgrade.prerequisite);
-      if (!prereq || !prereq.purchased) return false;
+      if (!prereq) return false;
+      // For repeatable prerequisites, require level > 0; otherwise require purchased
+      if (prereq.repeatable === true ? (prereq.level ?? 0) === 0 : !prereq.purchased) return false;
     }
 
-    // Check currency
+    // Check currency (use dynamic cost for repeatable upgrades)
+    const actualCost = getPrestigeUpgradeCost(upgrade);
     const currency = this.state.prestigeCurrency.get(upgrade.tier) ?? 0;
-    if (currency < upgrade.cost) return false;
+    if (currency < actualCost) return false;
 
     // Purchase
-    this.state.prestigeCurrency.set(upgrade.tier, currency - upgrade.cost);
-    upgrade.purchased = true;
-    this.purchasedPrestigeUpgrades.push(upgrade);
+    this.state.prestigeCurrency.set(upgrade.tier, currency - actualCost);
+
+    if (upgrade.repeatable === true) {
+      upgrade.level = (upgrade.level ?? 0) + 1;
+      // Add to cache if first level
+      if (upgrade.level === 1) {
+        this.purchasedPrestigeUpgrades.push(upgrade);
+      }
+    } else {
+      upgrade.purchased = true;
+      this.purchasedPrestigeUpgrades.push(upgrade);
+    }
 
     // If parallel slots prestige was purchased, spawn new hamlets
     if (upgrade.effect.type === 'prestige_parallel_slots') {
@@ -1564,7 +1592,9 @@ export class GameStateManager {
    * Called after bulk state changes (init, load, import).
    */
   private rebuildPurchasedCaches(): void {
-    this.purchasedPrestigeUpgrades = this.state.prestigeUpgrades.filter((u) => u.purchased);
+    this.purchasedPrestigeUpgrades = this.state.prestigeUpgrades.filter(
+      (u) => u.purchased || (u.repeatable === true && (u.level ?? 0) > 0),
+    );
     this.unlockedAchievements = this.state.achievements.filter((a) => a.unlocked);
   }
 
@@ -1992,7 +2022,9 @@ export class GameStateManager {
       const savedPrestigeUpgrades = saveData.gameState.prestigeUpgrades ?? [];
       const prestigeUpgrades = PRESTIGE_UPGRADES.map((def) => {
         const saved = savedPrestigeUpgrades.find((u: PrestigeUpgrade) => u.id === def.id);
-        return saved ? { ...def, purchased: saved.purchased } : { ...def, purchased: false };
+        return saved
+          ? { ...def, purchased: saved.purchased, level: saved.level }
+          : { ...def, purchased: false };
       });
 
       // Load research, merging saved state with current definitions

@@ -130,6 +130,8 @@ export interface PrestigeUpgrade {
   };
   purchased: boolean;
   prerequisite?: string;
+  repeatable?: boolean; // If true, can be purchased multiple times with escalating cost
+  level?: number; // Current level for repeatable prestige upgrades
 }
 
 export interface Achievement {

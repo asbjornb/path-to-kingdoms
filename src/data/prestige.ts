@@ -1285,7 +1285,208 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     purchased: false,
     prerequisite: 'prestige_feudal_ties_1',
   },
+
+  // ===== Repeatable prestige sinks (infinite purchase, escalating cost) =====
+
+  // Village: Tithe Collector (+2% income per level)
+  {
+    id: 'prestige_repeatable_tithe',
+    name: 'Tithe Collector',
+    description: '+2% income per level',
+    cost: 2,
+    tier: TierType.Village,
+    effect: { type: 'prestige_income_multiplier', value: 0.02 },
+    purchased: false,
+    prerequisite: 'prestige_growth_3',
+    repeatable: true,
+    level: 0,
+  },
+  // Village: Pastoral Endurance (+3% survival speed per level)
+  {
+    id: 'prestige_repeatable_pastoral',
+    name: 'Pastoral Endurance',
+    description: '+3% survival speed per level',
+    cost: 2,
+    tier: TierType.Village,
+    effect: { type: 'prestige_survival_speed', value: 0.03 },
+    purchased: false,
+    prerequisite: 'prestige_pastoral_2',
+    repeatable: true,
+    level: 0,
+  },
+
+  // Town: Guild Coffers (+1 flat cost building per level)
+  {
+    id: 'prestige_repeatable_coffers',
+    name: 'Guild Coffers',
+    description: '+1 flat cost building per level',
+    cost: 2,
+    tier: TierType.Town,
+    effect: { type: 'prestige_flat_cost_count', value: 1 },
+    purchased: false,
+    prerequisite: 'prestige_foundation_2',
+    repeatable: true,
+    level: 0,
+  },
+  // Town: Guild Connections (+2% patronage per level)
+  {
+    id: 'prestige_repeatable_guild_conn',
+    name: 'Guild Connections',
+    description: '+2% patronage per level',
+    cost: 2,
+    tier: TierType.Town,
+    effect: { type: 'prestige_patronage_boost', value: 0.02 },
+    purchased: false,
+    prerequisite: 'prestige_apprentice_scholars_1',
+    repeatable: true,
+    level: 0,
+  },
+
+  // City: Crown Mint (+5% prestige currency per level)
+  {
+    id: 'prestige_repeatable_mint',
+    name: 'Crown Mint',
+    description: '+5% prestige currency per level',
+    cost: 3,
+    tier: TierType.City,
+    effect: { type: 'prestige_currency_boost', value: 0.05 },
+    purchased: false,
+    prerequisite: 'prestige_crowning_1',
+    repeatable: true,
+    level: 0,
+  },
+  // City: Research Patronage (+3 research points per level)
+  {
+    id: 'prestige_repeatable_research',
+    name: 'Research Patronage',
+    description: '+3 research points per level',
+    cost: 3,
+    tier: TierType.City,
+    effect: { type: 'prestige_research_bonus', value: 3 },
+    purchased: false,
+    prerequisite: 'prestige_knowledge_2',
+    repeatable: true,
+    level: 0,
+  },
+
+  // County: Ambitious Drive (-2% goal targets per level)
+  {
+    id: 'prestige_repeatable_ambition',
+    name: 'Ambitious Drive',
+    description: '-2% goal targets per level',
+    cost: 3,
+    tier: TierType.County,
+    effect: { type: 'prestige_goal_reduction', value: 0.02 },
+    purchased: false,
+    prerequisite: 'prestige_ambition_2',
+    repeatable: true,
+    level: 0,
+  },
+  // County: Mastery Practice (+5% mastery per level)
+  {
+    id: 'prestige_repeatable_mastery',
+    name: 'Mastery Practice',
+    description: '+5% mastery per level',
+    cost: 3,
+    tier: TierType.County,
+    effect: { type: 'prestige_mastery_boost', value: 0.05 },
+    purchased: false,
+    prerequisite: 'prestige_master_builder_1',
+    repeatable: true,
+    level: 0,
+  },
+
+  // Duchy: Trade Empire (+5% production boost per level)
+  {
+    id: 'prestige_repeatable_trade',
+    name: 'Trade Empire',
+    description: '+5% production boost per level',
+    cost: 3,
+    tier: TierType.Duchy,
+    effect: { type: 'prestige_production_boost_amplifier', value: 0.05 },
+    purchased: false,
+    prerequisite: 'prestige_trade_networks_1',
+    repeatable: true,
+    level: 0,
+  },
+  // Duchy: Noble Connections (+5% patronage per level)
+  {
+    id: 'prestige_repeatable_noble',
+    name: 'Noble Connections',
+    description: '+5% patronage per level',
+    cost: 3,
+    tier: TierType.Duchy,
+    effect: { type: 'prestige_patronage_boost', value: 0.05 },
+    purchased: false,
+    prerequisite: 'prestige_settlers_cache_1',
+    repeatable: true,
+    level: 0,
+  },
+
+  // Realm: Realm Efficiency (+3% auto-build speed per level)
+  {
+    id: 'prestige_repeatable_autobuild',
+    name: 'Realm Efficiency',
+    description: '+3% auto-build speed per level',
+    cost: 3,
+    tier: TierType.Realm,
+    effect: { type: 'prestige_autobuild_speed', value: 0.03 },
+    purchased: false,
+    prerequisite: 'prestige_power_2',
+    repeatable: true,
+    level: 0,
+  },
+  // Realm: Arcane Scholarship (-2% research cost per level)
+  {
+    id: 'prestige_repeatable_scholarship',
+    name: 'Arcane Scholarship',
+    description: '-2% research cost per level',
+    cost: 3,
+    tier: TierType.Realm,
+    effect: { type: 'prestige_research_discount', value: 0.98 },
+    purchased: false,
+    prerequisite: 'prestige_endowment_1',
+    repeatable: true,
+    level: 0,
+  },
+
+  // Kingdom: Eternal Prosperity (+3% income per level)
+  {
+    id: 'prestige_repeatable_prosperity',
+    name: 'Eternal Prosperity',
+    description: '+3% income per level',
+    cost: 2,
+    tier: TierType.Kingdom,
+    effect: { type: 'prestige_income_multiplier', value: 0.03 },
+    purchased: false,
+    prerequisite: 'prestige_destiny_2',
+    repeatable: true,
+    level: 0,
+  },
+  // Kingdom: Royal Ambition (-3% goal targets per level)
+  {
+    id: 'prestige_repeatable_royal_ambition',
+    name: 'Royal Ambition',
+    description: '-3% goal targets per level',
+    cost: 2,
+    tier: TierType.Kingdom,
+    effect: { type: 'prestige_goal_reduction', value: 0.03 },
+    purchased: false,
+    prerequisite: 'prestige_royal_decree_1',
+    repeatable: true,
+    level: 0,
+  },
 ];
+
+/**
+ * Calculate the current cost of a prestige upgrade.
+ * For repeatable upgrades: baseCost + currentLevel (linear escalation).
+ * For one-time upgrades: just the base cost.
+ */
+export function getPrestigeUpgradeCost(upgrade: PrestigeUpgrade): number {
+  if (upgrade.repeatable !== true) return upgrade.cost;
+  return upgrade.cost + (upgrade.level ?? 0);
+}
 
 /**
  * Calculate prestige currency earned for a tier based on completions.
