@@ -5,9 +5,8 @@ import { ResearchUpgrade, TierType } from '../types/game';
 // research costs should not scale up.
 const RESEARCH_COSTS = {
   costReduction: [25, 75, 225],
-  scalingReduction: [50, 150, 450],
   startingIncome: [5, 15, 50],
-  foundationPlanning: 50,
+  foundationPlanning: 25,
   autoBuilding: [15, 30, 45, 75, 100, 200],
   expansionEfficiency: 500,
 };
@@ -737,46 +736,6 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     purchased: false,
   },
 
-  // Building Cost Scaling Reduction Research
-  {
-    id: 'hamlet_scaling_reduction_1',
-    name: 'Bulk Production I',
-    description: 'Reduces building cost scaling by improving multipliers',
-    cost: RESEARCH_COSTS.scalingReduction[0],
-    tier: TierType.Hamlet,
-    effect: {
-      type: 'cost_scaling_reduction',
-      value: 0.02,
-    },
-    purchased: false,
-  },
-  {
-    id: 'hamlet_scaling_reduction_2',
-    name: 'Bulk Production II',
-    description: 'Further reduces building cost scaling multipliers',
-    cost: RESEARCH_COSTS.scalingReduction[1],
-    tier: TierType.Hamlet,
-    prerequisite: 'hamlet_scaling_reduction_1',
-    effect: {
-      type: 'cost_scaling_reduction',
-      value: 0.04,
-    },
-    purchased: false,
-  },
-  {
-    id: 'hamlet_scaling_reduction_3',
-    name: 'Bulk Production III',
-    description: 'Maximizes bulk production efficiency for cost scaling',
-    cost: RESEARCH_COSTS.scalingReduction[2],
-    tier: TierType.Hamlet,
-    prerequisite: 'hamlet_scaling_reduction_2',
-    effect: {
-      type: 'cost_scaling_reduction',
-      value: 0.06,
-    },
-    purchased: false,
-  },
-
   // ===== VILLAGE RESEARCH =====
 
   // Village Starting Income
@@ -829,20 +788,6 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     effect: {
       type: 'cost_reduction',
       value: 0.84,
-    },
-    purchased: false,
-  },
-
-  // Village Cost Scaling Reduction
-  {
-    id: 'village_scaling_reduction_1',
-    name: 'Village Bulk Production I',
-    description: 'Reduces village building cost scaling',
-    cost: RESEARCH_COSTS.scalingReduction[0],
-    tier: TierType.Village,
-    effect: {
-      type: 'cost_scaling_reduction',
-      value: 0.02,
     },
     purchased: false,
   },
@@ -921,20 +866,6 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     purchased: false,
   },
 
-  // Town Cost Scaling Reduction
-  {
-    id: 'town_scaling_reduction_1',
-    name: 'Town Mass Production',
-    description: 'Reduces town building cost scaling',
-    cost: RESEARCH_COSTS.scalingReduction[0],
-    tier: TierType.Town,
-    effect: {
-      type: 'cost_scaling_reduction',
-      value: 0.03,
-    },
-    purchased: false,
-  },
-
   // Town Automation
   ...generateAutoBuilding(TierType.Town, 'town', TOWN_AUTO_BUILDINGS),
 
@@ -983,20 +914,6 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     purchased: false,
   },
 
-  // City Cost Scaling Reduction
-  {
-    id: 'city_scaling_reduction_1',
-    name: 'Urban Industrial Complex',
-    description: 'Reduces city building cost scaling',
-    cost: RESEARCH_COSTS.scalingReduction[0],
-    tier: TierType.City,
-    effect: {
-      type: 'cost_scaling_reduction',
-      value: 0.04,
-    },
-    purchased: false,
-  },
-
   // City Automation
   ...generateAutoBuilding(TierType.City, 'city', CITY_AUTO_BUILDINGS),
 
@@ -1039,19 +956,6 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     },
     purchased: false,
   },
-  {
-    id: 'county_scaling_reduction_1',
-    name: 'County Mass Production I',
-    description: 'Reduces county building cost scaling',
-    cost: RESEARCH_COSTS.scalingReduction[0],
-    tier: TierType.County,
-    effect: {
-      type: 'cost_scaling_reduction',
-      value: 0.05,
-    },
-    purchased: false,
-  },
-
   // County Automation
   ...generateAutoBuilding(TierType.County, 'county', COUNTY_AUTO_BUILDINGS),
 
@@ -1069,19 +973,6 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     },
     purchased: false,
   },
-  {
-    id: 'duchy_scaling_reduction_1',
-    name: 'Ducal Mass Production I',
-    description: 'Reduces duchy building cost scaling',
-    cost: RESEARCH_COSTS.scalingReduction[0],
-    tier: TierType.Duchy,
-    effect: {
-      type: 'cost_scaling_reduction',
-      value: 0.06,
-    },
-    purchased: false,
-  },
-
   // Duchy Automation
   ...generateAutoBuilding(TierType.Duchy, 'duchy', DUCHY_AUTO_BUILDINGS),
 
@@ -1099,19 +990,6 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     },
     purchased: false,
   },
-  {
-    id: 'realm_scaling_reduction_1',
-    name: 'Realm Mass Production I',
-    description: 'Reduces realm building cost scaling',
-    cost: RESEARCH_COSTS.scalingReduction[0],
-    tier: TierType.Realm,
-    effect: {
-      type: 'cost_scaling_reduction',
-      value: 0.07,
-    },
-    purchased: false,
-  },
-
   // Realm Automation
   ...generateAutoBuilding(TierType.Realm, 'realm', REALM_AUTO_BUILDINGS),
 
@@ -1129,19 +1007,6 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     },
     purchased: false,
   },
-  {
-    id: 'kingdom_scaling_reduction_1',
-    name: 'Royal Mass Production I',
-    description: 'Reduces kingdom building cost scaling',
-    cost: RESEARCH_COSTS.scalingReduction[0],
-    tier: TierType.Kingdom,
-    effect: {
-      type: 'cost_scaling_reduction',
-      value: 0.08,
-    },
-    purchased: false,
-  },
-
   // Kingdom Automation
   ...generateAutoBuilding(TierType.Kingdom, 'kingdom', KINGDOM_AUTO_BUILDINGS),
 ];
