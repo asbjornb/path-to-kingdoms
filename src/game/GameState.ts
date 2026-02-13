@@ -140,6 +140,12 @@ export class GameStateManager {
 
     const newSettlement = createSettlement(tierType);
 
+    // Apply research starting capital bonus (additive, before prestige multiplier)
+    const startingCapitalBonus = this.getResearchEffect('starting_capital', tierType);
+    if (startingCapitalBonus > 0) {
+      newSettlement.currency += startingCapitalBonus;
+    }
+
     // Apply mastery starting currency bonus
     const masteryBonus = this.getMasteryStartingCurrency(tierType);
     if (masteryBonus > 0) {
@@ -180,6 +186,22 @@ export class GameStateManager {
       if (buildingId !== '' && newSettlement.buildings.has(buildingId)) {
         const currentCount = newSettlement.buildings.get(buildingId) ?? 0;
         newSettlement.buildings.set(buildingId, currentCount + upgrade.effect.value);
+      }
+    }
+
+    // Apply research starting buildings: add pre-built buildings for this tier
+    const startingBuildingResearch = this.state.research.filter(
+      (r) =>
+        r.purchased &&
+        r.effect.type === 'starting_buildings' &&
+        r.tier === tierType &&
+        r.effect.buildingId !== undefined,
+    );
+    for (const research of startingBuildingResearch) {
+      const buildingId = research.effect.buildingId ?? '';
+      if (buildingId !== '' && newSettlement.buildings.has(buildingId)) {
+        const currentCount = newSettlement.buildings.get(buildingId) ?? 0;
+        newSettlement.buildings.set(buildingId, currentCount + (research.effect.value ?? 0));
       }
     }
 
@@ -1341,6 +1363,8 @@ export class GameStateManager {
     if (purchased.effect.type === 'parallel_slots') return;
     // tier_requirement_reduction is a one-time purchase per tier
     if (purchased.effect.type === 'tier_requirement_reduction') return;
+    // starting_buildings is a capped chain, don't auto-generate
+    if (purchased.effect.type === 'starting_buildings') return;
 
     // Check if there's already an unpurchased successor in the same chain
     const hasSameChainSuccessor = this.state.research.some(
@@ -1384,7 +1408,7 @@ export class GameStateManager {
           nextEffect.value = parseFloat((nextEffect.value * 0.95).toFixed(4));
         }
         break;
-      // starting_income: same value each level (keeps stacking)
+      // starting_income / starting_capital: same value each level (keeps stacking)
     }
 
     // Generate name: strip existing roman numeral and add next
@@ -1434,6 +1458,8 @@ export class GameStateManager {
         const next = Math.max(2, current - (effect.value ?? 1));
         return `Reduces ${base.tier} completions needed to advance tiers by ${effect.value ?? 1} (${current}→${next})`;
       }
+      case 'starting_capital':
+        return `Start with +${effect.value} currency in new ${tierName.toLowerCase()}s`;
       default:
         return base.description;
     }
@@ -1499,6 +1525,27 @@ export class GameStateManager {
         const current = researchFlat + prestigeFlat;
         if (current === 0) return '';
         return `(currently ${current})`;
+      }
+
+      case 'starting_capital': {
+        const current = this.getResearchEffect('starting_capital', research.tier);
+        if (current === 0) return '';
+        return `(currently +${current})`;
+      }
+
+      case 'starting_buildings': {
+        const buildingId = research.effect.buildingId ?? '';
+        if (buildingId === '') return '';
+        const purchased = this.state.research.filter(
+          (r) =>
+            r.purchased &&
+            r.effect.type === 'starting_buildings' &&
+            r.tier === research.tier &&
+            r.effect.buildingId === buildingId,
+        );
+        const currentCount = purchased.reduce((sum, r) => sum + (r.effect.value ?? 0), 0);
+        if (currentCount === 0) return '';
+        return `(currently ${currentCount})`;
       }
 
       default:
