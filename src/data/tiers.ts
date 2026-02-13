@@ -157,7 +157,7 @@ export const TIER_DATA: TierDefinition[] = [
       {
         id: 'town_watchtower',
         name: 'Watchtower',
-        baseCost: 8000,
+        baseCost: 10000,
         baseIncome: 150,
         costMultiplier: 1.25,
         effect: {
@@ -422,19 +422,19 @@ export const TIER_DATA: TierDefinition[] = [
       {
         id: 'kingdom_treasury',
         name: 'Royal Treasury',
-        baseCost: 300000000,
+        baseCost: 350000000,
         baseIncome: 15000000,
         costMultiplier: 1.25,
         effect: {
           type: 'income_multiplier',
-          value: 0.03,
-          description: '+3% income from all buildings per treasury',
+          value: 0.028,
+          description: '+2.8% income from all buildings per treasury',
         },
       },
       {
         id: 'kingdom_records',
         name: 'Hall of Records',
-        baseCost: 800000000,
+        baseCost: 1000000000,
         baseIncome: 25000000,
         costMultiplier: 1.3,
         effect: {
