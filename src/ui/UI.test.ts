@@ -28,7 +28,7 @@ describe('UI', () => {
       expect(header).toBeTruthy();
 
       const title = container.querySelector('h1');
-      expect(title?.textContent).toBe('Path to Kingdoms');
+      expect(title?.textContent).toContain('Path to Kingdoms');
 
       // Check for research stats (currency/income are now per-settlement)
       const researchValue = container.querySelector('#research');

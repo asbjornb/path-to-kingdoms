@@ -11,6 +11,7 @@ import {
 } from '../types/game';
 import { TIER_DATA, getTierByType } from '../data/tiers';
 import { formatNumber, formatIncome } from '../utils/format';
+import { getAppVersion } from '../version';
 
 export class UI {
   private game: GameStateManager;
@@ -184,7 +185,7 @@ export class UI {
     this.container.innerHTML = `
       <div class="game-container">
         <header class="game-header">
-          <h1>Path to Kingdoms</h1>
+          <h1>Path to Kingdoms <span class="version-label">v${getAppVersion()}</span></h1>
           <div class="stats">
             <div class="stat">
               <span class="stat-label">${this.selectedTier.charAt(0).toUpperCase() + this.selectedTier.slice(1)} Research:</span>

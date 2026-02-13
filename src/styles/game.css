@@ -1191,6 +1191,50 @@
   }
 }
 
+/* ===== Version Update Banner ===== */
+
+.version-update-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0.6rem 1rem;
+  background: rgba(250, 204, 21, 0.15);
+  border-bottom: 1px solid rgba(250, 204, 21, 0.4);
+  color: #facc15;
+  font-size: 0.9rem;
+  font-weight: 500;
+  animation: notificationSlideIn 0.3s ease-out;
+}
+
+.version-update-banner button {
+  padding: 0.25rem 0.75rem;
+  border: 1px solid #facc15;
+  border-radius: 4px;
+  background: rgba(250, 204, 21, 0.2);
+  color: #facc15;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.version-update-banner button:hover {
+  background: rgba(250, 204, 21, 0.35);
+}
+
+/* ===== Version Label ===== */
+
+.version-label {
+  color: #555;
+  font-size: 0.75rem;
+  font-weight: normal;
+}
+
 /* ===== Mobile Responsive ===== */
 
 @media (max-width: 768px) {
