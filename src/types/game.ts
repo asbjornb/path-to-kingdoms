@@ -43,6 +43,8 @@ export enum GoalType {
   BuildingCount = 'building_count',
   CurrentCurrency = 'current_currency',
   Survival = 'survival',
+  CurrencySpent = 'currency_spent',
+  TotalBuildings = 'total_buildings',
 }
 
 export interface Goal {
@@ -63,6 +65,7 @@ export interface Settlement {
   totalIncome: number;
   buildings: Map<string, number>;
   lifetimeCurrencyEarned: number;
+  totalCurrencySpent: number;
   spawnTime: number;
   goals: Goal[];
 }
@@ -202,6 +205,7 @@ export interface SerializableSettlement {
   totalIncome: number;
   buildings: [string, number][]; // Serialized Map
   lifetimeCurrencyEarned: number;
+  totalCurrencySpent: number;
   spawnTime: number;
   goals: Goal[];
 }

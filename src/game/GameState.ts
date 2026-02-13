@@ -33,6 +33,7 @@ function createSettlement(tierType: TierType): Settlement {
     totalIncome: 0,
     buildings: new Map(),
     lifetimeCurrencyEarned: 0,
+    totalCurrencySpent: 0,
     spawnTime: now,
     goals: GoalGenerator.generateRandomGoals(tierType, 1),
   };
@@ -210,6 +211,7 @@ export class GameStateManager {
     if (settlement.currency < cost) return false;
 
     settlement.currency -= cost;
+    settlement.totalCurrencySpent += cost;
     settlement.buildings.set(buildingId, currentCount + 1);
 
     // Recalculate total income for the settlement (accounts for building effects)
@@ -343,6 +345,7 @@ export class GameStateManager {
       );
       if (settlement.currency < cost) break;
       settlement.currency -= cost;
+      settlement.totalCurrencySpent += cost;
       settlement.buildings.set(buildingId, currentCount + 1);
       bought++;
     }
@@ -1596,6 +1599,7 @@ export class GameStateManager {
     }
 
     settlement.currency -= cost;
+    settlement.totalCurrencySpent += cost;
     settlement.buildings.set(buildingId, currentCount + 1);
     return true;
   }
@@ -1719,6 +1723,21 @@ export class GameStateManager {
             completed = newValue >= Math.ceil(effectiveTarget);
           }
           break;
+
+        case GoalType.CurrencySpent:
+          newValue = settlement.totalCurrencySpent;
+          completed = newValue >= effectiveTarget;
+          break;
+
+        case GoalType.TotalBuildings: {
+          let total = 0;
+          for (const count of settlement.buildings.values()) {
+            total += count;
+          }
+          newValue = total;
+          completed = newValue >= Math.ceil(effectiveTarget);
+          break;
+        }
 
         case GoalType.Survival: {
           // Income accelerates prosperity: higher income means faster progress
@@ -1885,6 +1904,7 @@ export class GameStateManager {
       const settlements: Settlement[] = saveData.gameState.settlements.map(
         (serializableSettlement) => ({
           ...serializableSettlement,
+          totalCurrencySpent: serializableSettlement.totalCurrencySpent ?? 0,
           buildings: new Map(serializableSettlement.buildings),
         }),
       );

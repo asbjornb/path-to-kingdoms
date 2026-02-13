@@ -836,6 +836,7 @@ describe('GameStateManager', () => {
         totalIncome: 0,
         buildings: new Map(),
         lifetimeCurrencyEarned: 0,
+        totalCurrencySpent: 0,
         spawnTime: Date.now(),
         goals: GoalGenerator.generateRandomGoals(TierType.Town, 1),
       };
