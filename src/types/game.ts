@@ -195,6 +195,8 @@ export interface GameState {
   settings: {
     devModeEnabled: boolean;
     showCompletedResearch: boolean;
+    showPrestigeShop: boolean;
+    showCompletedPrestige: boolean;
     buyAmount: BuyAmount;
     compactView: boolean;
     goalNotificationsByTier: Partial<Record<TierType, boolean>>;
@@ -232,6 +234,8 @@ export interface SaveData {
     settings: {
       devModeEnabled: boolean;
       showCompletedResearch: boolean;
+      showPrestigeShop?: boolean;
+      showCompletedPrestige?: boolean;
       buyAmount: BuyAmount;
       compactView: boolean;
       goalNotificationsByTier?: Partial<Record<TierType, boolean>>;

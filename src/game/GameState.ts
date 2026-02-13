@@ -118,6 +118,8 @@ export class GameStateManager {
       settings: {
         devModeEnabled: false,
         showCompletedResearch: false,
+        showPrestigeShop: false,
+        showCompletedPrestige: false,
         buyAmount: 1,
         compactView: true,
         goalNotificationsByTier: {},
@@ -1861,6 +1863,24 @@ export class GameStateManager {
     return this.state.settings.showCompletedResearch;
   }
 
+  public toggleShowPrestigeShop(): boolean {
+    this.state.settings.showPrestigeShop = !this.state.settings.showPrestigeShop;
+    return this.state.settings.showPrestigeShop;
+  }
+
+  public isShowPrestigeShopEnabled(): boolean {
+    return this.state.settings.showPrestigeShop;
+  }
+
+  public toggleShowCompletedPrestige(): boolean {
+    this.state.settings.showCompletedPrestige = !this.state.settings.showCompletedPrestige;
+    return this.state.settings.showCompletedPrestige;
+  }
+
+  public isShowCompletedPrestigeEnabled(): boolean {
+    return this.state.settings.showCompletedPrestige;
+  }
+
   public toggleCompactView(): boolean {
     this.state.settings.compactView = !this.state.settings.compactView;
     return this.state.settings.compactView;
@@ -1991,6 +2011,8 @@ export class GameStateManager {
       const settings: GameState['settings'] = {
         devModeEnabled: savedSettings.devModeEnabled,
         showCompletedResearch: savedSettings.showCompletedResearch,
+        showPrestigeShop: savedSettings.showPrestigeShop ?? false,
+        showCompletedPrestige: savedSettings.showCompletedPrestige ?? false,
         buyAmount: savedSettings.buyAmount ?? 1,
         compactView: savedSettings.compactView ?? true,
         goalNotificationsByTier: savedSettings.goalNotificationsByTier ?? {},
