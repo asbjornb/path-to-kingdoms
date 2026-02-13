@@ -130,7 +130,7 @@ export const TIER_DATA: TierDefinition[] = [
         id: 'town_house',
         name: 'Town House',
         baseCost: 1000,
-        baseIncome: 100,
+        baseIncome: 85,
         costMultiplier: 1.15,
       },
       {
@@ -143,7 +143,7 @@ export const TIER_DATA: TierDefinition[] = [
       {
         id: 'town_forge',
         name: 'Forge',
-        baseCost: 20000,
+        baseCost: 25000,
         baseIncome: 800,
         costMultiplier: 1.25,
       },
@@ -175,8 +175,8 @@ export const TIER_DATA: TierDefinition[] = [
         costMultiplier: 1.3,
         effect: {
           type: 'income_per_building',
-          value: 25,
-          description: '+25 income for each building in the settlement',
+          value: 18,
+          description: '+18 income for each building in the settlement',
         },
       },
     ],
@@ -422,19 +422,19 @@ export const TIER_DATA: TierDefinition[] = [
       {
         id: 'kingdom_treasury',
         name: 'Royal Treasury',
-        baseCost: 350000000,
+        baseCost: 500000000,
         baseIncome: 15000000,
         costMultiplier: 1.25,
         effect: {
           type: 'income_multiplier',
-          value: 0.028,
-          description: '+2.8% income from all buildings per treasury',
+          value: 0.034,
+          description: '+3.4% income from all buildings per treasury',
         },
       },
       {
         id: 'kingdom_records',
         name: 'Hall of Records',
-        baseCost: 1000000000,
+        baseCost: 1300000000,
         baseIncome: 25000000,
         costMultiplier: 1.3,
         effect: {
