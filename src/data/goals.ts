@@ -44,16 +44,15 @@ export const GoalGenerator = {
     return tierFirstCost / hamletFirstCost;
   },
 
-  generateRandomGoals(tierType: TierType, count: number = 1): Goal[] {
-    const goals: Goal[] = [];
+  getAllGoalTemplates(tierType: TierType): Goal[] {
     const tierDef = TIER_DATA.find((t) => t.type === tierType);
-    if (!tierDef) return goals;
+    if (!tierDef) return [];
 
     const incomeScale = this.getTierScale(tierType);
     const costScale = this.getCostScale(tierType);
     const difficulty = TIER_DIFFICULTY[tierType];
 
-    const goalTemplates: Array<{
+    const templates: Array<{
       type: GoalType;
       baseValue: number;
       description: string;
@@ -110,7 +109,7 @@ export const GoalGenerator = {
       const positionFactor = 1 - (i / buildingIndex) * 0.6; // 1.0 down to 0.4
       const targetCount = Math.round(30 * positionFactor * difficulty);
 
-      goalTemplates.push({
+      templates.push({
         type: GoalType.BuildingCount,
         baseValue: targetCount,
         description: `Build ${targetCount} ${building.name}s`,
@@ -118,24 +117,21 @@ export const GoalGenerator = {
       });
     });
 
-    // Randomly select unique goals
-    const shuffled = [...goalTemplates].sort(() => Math.random() - 0.5);
-    const selectedTemplates = shuffled.slice(0, count);
+    return templates.map((t) => ({
+      id: `goal_${this.goalCounter++}`,
+      type: t.type,
+      description: this.formatDescription(t.description, t.baseValue),
+      targetValue: t.baseValue,
+      currentValue: 0,
+      isCompleted: false,
+      buildingId: t.buildingId,
+    }));
+  },
 
-    for (const template of selectedTemplates) {
-      const goal: Goal = {
-        id: `goal_${this.goalCounter++}`,
-        type: template.type,
-        description: this.formatDescription(template.description, template.baseValue),
-        targetValue: template.baseValue,
-        currentValue: 0,
-        isCompleted: false,
-        buildingId: template.buildingId,
-      };
-      goals.push(goal);
-    }
-
-    return goals;
+  generateRandomGoals(tierType: TierType, count: number = 1): Goal[] {
+    const allTemplates = this.getAllGoalTemplates(tierType);
+    const shuffled = [...allTemplates].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, count);
   },
 
   formatDescription(description: string, value: number): string {
