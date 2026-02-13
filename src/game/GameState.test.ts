@@ -798,6 +798,31 @@ describe('GameStateManager', () => {
       expect(settlement.buildings.get('hamlet_hut')).toBe(1);
       expect(settlement.currency).toBe(5); // 15 - 10
     });
+
+    it('should auto-buy in ALL parallel settlements, not just the first', () => {
+      // Unlock a second parallel hamlet slot
+      game.getState().researchPoints.set(TierType.Hamlet, 1000);
+      game.purchaseResearch('hamlet_parallel_2');
+
+      const settlements = game.getState().settlements.filter((s) => s.tier === TierType.Hamlet);
+      expect(settlements.length).toBeGreaterThanOrEqual(2);
+
+      // Give all settlements enough currency for huts
+      for (const s of settlements) {
+        s.currency = 10000;
+      }
+
+      // Set auto-build timer to fire immediately
+      const autoResearch = game.getState().research.find((r) => r.id === 'hamlet_auto_hut_1')!;
+      game.getState().autoBuildingTimers.set(autoResearch.id, 0);
+
+      game.update();
+
+      // All settlements should have gotten a hut, not just the first one
+      for (const s of settlements) {
+        expect(s.buildings.get('hamlet_hut')).toBeGreaterThanOrEqual(1);
+      }
+    });
   });
 
   describe('getEffectiveBuildingIncome', () => {

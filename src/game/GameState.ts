@@ -1519,6 +1519,7 @@ export class GameStateManager {
         // Find settlements of the same tier that can afford this building
         const tierSettlements = this.state.settlements.filter((s) => s.tier === research.tier);
 
+        let bought = false;
         for (const settlement of tierSettlements) {
           const cost = this.getBuildingCost(settlement.id, buildingId);
           if (cost !== null && settlement.currency >= cost) {
@@ -1530,11 +1531,12 @@ export class GameStateManager {
             }
             // Try to buy the building
             if (this.buyBuilding(settlement.id, buildingId)) {
-              // Update the timer for this research
-              this.state.autoBuildingTimers.set(research.id, now);
-              break; // Only buy one building per interval
+              bought = true;
             }
           }
+        }
+        if (bought) {
+          this.state.autoBuildingTimers.set(research.id, now);
         }
       }
     }
