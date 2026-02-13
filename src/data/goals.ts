@@ -73,6 +73,7 @@ export const GoalGenerator = {
     const incomeDifficulty = Math.pow(difficulty, 0.55);
     const currentCurrencyDifficulty = Math.pow(difficulty, 0.55);
     const survivalScale = 1 + Math.log10(Math.max(incomeScale, 1)) * 0.15;
+    const buildingScale = BUILDING_TIER_SCALE[tierType];
 
     const templates: Array<{
       type: GoalType;
@@ -113,6 +114,23 @@ export const GoalGenerator = {
         description: 'Have {value} currency at once',
       },
 
+      // Currency spent goals: similar scaling to AccumulateCurrency but slightly lower
+      // targets since players retain some currency as cash on hand
+      {
+        type: GoalType.CurrencySpent,
+        baseValue: Math.round(110000 * costScale * difficulty),
+        description: 'Spend {value} currency on buildings',
+      },
+
+      // Total buildings goals: uses BUILDING_TIER_SCALE (not TIER_DIFFICULTY) because
+      // total building count is dominated by exponential cost curves. A higher flat base
+      // (120) compensates for the spread-buying advantage vs individual BuildingCount goals.
+      {
+        type: GoalType.TotalBuildings,
+        baseValue: Math.round(120 * buildingScale),
+        description: 'Own {value} total buildings',
+      },
+
       // Prosperity goals (time-based, accelerated by income)
       // Log-based income scaling compensates for income-driven acceleration at higher tiers
       {
@@ -132,7 +150,6 @@ export const GoalGenerator = {
     // 0.4x for most expensive). Cost multiplier adjustment reduces targets for buildings with
     // aggressive cost scaling (1.25+), dampened by position to avoid over-penalizing expensive
     // buildings that are quickly affordable once income is high.
-    const buildingScale = BUILDING_TIER_SCALE[tierType];
     const buildingIndex = tierDef.buildings.length;
     tierDef.buildings.forEach((building, i) => {
       const positionFactor = 1.5 - (i / buildingIndex) * 1.1; // 1.5 down to 0.4
