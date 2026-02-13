@@ -374,6 +374,12 @@ export class UI {
                     ? `Buy ${qty}x`
                     : 'Buy';
 
+              const effectiveIncome = this.game.getEffectiveBuildingIncome(
+                settlement.id,
+                building.id,
+              );
+              const isBoosted = effectiveIncome > building.baseIncome;
+
               return `
               <div class="building">
                 <div class="building-header">
@@ -390,7 +396,7 @@ export class UI {
                   </button>
                 </div>
                 <div class="building-details">
-                  <span class="building-income">+${formatIncome(building.baseIncome)}</span>
+                  <span class="building-income ${isBoosted ? 'boosted' : ''}">+${formatIncome(effectiveIncome)}</span>
                   ${building.effect ? `<span class="building-effect">${building.effect.description}</span>` : ''}
                 </div>
               </div>
