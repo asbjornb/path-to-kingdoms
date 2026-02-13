@@ -9,6 +9,8 @@ const RESEARCH_COSTS = {
   foundationPlanning: 25,
   autoBuilding: [15, 30, 45, 75, 100, 200],
   expansionEfficiency: 500,
+  startingCapital: 10,
+  startingBuildings: [15, 25, 40, 60, 85, 115, 150, 200, 260, 330, 410, 500],
 };
 
 // ===== Auto-building generator =====
@@ -63,6 +65,75 @@ function generateFoundationPlanning(
       purchased: false,
     }),
   );
+}
+
+// ===== Starting capital generator =====
+
+function generateStartingCapital(
+  tiers: { tier: TierType; prefix: string; value: number }[],
+): ResearchUpgrade[] {
+  return tiers.map(
+    ({ tier, prefix, value }): ResearchUpgrade => ({
+      id: `${prefix}_starting_capital_1`,
+      name: 'Starting Capital',
+      description: `Start with +${value} currency in new ${prefix}s`,
+      cost: RESEARCH_COSTS.startingCapital,
+      tier,
+      effect: {
+        type: 'starting_capital',
+        value,
+      },
+      purchased: false,
+    }),
+  );
+}
+
+// ===== Starting buildings generator =====
+
+interface StartingBuildingsTierSpec {
+  tier: TierType;
+  prefix: string;
+  buildings: { id: string; name: string }[];
+}
+
+function generateStartingBuildings(tiers: StartingBuildingsTierSpec[]): ResearchUpgrade[] {
+  const result: ResearchUpgrade[] = [];
+  for (const { tier, prefix, buildings } of tiers) {
+    let prevId: string | undefined;
+    let levelIndex = 0;
+    for (const building of buildings) {
+      for (let copy = 1; copy <= 2; copy++) {
+        const level = levelIndex + 1;
+        const id = `${prefix}_starting_building_${level}`;
+        const shortName = building.name;
+        const desc =
+          copy === 1
+            ? `Start with 1 ${shortName} in new ${prefix}s`
+            : `Start with 2 ${shortName}s in new ${prefix}s`;
+        const cost = RESEARCH_COSTS.startingBuildings[levelIndex] ?? 500;
+        const research: ResearchUpgrade = {
+          id,
+          name: `Prefab ${shortName} ${copy === 1 ? 'I' : 'II'}`,
+          description: desc,
+          cost,
+          tier,
+          effect: {
+            type: 'starting_buildings',
+            value: 1,
+            buildingId: building.id,
+          },
+          purchased: false,
+        };
+        if (prevId !== undefined) {
+          research.prerequisite = prevId;
+        }
+        result.push(research);
+        prevId = id;
+        levelIndex++;
+      }
+    }
+  }
+  return result;
 }
 
 // ===== Expansion efficiency generator =====
@@ -1134,4 +1205,114 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
   },
   // Kingdom Automation
   ...generateAutoBuilding(TierType.Kingdom, 'kingdom', KINGDOM_AUTO_BUILDINGS),
+
+  // ===== STARTING CAPITAL (per-tier, infinitely repeatable) =====
+
+  ...generateStartingCapital([
+    { tier: TierType.Hamlet, prefix: 'hamlet', value: 5 },
+    { tier: TierType.Village, prefix: 'village', value: 50 },
+    { tier: TierType.Town, prefix: 'town', value: 500 },
+    { tier: TierType.City, prefix: 'city', value: 5000 },
+    { tier: TierType.County, prefix: 'county', value: 50000 },
+    { tier: TierType.Duchy, prefix: 'duchy', value: 500000 },
+    { tier: TierType.Realm, prefix: 'realm', value: 5000000 },
+    { tier: TierType.Kingdom, prefix: 'kingdom', value: 50000000 },
+  ]),
+
+  // ===== STARTING BUILDINGS (per-tier, capped chain) =====
+
+  ...generateStartingBuildings([
+    {
+      tier: TierType.Hamlet,
+      prefix: 'hamlet',
+      buildings: [
+        { id: 'hamlet_hut', name: 'Hut' },
+        { id: 'hamlet_garden', name: 'Garden' },
+        { id: 'hamlet_workshop', name: 'Workshop' },
+        { id: 'hamlet_shrine', name: 'Shrine' },
+        { id: 'hamlet_market', name: 'Market Stall' },
+        { id: 'hamlet_library', name: 'Small Library' },
+      ],
+    },
+    {
+      tier: TierType.Village,
+      prefix: 'village',
+      buildings: [
+        { id: 'village_cottage', name: 'Cottage' },
+        { id: 'village_farm', name: 'Farm' },
+        { id: 'village_mill', name: 'Mill' },
+        { id: 'village_chapel', name: 'Chapel' },
+        { id: 'village_well', name: 'Village Well' },
+        { id: 'village_herbalist', name: 'Herbalist' },
+      ],
+    },
+    {
+      tier: TierType.Town,
+      prefix: 'town',
+      buildings: [
+        { id: 'town_house', name: 'Town House' },
+        { id: 'town_market', name: 'Market' },
+        { id: 'town_forge', name: 'Forge' },
+        { id: 'town_guild', name: 'Guild Hall' },
+        { id: 'town_watchtower', name: 'Watchtower' },
+        { id: 'town_granary', name: 'Granary' },
+      ],
+    },
+    {
+      tier: TierType.City,
+      prefix: 'city',
+      buildings: [
+        { id: 'city_apartment', name: 'Apartment' },
+        { id: 'city_bazaar', name: 'Grand Bazaar' },
+        { id: 'city_university', name: 'University' },
+        { id: 'city_cathedral', name: 'Cathedral' },
+        { id: 'city_observatory', name: 'Observatory' },
+        { id: 'city_trade_guild', name: 'Trade Guild' },
+      ],
+    },
+    {
+      tier: TierType.County,
+      prefix: 'county',
+      buildings: [
+        { id: 'county_manor', name: 'Manor' },
+        { id: 'county_plantation', name: 'Plantation' },
+        { id: 'county_fortress', name: 'Fortress' },
+        { id: 'county_courthouse', name: 'Courthouse' },
+        { id: 'county_tax_office', name: 'Tax Office' },
+      ],
+    },
+    {
+      tier: TierType.Duchy,
+      prefix: 'duchy',
+      buildings: [
+        { id: 'duchy_palace', name: 'Palace' },
+        { id: 'duchy_port', name: 'Grand Port' },
+        { id: 'duchy_academy', name: 'Royal Academy' },
+        { id: 'duchy_mint', name: 'Mint' },
+        { id: 'duchy_fleet', name: 'Merchant Fleet' },
+      ],
+    },
+    {
+      tier: TierType.Realm,
+      prefix: 'realm',
+      buildings: [
+        { id: 'realm_citadel', name: 'Citadel' },
+        { id: 'realm_metropolis', name: 'Metropolis' },
+        { id: 'realm_wonder', name: 'Wonder' },
+        { id: 'realm_oracle', name: 'Oracle' },
+        { id: 'realm_exchange', name: 'Grand Exchange' },
+      ],
+    },
+    {
+      tier: TierType.Kingdom,
+      prefix: 'kingdom',
+      buildings: [
+        { id: 'kingdom_capital', name: 'Capital' },
+        { id: 'kingdom_empire', name: 'Empire District' },
+        { id: 'kingdom_monument', name: 'Eternal Monument' },
+        { id: 'kingdom_treasury', name: 'Royal Treasury' },
+        { id: 'kingdom_records', name: 'Hall of Records' },
+      ],
+    },
+  ]),
 ];

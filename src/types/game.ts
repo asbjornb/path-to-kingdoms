@@ -83,7 +83,9 @@ export interface ResearchUpgrade {
       | 'starting_income'
       | 'auto_building'
       | 'tier_requirement_reduction'
-      | 'flat_cost_count';
+      | 'flat_cost_count'
+      | 'starting_capital'
+      | 'starting_buildings';
     value?: number;
     buildingId?: string; // For auto_building type
     interval?: number; // For auto_building type (in milliseconds)
