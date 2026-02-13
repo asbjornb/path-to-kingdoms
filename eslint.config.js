@@ -54,7 +54,7 @@ export default [
     },
   },
   {
-    files: ['**/*.test.ts'],
+    files: ['**/*.test.ts', '**/balance-simulation-helpers.ts'],
     languageOptions: {
       parser: typescriptParser,
       parserOptions: {
