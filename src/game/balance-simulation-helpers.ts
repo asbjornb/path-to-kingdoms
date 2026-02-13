@@ -113,6 +113,8 @@ function simulateGoal(tierType: TierType, goal: Goal): number | null {
 
   let simulatedTime = 1_000_000_000;
   const dateNowSpy = vi.spyOn(Date, 'now').mockImplementation(() => simulatedTime);
+  // Suppress "No save data found" from GameStateManager constructor
+  const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
   try {
     const game = new GameStateManager();
@@ -160,6 +162,7 @@ function simulateGoal(tierType: TierType, goal: Goal): number | null {
 
     return null;
   } finally {
+    warnSpy.mockRestore();
     dateNowSpy.mockRestore();
   }
 }
