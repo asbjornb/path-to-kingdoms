@@ -641,79 +641,52 @@ export class UI {
     const hasPurchased = state.prestigeUpgrades.some((u) => u.purchased);
     if (!hasAnyCurrency && !hasPurchased) return '';
 
-    // Show all prestige upgrades, filtering by prerequisites
-    let upgrades = state.prestigeUpgrades.filter((upgrade) => {
-      if (upgrade.prerequisite === undefined || upgrade.prerequisite === '') return true;
-      const prereq = state.prestigeUpgrades.find((u) => u.id === upgrade.prerequisite);
-      return prereq !== undefined && prereq.purchased;
-    });
-
-    // Hide purchased ones unless show completed is on
-    const showCompleted = this.game.isShowCompletedResearchEnabled();
-    if (!showCompleted) {
-      upgrades = upgrades.filter((u) => !u.purchased);
-    }
-
-    // Sort affordable upgrades first, then by cost ascending within each group
-    upgrades.sort((a, b) => {
-      const aCurrency = state.prestigeCurrency.get(a.tier) ?? 0;
-      const bCurrency = state.prestigeCurrency.get(b.tier) ?? 0;
-      const aAffordable = a.purchased || aCurrency >= a.cost;
-      const bAffordable = b.purchased || bCurrency >= b.cost;
-      if (aAffordable !== bAffordable) return aAffordable ? -1 : 1;
-      return a.cost - b.cost;
-    });
-
-    if (upgrades.length === 0 && !showCompleted) return '';
-
-    // Show prestige currencies summary
-    const currencyLines: string[] = [];
-    for (const tier of TIER_DATA) {
-      if (tier.type === TierType.Hamlet) continue;
-      const amount = state.prestigeCurrency.get(tier.type) ?? 0;
-      if (amount > 0 || state.prestigeUpgrades.some((u) => u.tier === tier.type && u.purchased)) {
-        currencyLines.push(`<span class="prestige-currency-item">${tier.name}: ${amount}</span>`);
-      }
-    }
+    const showShop = this.game.isShowPrestigeShopEnabled();
+    const purchasedUpgrades = state.prestigeUpgrades.filter((u) => u.purchased);
 
     return `
       <div class="prestige-upgrades-section">
-        <h3>Prestige Shop</h3>
-        <input type="text" class="prestige-search-input" placeholder="Search upgrades..." value="${this.prestigeSearchQuery}" oninput="window.filterPrestigeUpgrades(this.value)">
-        ${currencyLines.length > 0 ? `<div class="prestige-currencies">${currencyLines.join('')}</div>` : ''}
-        <div class="research-list">
-          ${upgrades
-            .map((upgrade) => {
-              const currency = state.prestigeCurrency.get(upgrade.tier) ?? 0;
-              const canAfford = currency >= upgrade.cost;
-              const tierName = upgrade.tier.charAt(0).toUpperCase() + upgrade.tier.slice(1);
-              const searchText = this.getUpgradeSearchText(upgrade);
-              const matchesSearch = this.upgradeMatchesSearch(upgrade, this.prestigeSearchQuery);
-              const upgradeTags = this.renderUpgradeTags(upgrade);
-
-              return `
-              <div class="research-item prestige-item ${upgrade.purchased ? 'purchased' : ''}" data-search-text="${searchText}"${!matchesSearch ? ' style="display:none"' : ''}>
-                <h4>${upgrade.name}</h4>
-                ${upgradeTags}
-                <p>${upgrade.description}</p>
-                ${
-                  !upgrade.purchased
-                    ? `
-                  <button
-                    class="research-btn prestige-upgrade-btn ${!canAfford ? 'disabled' : ''}"
-                    onclick="window.purchasePrestigeUpgrade('${upgrade.id}')"
-                    ${!canAfford ? 'disabled' : ''}
-                  >
-                    ${upgrade.cost} ${tierName} Crowns
-                  </button>
-                `
-                    : '<span class="purchased-label">Purchased</span>'
-                }
-              </div>
-            `;
-            })
-            .join('')}
+        <div class="research-header">
+          <h3>Prestige Upgrades</h3>
+          <div class="research-toggle">
+            <label>
+              <input
+                type="checkbox"
+                id="show-prestige-shop"
+                ${showShop ? 'checked' : ''}
+                onchange="window.toggleShowPrestigeShop()"
+              >
+              <span class="toggle-label">Show owned</span>
+            </label>
+          </div>
         </div>
+        ${
+          showShop && purchasedUpgrades.length > 0
+            ? `
+          <input type="text" class="prestige-search-input" placeholder="Search upgrades..." value="${this.prestigeSearchQuery}" oninput="window.filterPrestigeUpgrades(this.value)">
+          <div class="research-list">
+            ${purchasedUpgrades
+              .map((upgrade) => {
+                const searchText = this.getUpgradeSearchText(upgrade);
+                const matchesSearch = this.upgradeMatchesSearch(upgrade, this.prestigeSearchQuery);
+                const upgradeTags = this.renderUpgradeTags(upgrade);
+
+                return `
+                <div class="research-item prestige-item purchased" data-search-text="${searchText}"${!matchesSearch ? ' style="display:none"' : ''}>
+                  <h4>${upgrade.name}</h4>
+                  ${upgradeTags}
+                  <p>${upgrade.description}</p>
+                  <span class="purchased-label">Purchased</span>
+                </div>
+              `;
+              })
+              .join('')}
+          </div>
+        `
+            : showShop
+              ? '<p class="prestige-shop-empty">No prestige upgrades purchased yet.</p>'
+              : ''
+        }
       </div>
     `;
   }
@@ -835,7 +808,20 @@ export class UI {
             ${
               purchasedUpgrades.length > 0
                 ? `
-              <div class="prestige-shop-purchased">
+              <div class="research-toggle">
+                <label>
+                  <input
+                    type="checkbox"
+                    id="show-completed-prestige"
+                    ${this.game.isShowCompletedPrestigeEnabled() ? 'checked' : ''}
+                    onchange="window.toggleShowCompletedPrestige()"
+                  >
+                  <span class="toggle-label">Show owned</span>
+                </label>
+              </div>
+              ${
+                this.game.isShowCompletedPrestigeEnabled()
+                  ? `<div class="prestige-shop-purchased">
                 ${purchasedUpgrades
                   .map((upgrade) => {
                     const searchText = this.getUpgradeSearchText(upgrade);
@@ -856,7 +842,9 @@ export class UI {
                   `;
                   })
                   .join('')}
-              </div>
+              </div>`
+                  : ''
+              }
             `
                 : ''
             }

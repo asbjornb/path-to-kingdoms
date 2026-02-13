@@ -16,7 +16,8 @@ declare global {
     closePrestigeShop: () => void;
     togglePrestigeShopUpgrade: (upgradeId: string) => void;
     confirmPrestige: () => void;
-    purchasePrestigeUpgrade: (upgradeId: string) => void;
+    toggleShowPrestigeShop: () => void;
+    toggleShowCompletedPrestige: () => void;
     filterPrestigeUpgrades: (query: string) => void;
     filterPrestigeShop: (query: string) => void;
     toggleAchievements: () => void;
