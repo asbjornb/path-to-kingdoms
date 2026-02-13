@@ -82,7 +82,6 @@ export interface ResearchUpgrade {
       | 'parallel_slots'
       | 'starting_income'
       | 'auto_building'
-      | 'cost_scaling_reduction'
       | 'tier_requirement_reduction'
       | 'flat_cost_count';
     value?: number;
