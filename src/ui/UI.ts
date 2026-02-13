@@ -1072,7 +1072,8 @@ export class UI {
 
     const countChanged = currentSettlementCount !== this.lastSettlementCount;
     const idsChanged =
-      JSON.stringify(currentSettlementIds) !== JSON.stringify(this.lastSettlementIds);
+      currentSettlementIds.length !== this.lastSettlementIds.length ||
+      currentSettlementIds.some((id, i) => id !== this.lastSettlementIds[i]);
 
     if (countChanged || idsChanged) {
       this.lastSettlementCount = currentSettlementCount;

@@ -68,6 +68,7 @@ export class GameStateManager {
   private state: GameState;
   private lastUpdate: number = Date.now();
   private lastAchievementCheck: number = 0;
+  private lastGoalUpdate: number = 0;
   private readonly GAME_VERSION = '0.1.0';
   private readonly SAVE_KEY = 'path-to-kingdoms-save';
   private autoSaveInterval: number | null = null;
@@ -1533,6 +1534,7 @@ export class GameStateManager {
     this.clearEffectCache();
 
     // Update currency for each settlement based on its income
+    const shouldUpdateGoals = now - this.lastGoalUpdate >= 300;
     this.state.settlements.forEach((settlement) => {
       const crossTierBonus = this.calculateCrossTierBonus(settlement);
       let currencyGained = (settlement.totalIncome + crossTierBonus) * deltaTime;
@@ -1545,9 +1547,17 @@ export class GameStateManager {
       settlement.currency += currencyGained;
       settlement.lifetimeCurrencyEarned += currencyGained;
 
-      // Update goal progress
-      this.updateGoalProgress(settlement);
+      // Update goal progress every 300ms instead of every tick
+      if (shouldUpdateGoals) {
+        this.updateGoalProgress(settlement);
+      } else {
+        // Always check completion even on skipped ticks (cheap: just checks flags)
+        this.checkSettlementCompletion(settlement);
+      }
     });
+    if (shouldUpdateGoals) {
+      this.lastGoalUpdate = now;
+    }
 
     // Process automated building purchases
     this.processAutoBuildingPurchases(now);
@@ -1596,6 +1606,19 @@ export class GameStateManager {
       (r) => r.purchased && r.effect.type === 'auto_building',
     );
 
+    if (autoBuildingResearch.length === 0) return;
+
+    // Pre-group settlements by tier so we don't re-filter per research item
+    const settlementsByTier = new Map<TierType, Settlement[]>();
+    for (const settlement of this.state.settlements) {
+      const list = settlementsByTier.get(settlement.tier);
+      if (list !== undefined) {
+        list.push(settlement);
+      } else {
+        settlementsByTier.set(settlement.tier, [settlement]);
+      }
+    }
+
     const dirtySettlements = new Set<Settlement>();
 
     for (const research of autoBuildingResearch) {
@@ -1620,8 +1643,8 @@ export class GameStateManager {
 
       // Check if enough time has passed
       if (now - lastPurchaseTime >= interval) {
-        // Find settlements of the same tier
-        const tierSettlements = this.state.settlements.filter((s) => s.tier === research.tier);
+        const tierSettlements = settlementsByTier.get(research.tier);
+        if (tierSettlements === undefined) continue;
 
         let bought = false;
         for (const settlement of tierSettlements) {
