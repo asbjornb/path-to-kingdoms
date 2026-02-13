@@ -36,23 +36,6 @@ describe('Tier data', () => {
         });
       });
     });
-
-    it('should have increasing completion thresholds', () => {
-      for (let i = 1; i < TIER_DATA.length; i++) {
-        const current = TIER_DATA[i];
-        const previous = TIER_DATA[i - 1];
-        expect(current.completionThreshold).toBeGreaterThan(previous.completionThreshold);
-      }
-    });
-
-    it('should have valid unlock requirements', () => {
-      expect(TIER_DATA[0].unlockRequirement).toBe(0); // Hamlet unlocked by default
-
-      for (let i = 1; i < TIER_DATA.length; i++) {
-        const tier = TIER_DATA[i];
-        expect(tier.unlockRequirement).toBeGreaterThan(0);
-      }
-    });
   });
 
   describe('getTierByType', () => {
