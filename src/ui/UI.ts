@@ -187,10 +187,6 @@ export class UI {
         <header class="game-header">
           <h1>Path to Kingdoms <span class="version-label">v${getAppVersion()}</span></h1>
           <div class="stats">
-            <div class="stat">
-              <span class="stat-label">${this.selectedTier.charAt(0).toUpperCase() + this.selectedTier.slice(1)} Research:</span>
-              <span class="stat-value" id="research">${this.game.getResearchPoints(this.selectedTier)}</span>
-            </div>
             ${this.renderPrestigeHeader()}
             <div class="buy-amount-toggle">
               <span class="toggle-label">Buy:</span>
@@ -472,6 +468,10 @@ export class UI {
     );
 
     return `
+      <div class="research-points-display">
+        <span class="stat-label">Research Points:</span>
+        <span class="stat-value" id="research">${tierResearchPoints}</span>
+      </div>
       <div class="research-header">
         <h3>${this.selectedTier.charAt(0).toUpperCase() + this.selectedTier.slice(1)} Research</h3>
         <div class="research-toggle">
@@ -1041,7 +1041,7 @@ export class UI {
   }
 
   private updateDynamicValues(): void {
-    // Update research points in header
+    // Update research points in research panel
     const researchEl = document.getElementById('research');
     if (researchEl) {
       researchEl.textContent = this.game.getResearchPoints(this.selectedTier).toString();
