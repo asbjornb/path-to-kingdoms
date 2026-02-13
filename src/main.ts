@@ -101,10 +101,14 @@ function initGame(): void {
     ui.render();
   };
 
-  window.purchasePrestigeUpgrade = (upgradeId: string): void => {
-    if (game.purchasePrestigeUpgrade(upgradeId)) {
-      ui.render();
-    }
+  window.toggleShowPrestigeShop = (): void => {
+    game.toggleShowPrestigeShop();
+    ui.render();
+  };
+
+  window.toggleShowCompletedPrestige = (): void => {
+    game.toggleShowCompletedPrestige();
+    ui.render();
   };
 
   window.filterPrestigeUpgrades = (query: string): void => {
