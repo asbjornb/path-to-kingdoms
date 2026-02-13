@@ -7,6 +7,7 @@ import {
   GoalType,
   BuyAmount,
   PrestigeUpgrade,
+  ResearchUpgrade,
 } from '../types/game';
 import { TIER_DATA, getTierByType } from '../data/tiers';
 import { formatNumber, formatIncome } from '../utils/format';
@@ -402,6 +403,32 @@ export class UI {
     `;
   }
 
+  private sortResearch(research: ResearchUpgrade[], buildingIds: string[]): ResearchUpgrade[] {
+    const categoryOrder: Record<string, number> = {
+      parallel_slots: 0,
+      starting_income: 1,
+      cost_reduction: 2,
+      flat_cost_count: 3,
+      auto_building: 4,
+      tier_requirement_reduction: 5,
+    };
+
+    return [...research].sort((a, b) => {
+      const catA = categoryOrder[a.effect.type] ?? 99;
+      const catB = categoryOrder[b.effect.type] ?? 99;
+      if (catA !== catB) return catA - catB;
+
+      // Within auto_building, sort by building index then cost
+      if (a.effect.type === 'auto_building' && b.effect.type === 'auto_building') {
+        const idxA = buildingIds.indexOf(a.effect.buildingId ?? '');
+        const idxB = buildingIds.indexOf(b.effect.buildingId ?? '');
+        if (idxA !== idxB) return idxA - idxB;
+      }
+
+      return a.cost - b.cost;
+    });
+  }
+
   private renderResearch(): string {
     const state = this.game.getState();
     const tierResearchPoints = this.game.getResearchPoints(this.selectedTier);
@@ -422,14 +449,23 @@ export class UI {
       availableResearch = availableResearch.filter((research) => !research.purchased);
     }
 
+    // Stable sort: by category, then building order, then cost
+    const tierDef = getTierByType(this.selectedTier);
+    const buildingIds = tierDef?.buildings.map((b) => b.id) ?? [];
+    availableResearch = this.sortResearch(availableResearch, buildingIds);
+
+    const hasAutoBuilding = availableResearch.some(
+      (r) => r.effect.type === 'auto_building' && !r.purchased,
+    );
+
     return `
       <div class="research-header">
         <h3>${this.selectedTier.charAt(0).toUpperCase() + this.selectedTier.slice(1)} Research</h3>
         <div class="research-toggle">
           <label>
-            <input 
-              type="checkbox" 
-              id="show-completed-research" 
+            <input
+              type="checkbox"
+              id="show-completed-research"
               ${showCompleted ? 'checked' : ''}
               onchange="window.toggleShowCompletedResearch()"
             >
@@ -437,36 +473,44 @@ export class UI {
           </label>
         </div>
       </div>
+      ${hasAutoBuilding ? '<p class="research-auto-note">Auto-builders spend up to 5% of treasury per purchase. First of each type is always bought when affordable.</p>' : ''}
       <div class="research-list">
         ${availableResearch
           .map((research) => {
             const canAfford = tierResearchPoints >= research.cost;
 
-            const isAutoBuilding = research.effect.type === 'auto_building';
+            if (research.purchased) {
+              return `
+              <div class="research-item purchased" title="${this.escapeAttr(research.description)}">
+                <span class="research-item-name">${research.name}</span>
+                <span class="purchased-label">Purchased</span>
+              </div>`;
+            }
+
             return `
-            <div class="research-item ${research.purchased ? 'purchased' : ''}">
-              <h4>${research.name}</h4>
-              <p>${research.description}</p>
-              ${isAutoBuilding ? '<p class="research-note">Will only spend up to 5% of treasury per purchase. First building of each type is always purchased when affordable.</p>' : ''}
-              ${
-                !research.purchased
-                  ? `
-                <button
-                  class="research-btn ${!canAfford ? 'disabled' : ''}"
-                  onclick="window.purchaseResearch('${research.id}')"
-                  ${!canAfford ? 'disabled' : ''}
-                >
-                  Research (${research.cost} points)
-                </button>
-              `
-                  : '<span class="purchased-label">Purchased</span>'
-              }
+            <div class="research-item">
+              <div class="research-item-top">
+                <span class="research-item-name">${research.name}</span>
+                <span class="research-cost">${research.cost} pts</span>
+              </div>
+              <p class="research-desc">${research.description}</p>
+              <button
+                class="research-btn ${!canAfford ? 'disabled' : ''}"
+                onclick="window.purchaseResearch('${research.id}')"
+                ${!canAfford ? 'disabled' : ''}
+              >
+                Research
+              </button>
             </div>
           `;
           })
           .join('')}
       </div>
     `;
+  }
+
+  private escapeAttr(str: string): string {
+    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
   }
 
   private getDisplayCostAndQty(

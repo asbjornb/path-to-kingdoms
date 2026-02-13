@@ -90,13 +90,17 @@ describe('UI', () => {
       const researchItems = container.querySelectorAll('.research-item');
       expect(researchItems.length).toBeGreaterThan(0);
 
-      // Each research item should have title, description, and button/label
+      // Each research item should have a name and either button or purchased label
       researchItems.forEach((item) => {
-        const title = item.querySelector('h4');
-        const description = item.querySelector('p');
+        const name = item.querySelector('.research-item-name');
+        expect(name).toBeTruthy();
 
-        expect(title).toBeTruthy();
-        expect(description).toBeTruthy();
+        // Unpurchased items should have a visible description
+        const isPurchased = item.classList.contains('purchased');
+        if (!isPurchased) {
+          const description = item.querySelector('.research-desc');
+          expect(description).toBeTruthy();
+        }
 
         // Should have either a button or purchased label
         const button = item.querySelector('.research-btn');
