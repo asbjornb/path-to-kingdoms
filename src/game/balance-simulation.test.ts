@@ -116,7 +116,7 @@ function allGoalTemplatesForTier(tierType: TierType): Goal[] {
   }> = [];
 
   // Income goals
-  for (const mult of [100, 250, 500]) {
+  for (const mult of [500]) {
     const val = Math.round(mult * incomeScale * difficulty);
     templates.push({
       type: GoalType.ReachIncome,
@@ -126,7 +126,7 @@ function allGoalTemplatesForTier(tierType: TierType): Goal[] {
   }
 
   // Accumulate currency goals
-  for (const mult of [12000, 40000, 120000]) {
+  for (const mult of [100000, 150000]) {
     const val = Math.round(mult * costScale * difficulty);
     templates.push({
       type: GoalType.AccumulateCurrency,
@@ -136,7 +136,7 @@ function allGoalTemplatesForTier(tierType: TierType): Goal[] {
   }
 
   // Current currency goals
-  for (const mult of [3000, 7500, 15000]) {
+  for (const mult of [10000, 20000]) {
     const val = Math.round(mult * costScale * difficulty);
     templates.push({
       type: GoalType.CurrentCurrency,
@@ -146,7 +146,7 @@ function allGoalTemplatesForTier(tierType: TierType): Goal[] {
   }
 
   // Survival goals
-  for (const baseSec of [300, 600, 900]) {
+  for (const baseSec of [600, 900]) {
     const val = Math.round(baseSec * difficulty);
     templates.push({
       type: GoalType.Survival,

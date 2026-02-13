@@ -62,16 +62,6 @@ export const GoalGenerator = {
       // Income goals (scaled by tier income level and difficulty)
       {
         type: GoalType.ReachIncome,
-        baseValue: Math.round(100 * incomeScale * difficulty),
-        description: 'Reach {value} income per second',
-      },
-      {
-        type: GoalType.ReachIncome,
-        baseValue: Math.round(250 * incomeScale * difficulty),
-        description: 'Reach {value} income per second',
-      },
-      {
-        type: GoalType.ReachIncome,
         baseValue: Math.round(500 * incomeScale * difficulty),
         description: 'Reach {value} income per second',
       },
@@ -79,43 +69,28 @@ export const GoalGenerator = {
       // Lifetime currency goals (scaled by tier cost level and difficulty)
       {
         type: GoalType.AccumulateCurrency,
-        baseValue: Math.round(12000 * costScale * difficulty),
+        baseValue: Math.round(100000 * costScale * difficulty),
         description: 'Earn {value} total currency',
       },
       {
         type: GoalType.AccumulateCurrency,
-        baseValue: Math.round(40000 * costScale * difficulty),
-        description: 'Earn {value} total currency',
-      },
-      {
-        type: GoalType.AccumulateCurrency,
-        baseValue: Math.round(120000 * costScale * difficulty),
+        baseValue: Math.round(150000 * costScale * difficulty),
         description: 'Earn {value} total currency',
       },
 
       // Current currency goals (scaled by tier cost level and difficulty)
       {
         type: GoalType.CurrentCurrency,
-        baseValue: Math.round(3000 * costScale * difficulty),
+        baseValue: Math.round(10000 * costScale * difficulty),
         description: 'Have {value} currency at once',
       },
       {
         type: GoalType.CurrentCurrency,
-        baseValue: Math.round(7500 * costScale * difficulty),
-        description: 'Have {value} currency at once',
-      },
-      {
-        type: GoalType.CurrentCurrency,
-        baseValue: Math.round(15000 * costScale * difficulty),
+        baseValue: Math.round(20000 * costScale * difficulty),
         description: 'Have {value} currency at once',
       },
 
       // Prosperity goals (time-based, accelerated by income)
-      {
-        type: GoalType.Survival,
-        baseValue: Math.round(300 * difficulty),
-        description: 'Prosper for {minutes} minutes',
-      },
       {
         type: GoalType.Survival,
         baseValue: Math.round(600 * difficulty),
