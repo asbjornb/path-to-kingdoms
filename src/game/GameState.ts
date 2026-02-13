@@ -346,12 +346,15 @@ export class GameStateManager {
     const flatCostCount = researchFlatCost + prestigeFlatCost;
     const effectiveCount = Math.max(0, count - flatCostCount);
 
-    return Math.floor(
-      baseCost *
-        Math.pow(adjustedMultiplier, effectiveCount) *
-        costReduction *
-        prestigeCostReduction *
-        achievementCostReduction,
+    return Math.max(
+      1,
+      Math.floor(
+        baseCost *
+          Math.pow(adjustedMultiplier, effectiveCount) *
+          costReduction *
+          prestigeCostReduction *
+          achievementCostReduction,
+      ),
     );
   }
 
