@@ -174,6 +174,8 @@ export class UI {
     this.lastSettlementCount = this.game.getState().settlements.length;
     this.lastSettlementIds = this.game.getState().settlements.map((s) => s.id);
 
+    const settlementsArea = this.container.querySelector('.settlements-area');
+    const savedSettlementsScroll = settlementsArea !== null ? settlementsArea.scrollTop : 0;
     const researchPanel = this.container.querySelector('.research-panel');
     const savedResearchScroll = researchPanel !== null ? researchPanel.scrollTop : 0;
     const prestigeModal = this.container.querySelector('.prestige-shop-modal');
@@ -253,6 +255,10 @@ export class UI {
       ${this.renderPrestigeShopOverlay()}
     `;
 
+    const newSettlementsArea = this.container.querySelector('.settlements-area');
+    if (newSettlementsArea !== null && savedSettlementsScroll > 0) {
+      newSettlementsArea.scrollTop = savedSettlementsScroll;
+    }
     const newResearchPanel = this.container.querySelector('.research-panel');
     if (newResearchPanel !== null && savedResearchScroll > 0) {
       newResearchPanel.scrollTop = savedResearchScroll;
