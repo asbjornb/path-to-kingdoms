@@ -49,57 +49,132 @@ jobs:
 
       - run: npm ci
 
-      - name: Run balance simulation
-        id: sim
+      - name: Run balance simulation (PR branch)
+        id: sim-pr
         run: |
           set +e
-          NO_COLOR=1 npx vitest run balance-sim --reporter=verbose 2>&1 | tee /tmp/balance-sim.txt
-          echo "sim_exit=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+          NO_COLOR=1 npx vitest run balance-sim --reporter=verbose 2>&1 | tee /tmp/balance-sim-pr.txt
+          echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
 
-      - name: Parse simulation output
+      - name: Run balance simulation (main branch)
+        id: sim-main
+        run: |
+          set +e
+          git fetch origin main --depth=1
+          if git worktree add /tmp/main-branch origin/main 2>/dev/null; then
+            cd /tmp/main-branch
+            npm ci
+            NO_COLOR=1 npx vitest run balance-sim --reporter=verbose 2>&1 | tee /tmp/balance-sim-main.txt
+            cd "$GITHUB_WORKSPACE"
+            git worktree remove /tmp/main-branch --force 2>/dev/null
+          fi
+          exit 0
+
+      - name: Parse and compare simulation results
         if: always()
         run: |
           python3 << 'PYEOF'
-          import re
+          import re, json
 
-          raw = ''
-          try:
-              with open('/tmp/balance-sim.txt', 'r') as f:
-                  raw = f.read()
-          except FileNotFoundError:
-              pass
+          def parse_sim(filepath):
+              try:
+                  with open(filepath) as f:
+                      raw = f.read()
+              except FileNotFoundError:
+                  return {}, ''
+              raw = re.sub(r'\x1b\[[0-9;]*m', '', raw)
+              tiers = {}
+              for m in re.finditer(
+                  r'BALANCE SIMULATION\s*\W+\s*(\w+).*?(\d+)/(\d+)\s+goals within bounds',
+                  raw,
+                  re.DOTALL,
+              ):
+                  name, passed, total = m.group(1), int(m.group(2)), int(m.group(3))
+                  tiers[name.upper()] = {'name': name.title(), 'passed': passed, 'total': total}
+              blocks = re.findall(r'(={10,}.*?={10,}.*?={10,})', raw, re.DOTALL)
+              tables = '\n\n'.join(blocks) if blocks else raw
+              return tiers, tables
 
-          # Strip ANSI escape codes
-          raw = re.sub(r'\x1b\[[0-9;]*m', '', raw)
+          pr_tiers, pr_tables = parse_sim('/tmp/balance-sim-pr.txt')
+          main_tiers, main_tables = parse_sim('/tmp/balance-sim-main.txt')
 
-          # Extract per-tier summaries: "BALANCE SIMULATION — TIER" ... "X/Y goals within bounds"
-          tier_results = re.findall(
-              r'BALANCE SIMULATION\s*\W+\s*(\w+).*?(\d+)/(\d+)\s+goals within bounds',
-              raw,
-              re.DOTALL,
+          TIER_ORDER = ['HAMLET','VILLAGE','TOWN','CITY','COUNTY','DUCHY','REALM','KINGDOM']
+          all_keys = sorted(
+              set(list(pr_tiers.keys()) + list(main_tiers.keys())),
+              key=lambda k: TIER_ORDER.index(k) if k in TIER_ORDER else 99,
           )
 
-          summary_rows = []
-          all_pass = True
-          for tier_name, passed, total in tier_results:
-              p, t = int(passed), int(total)
-              status = 'pass' if p == t else 'warn'
-              if p != t:
-                  all_pass = False
-              summary_rows.append(f'{tier_name.title()}|{passed}/{total}|{status}')
+          rows = []
+          pr_total_passed = 0
+          pr_total_goals = 0
+          main_total_passed = 0
+          main_total_goals = 0
 
-          with open('/tmp/sim-summary.txt', 'w') as f:
-              f.write('\n'.join(summary_rows))
+          for key in all_keys:
+              pr = pr_tiers.get(key)
+              main = main_tiers.get(key)
+              name = (pr or main)['name']
 
-          # Extract full table blocks (each bounded by three === lines)
-          blocks = re.findall(r'(={10,}.*?={10,}.*?={10,})', raw, re.DOTALL)
-          tables = '\n\n'.join(blocks) if blocks else raw
+              if pr:
+                  pr_total_passed += pr['passed']
+                  pr_total_goals += pr['total']
+                  pr_icon = '✅' if pr['passed'] == pr['total'] else '⚠️'
+                  pr_str = f"{pr['passed']}/{pr['total']} {pr_icon}"
+              else:
+                  pr_str = '—'
 
-          with open('/tmp/sim-tables.txt', 'w') as f:
-              f.write(tables)
+              if main:
+                  main_total_passed += main['passed']
+                  main_total_goals += main['total']
+                  main_icon = '✅' if main['passed'] == main['total'] else '⚠️'
+                  main_str = f"{main['passed']}/{main['total']} {main_icon}"
+              else:
+                  main_str = '—'
 
-          with open('/tmp/sim-allpass.txt', 'w') as f:
-              f.write('true' if all_pass else 'false')
+              if pr and main:
+                  delta = pr['passed'] - main['passed']
+                  if delta > 0:
+                      delta_str = f'**+{delta}**'
+                  elif delta < 0:
+                      delta_str = f'**{delta}**'
+                  else:
+                      delta_str = '—'
+              else:
+                  delta_str = 'new' if pr and not main else 'removed'
+
+              rows.append(f'| {name} | {pr_str} | {main_str} | {delta_str} |')
+
+          has_main = len(main_tiers) > 0
+          total_delta = pr_total_passed - main_total_passed
+
+          if has_main:
+              if total_delta > 0:
+                  overall = f'**{pr_total_passed}/{pr_total_goals}** goals in bounds (improved by {total_delta} vs main)'
+              elif total_delta < 0:
+                  overall = f'**{pr_total_passed}/{pr_total_goals}** goals in bounds (regressed by {abs(total_delta)} vs main)'
+              else:
+                  overall = f'**{pr_total_passed}/{pr_total_goals}** goals in bounds (no change vs main)'
+          else:
+              overall = f'**{pr_total_passed}/{pr_total_goals}** goals in bounds'
+
+          max_len = 25000
+          if len(pr_tables) > max_len:
+              pr_tables = pr_tables[:max_len] + '\n... (truncated)'
+          if len(main_tables) > max_len:
+              main_tables = main_tables[:max_len] + '\n... (truncated)'
+
+          result = {
+              'overall': overall,
+              'rows': '\n'.join(rows),
+              'pr_tables': pr_tables,
+              'main_tables': main_tables,
+              'has_main': has_main,
+              'total_delta': total_delta,
+              'all_pass': pr_total_passed == pr_total_goals,
+          }
+
+          with open('/tmp/sim-comparison.json', 'w') as f:
+              json.dump(result, f)
           PYEOF
 
       - name: Post simulation results to PR
@@ -109,61 +184,90 @@ jobs:
           script: |
             const fs = require('fs');
 
-            let summaryRaw = '';
-            let tables = 'No simulation output captured.';
-            let allPass = false;
-
-            try { summaryRaw = fs.readFileSync('/tmp/sim-summary.txt', 'utf8').trim(); } catch {}
-            try { tables = fs.readFileSync('/tmp/sim-tables.txt', 'utf8').trim(); } catch {}
-            try { allPass = fs.readFileSync('/tmp/sim-allpass.txt', 'utf8').trim() === 'true'; } catch {}
-
-            // Build summary table
-            let summaryTable = '';
-            if (summaryRaw) {
-              const rows = summaryRaw.split('\n').map(line => {
-                const [tier, count, status] = line.split('|');
-                const icon = status === 'pass' ? '✅' : '⚠️';
-                return `| ${tier} | ${count} ${icon} |`;
-              });
-              summaryTable = [
-                '| Tier | Goals in Bounds |',
-                '|------|----------------|',
-                ...rows,
-              ].join('\n');
-            }
-
-            const simExit = parseInt('${{ steps.sim.outputs.sim_exit }}', 10);
-            const passed = allPass && simExit === 0;
-            const icon = passed ? '✅' : '⚠️';
-            const status = passed
-              ? 'All goals within expected bounds'
-              : 'Some goals outside expected bounds';
-
-            // Truncate if needed (GitHub comment limit ~65536 chars)
-            if (tables.length > 55000) {
-              tables = tables.slice(0, 55000) + '\n... (truncated)';
+            let data;
+            try {
+              data = JSON.parse(fs.readFileSync('/tmp/sim-comparison.json', 'utf8'));
+            } catch {
+              data = null;
             }
 
             const marker = '<!-- balance-simulation-results -->';
-            const body = [
+
+            if (!data) {
+              const body = [
+                marker,
+                '## ⚠️ Balance Simulation Results',
+                '',
+                'Simulation output could not be parsed. Check the workflow logs.',
+              ].join('\n');
+
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+              });
+              const existing = comments.find(c => c.body?.includes(marker));
+              if (existing) {
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: existing.id,
+                  body,
+                });
+              } else {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body,
+                });
+              }
+              return;
+            }
+
+            const icon = data.total_delta < 0 ? '❌' : data.all_pass ? '✅' : '⚠️';
+
+            const sections = [
               marker,
               `## ${icon} Balance Simulation Results`,
               '',
-              `**Status:** ${status}`,
+              data.overall,
               '',
-              summaryTable,
+              '| Tier | PR | main | Change |',
+              '|------|-----|------|--------|',
+              data.rows,
+            ];
+
+            // PR branch details
+            sections.push(
               '',
               '<details>',
-              '<summary>Full simulation output</summary>',
+              '<summary>Full simulation output (PR branch)</summary>',
               '',
               '```',
-              tables,
+              data.pr_tables || 'No output captured.',
               '```',
               '',
               '</details>',
-            ].join('\n');
+            );
 
-            // Find existing comment to update (avoids spamming on repeated pushes)
+            // main branch details (only if we got results)
+            if (data.has_main) {
+              sections.push(
+                '',
+                '<details>',
+                '<summary>Full simulation output (main)</summary>',
+                '',
+                '```',
+                data.main_tables || 'No output captured.',
+                '```',
+                '',
+                '</details>',
+              );
+            }
+
+            const body = sections.join('\n');
+
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
