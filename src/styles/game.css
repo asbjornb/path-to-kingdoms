@@ -264,6 +264,10 @@
   font-size: 0.8rem;
 }
 
+.building-income.boosted {
+  color: #facc15;
+}
+
 .building-effect {
   color: #a855f7;
   font-size: 0.75rem;

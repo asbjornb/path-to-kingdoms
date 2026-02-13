@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { GameStateManager } from './GameState';
-import { TierType, GoalType } from '../types/game';
+import { TierType, GoalType, Settlement } from '../types/game';
+import { getTierByType } from '../data/tiers';
+import { GoalGenerator } from '../data/goals';
 
 describe('GameStateManager', () => {
   let game: GameStateManager;
@@ -794,6 +796,74 @@ describe('GameStateManager', () => {
 
       expect(settlement.buildings.get('hamlet_hut')).toBe(1);
       expect(settlement.currency).toBe(5); // 15 - 10
+    });
+  });
+
+  describe('getEffectiveBuildingIncome', () => {
+    function createTownSettlement(): Settlement {
+      const tierDef = getTierByType(TierType.Town)!;
+      const settlement: Settlement = {
+        id: `town_test_${Date.now()}`,
+        tier: TierType.Town,
+        isComplete: false,
+        currency: 1000000,
+        totalIncome: 0,
+        buildings: new Map(),
+        lifetimeCurrencyEarned: 0,
+        spawnTime: Date.now(),
+        goals: GoalGenerator.generateRandomGoals(TierType.Town, 1),
+      };
+      tierDef.buildings.forEach((b) => settlement.buildings.set(b.id, 0));
+      return settlement;
+    }
+
+    it('should return baseIncome when no synergies are active', () => {
+      const settlement = game.getState().settlements[0];
+      // hamlet_hut has baseIncome of 1
+      expect(game.getEffectiveBuildingIncome(settlement.id, 'hamlet_hut')).toBe(1);
+    });
+
+    it('should return 0 for non-existent settlement', () => {
+      expect(game.getEffectiveBuildingIncome('fake_id', 'hamlet_hut')).toBe(0);
+    });
+
+    it('should return 0 for non-existent building', () => {
+      const settlement = game.getState().settlements[0];
+      expect(game.getEffectiveBuildingIncome(settlement.id, 'fake_building')).toBe(0);
+    });
+
+    it('should boost forge income based on watchtower count', () => {
+      // Set up a Town settlement with watchtowers
+      const settlement = createTownSettlement();
+      game.getState().unlockedTiers.add(TierType.Town);
+      game.getState().settlements.push(settlement);
+
+      // No watchtowers: forge income should be base (800)
+      expect(game.getEffectiveBuildingIncome(settlement.id, 'town_forge')).toBe(800);
+
+      // Add 2 watchtowers: each gives +15% to forge = +30% total
+      settlement.buildings.set('town_watchtower', 2);
+      expect(game.getEffectiveBuildingIncome(settlement.id, 'town_forge')).toBeCloseTo(
+        800 * 1.3,
+        2,
+      );
+
+      // Add more watchtowers: 5 watchtowers = +75%
+      settlement.buildings.set('town_watchtower', 5);
+      expect(game.getEffectiveBuildingIncome(settlement.id, 'town_forge')).toBeCloseTo(
+        800 * 1.75,
+        2,
+      );
+    });
+
+    it('should not boost watchtower income (only forge is the target)', () => {
+      const settlement = createTownSettlement();
+      game.getState().unlockedTiers.add(TierType.Town);
+      game.getState().settlements.push(settlement);
+
+      settlement.buildings.set('town_watchtower', 5);
+      // Watchtower base income is 150, it should not boost itself
+      expect(game.getEffectiveBuildingIncome(settlement.id, 'town_watchtower')).toBe(150);
     });
   });
 });

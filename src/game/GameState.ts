@@ -586,6 +586,74 @@ export class GameStateManager {
   }
 
   /**
+   * Get the effective per-unit income for a building in a settlement,
+   * accounting for production boosts, achievement synergies, prestige synergies,
+   * and prestige building income boosts.
+   */
+  public getEffectiveBuildingIncome(settlementId: string, buildingId: string): number {
+    const settlement = this.state.settlements.find((s) => s.id === settlementId);
+    if (!settlement) return 0;
+
+    const tierDef = getTierByType(settlement.tier);
+    if (!tierDef) return 0;
+
+    const building = tierDef.buildings.find((b) => b.id === buildingId);
+    if (!building) return 0;
+
+    let income = building.baseIncome;
+
+    // Calculate production_boost total for this building
+    const productionBoostAmplifier =
+      1 + this.getPrestigeEffect('prestige_production_boost_amplifier');
+    let boost = 0;
+
+    for (const b of tierDef.buildings) {
+      if (b.effect?.type === 'production_boost' && b.effect.targetBuilding === buildingId) {
+        const boosterCount = settlement.buildings.get(b.id) ?? 0;
+        boost += b.effect.value * boosterCount * productionBoostAmplifier;
+      }
+    }
+
+    // Add achievement synergy boosts
+    for (const achievement of this.state.achievements) {
+      if (
+        achievement.unlocked &&
+        achievement.bonus.type === 'building_synergy' &&
+        achievement.bonus.targetBuildingId === buildingId &&
+        achievement.bonus.sourceBuildingId !== undefined
+      ) {
+        const sourceCount = settlement.buildings.get(achievement.bonus.sourceBuildingId) ?? 0;
+        boost += achievement.bonus.value * sourceCount;
+      }
+    }
+
+    // Add prestige synergy boosts
+    for (const upgrade of this.state.prestigeUpgrades) {
+      if (
+        upgrade.purchased &&
+        upgrade.effect.type === 'prestige_building_synergy' &&
+        upgrade.effect.targetBuilding === buildingId &&
+        upgrade.effect.sourceBuilding !== undefined
+      ) {
+        const sourceCount = settlement.buildings.get(upgrade.effect.sourceBuilding) ?? 0;
+        boost += upgrade.effect.value * sourceCount;
+      }
+    }
+
+    if (boost > 0) {
+      income *= 1 + boost;
+    }
+
+    // Apply prestige building-specific income boost
+    const prestigeBuildingBoost = this.getPrestigeBuildingBoost(buildingId);
+    if (prestigeBuildingBoost > 0) {
+      income *= 1 + prestigeBuildingBoost;
+    }
+
+    return income;
+  }
+
+  /**
    * Get the mastery level for a tier (= total completions for that tier).
    */
   public getMasteryLevel(tier: TierType): number {
