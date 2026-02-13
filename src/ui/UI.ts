@@ -27,6 +27,8 @@ export class UI {
   private activeNotificationIds: Set<string> = new Set();
   private prestigeSearchQuery: string = '';
   private prestigeShopSearchQuery: string = '';
+  private visibleSettlements: Set<HTMLElement> = new Set();
+  private settlementObserver: IntersectionObserver | null = null;
 
   constructor(game: GameStateManager, container: HTMLElement) {
     this.game = game;
@@ -268,6 +270,8 @@ export class UI {
     if (newPrestigeModal !== null && savedModalScroll > 0) {
       newPrestigeModal.scrollTop = savedModalScroll;
     }
+
+    this.setupSettlementObserver();
   }
 
   private renderTierTabs(): string {
@@ -1018,6 +1022,36 @@ export class UI {
     return `${formatNumber(goal.currentValue)}/${formatNumber(effectiveTarget)}`;
   }
 
+  private setupSettlementObserver(): void {
+    if (this.settlementObserver !== null) {
+      this.settlementObserver.disconnect();
+    }
+    this.visibleSettlements.clear();
+
+    // IntersectionObserver may not be available in test environments
+    if (typeof IntersectionObserver === 'undefined') return;
+
+    const root = this.container.querySelector('.settlements-area');
+    this.settlementObserver = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const el = entry.target as HTMLElement;
+          if (entry.isIntersecting) {
+            this.visibleSettlements.add(el);
+          } else {
+            this.visibleSettlements.delete(el);
+          }
+        }
+      },
+      { root: root ?? undefined, rootMargin: '200px' },
+    );
+
+    const settlementEls = this.container.querySelectorAll('.settlement');
+    settlementEls.forEach((el) => {
+      this.settlementObserver?.observe(el);
+    });
+  }
+
   public update(): void {
     if (!this.isInitialized) return;
 
@@ -1078,13 +1112,14 @@ export class UI {
     const settlements = this.game
       .getState()
       .settlements.filter((s) => s.tier === this.selectedTier);
+    const settlementElements = document.querySelectorAll('.settlement');
+    const buyAmount = this.game.getBuyAmount();
+
     settlements.forEach((settlement, index) => {
-      // Find settlement elements by data attribute or index
-      const settlementElements = document.querySelectorAll('.settlement');
       const settlementEl = settlementElements[index] as HTMLElement;
       if (settlementEl === null || settlementEl === undefined) return;
 
-      // Update currency and income values
+      // Always update cheap displays: currency, income, goals
       const currencyEl = settlementEl.querySelector('.settlement-stat .stat-value');
       const statValues = settlementEl.querySelectorAll('.settlement-stat .stat-value');
       const incomeEl = statValues.length > 1 ? statValues[1] : null;
@@ -1133,8 +1168,10 @@ export class UI {
         }
       }
 
+      // Skip expensive building button updates for off-screen settlements
+      if (this.visibleSettlements.size > 0 && !this.visibleSettlements.has(settlementEl)) return;
+
       // Update building counts and button states
-      const buyAmount = this.game.getBuyAmount();
       const buildingButtons = settlementEl.querySelectorAll('.buy-btn');
       buildingButtons.forEach((button) => {
         if (!(button instanceof HTMLButtonElement)) return;
