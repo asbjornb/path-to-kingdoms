@@ -388,8 +388,8 @@ export const TIER_DATA: TierDefinition[] = [
         costMultiplier: 1.3,
         effect: {
           type: 'income_per_building',
-          value: 250000,
-          description: '+250K income for each building in the settlement',
+          value: 100000,
+          description: '+100K income for each building in the settlement',
         },
       },
     ],
