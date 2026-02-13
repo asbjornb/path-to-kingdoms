@@ -421,8 +421,8 @@ describe('GameStateManager', () => {
       const bonus = game.getCrossTierBonus(hamletSettlement!.id);
 
       // Village (distance 1): 2 * 10 * 0.05 / 2 = 0.5
-      // Town (distance 2): 1 * 100 * 0.05 / 4 = 1.25
-      expect(bonus).toBeCloseTo(1.75, 4);
+      // Town (distance 2): 1 * 85 * 0.05 / 4 = 1.0625
+      expect(bonus).toBeCloseTo(1.5625, 4);
     });
 
     it('should apply patronage bonus to currency in update loop', () => {
