@@ -903,13 +903,26 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
   // City Cost Reduction
   {
     id: 'city_cost_reduction_1',
-    name: 'Metropolitan Efficiency',
+    name: 'Metropolitan Efficiency I',
     description: 'Reduces all city building costs by 10%',
     cost: RESEARCH_COSTS.costReduction[0],
     tier: TierType.City,
     effect: {
       type: 'cost_reduction',
       value: 0.9,
+    },
+    purchased: false,
+  },
+  {
+    id: 'city_cost_reduction_2',
+    name: 'Metropolitan Efficiency II',
+    description: 'Reduces all city building costs by 15%',
+    cost: RESEARCH_COSTS.costReduction[1],
+    tier: TierType.City,
+    prerequisite: 'city_cost_reduction_1',
+    effect: {
+      type: 'cost_reduction',
+      value: 0.85,
     },
     purchased: false,
   },
@@ -944,6 +957,21 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
 
   // ===== COUNTY RESEARCH =====
 
+  // County Starting Income
+  {
+    id: 'county_starting_income_1',
+    name: 'County Foundation Endowment',
+    description: '+50000 starting income for new counties',
+    cost: RESEARCH_COSTS.startingIncome[0],
+    tier: TierType.County,
+    effect: {
+      type: 'starting_income',
+      value: 50000,
+    },
+    purchased: false,
+  },
+
+  // County Cost Reduction
   {
     id: 'county_cost_reduction_1',
     name: 'County Construction Efficiency I',
@@ -956,11 +984,39 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     },
     purchased: false,
   },
+  {
+    id: 'county_cost_reduction_2',
+    name: 'County Construction Efficiency II',
+    description: 'Reduces all county building costs by 20%',
+    cost: RESEARCH_COSTS.costReduction[1],
+    tier: TierType.County,
+    prerequisite: 'county_cost_reduction_1',
+    effect: {
+      type: 'cost_reduction',
+      value: 0.8,
+    },
+    purchased: false,
+  },
   // County Automation
   ...generateAutoBuilding(TierType.County, 'county', COUNTY_AUTO_BUILDINGS),
 
   // ===== DUCHY RESEARCH =====
 
+  // Duchy Starting Income
+  {
+    id: 'duchy_starting_income_1',
+    name: 'Ducal Development Fund',
+    description: '+500000 starting income for new duchies',
+    cost: RESEARCH_COSTS.startingIncome[0],
+    tier: TierType.Duchy,
+    effect: {
+      type: 'starting_income',
+      value: 500000,
+    },
+    purchased: false,
+  },
+
+  // Duchy Cost Reduction
   {
     id: 'duchy_cost_reduction_1',
     name: 'Ducal Engineering I',
@@ -973,11 +1029,39 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     },
     purchased: false,
   },
+  {
+    id: 'duchy_cost_reduction_2',
+    name: 'Ducal Engineering II',
+    description: 'Reduces all duchy building costs by 20%',
+    cost: RESEARCH_COSTS.costReduction[1],
+    tier: TierType.Duchy,
+    prerequisite: 'duchy_cost_reduction_1',
+    effect: {
+      type: 'cost_reduction',
+      value: 0.8,
+    },
+    purchased: false,
+  },
   // Duchy Automation
   ...generateAutoBuilding(TierType.Duchy, 'duchy', DUCHY_AUTO_BUILDINGS),
 
   // ===== REALM RESEARCH =====
 
+  // Realm Starting Income
+  {
+    id: 'realm_starting_income_1',
+    name: 'Realm Foundation Grant',
+    description: '+5000000 starting income for new realms',
+    cost: RESEARCH_COSTS.startingIncome[0],
+    tier: TierType.Realm,
+    effect: {
+      type: 'starting_income',
+      value: 5000000,
+    },
+    purchased: false,
+  },
+
+  // Realm Cost Reduction
   {
     id: 'realm_cost_reduction_1',
     name: 'Realm Engineering I',
@@ -990,17 +1074,58 @@ export const RESEARCH_DATA: ResearchUpgrade[] = [
     },
     purchased: false,
   },
+  {
+    id: 'realm_cost_reduction_2',
+    name: 'Realm Engineering II',
+    description: 'Reduces all realm building costs by 20%',
+    cost: RESEARCH_COSTS.costReduction[1],
+    tier: TierType.Realm,
+    prerequisite: 'realm_cost_reduction_1',
+    effect: {
+      type: 'cost_reduction',
+      value: 0.8,
+    },
+    purchased: false,
+  },
   // Realm Automation
   ...generateAutoBuilding(TierType.Realm, 'realm', REALM_AUTO_BUILDINGS),
 
   // ===== KINGDOM RESEARCH =====
 
+  // Kingdom Starting Income
+  {
+    id: 'kingdom_starting_income_1',
+    name: 'Royal Development Treasury',
+    description: '+50000000 starting income for new kingdoms',
+    cost: RESEARCH_COSTS.startingIncome[0],
+    tier: TierType.Kingdom,
+    effect: {
+      type: 'starting_income',
+      value: 50000000,
+    },
+    purchased: false,
+  },
+
+  // Kingdom Cost Reduction
   {
     id: 'kingdom_cost_reduction_1',
     name: 'Royal Engineering I',
     description: 'Reduces all kingdom building costs by 20%',
     cost: RESEARCH_COSTS.costReduction[0],
     tier: TierType.Kingdom,
+    effect: {
+      type: 'cost_reduction',
+      value: 0.8,
+    },
+    purchased: false,
+  },
+  {
+    id: 'kingdom_cost_reduction_2',
+    name: 'Royal Engineering II',
+    description: 'Reduces all kingdom building costs by 20%',
+    cost: RESEARCH_COSTS.costReduction[1],
+    tier: TierType.Kingdom,
+    prerequisite: 'kingdom_cost_reduction_1',
     effect: {
       type: 'cost_reduction',
       value: 0.8,
