@@ -17,7 +17,6 @@ export interface Building {
   baseCost: number;
   baseIncome: number;
   costMultiplier: number;
-  description?: string;
   effect?: {
     type:
       | 'income_multiplier'
@@ -35,8 +34,6 @@ export interface Building {
 export interface TierDefinition {
   type: TierType;
   name: string;
-  unlockRequirement: number;
-  completionThreshold: number;
   buildings: Building[];
 }
 

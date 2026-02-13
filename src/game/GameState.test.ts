@@ -634,6 +634,93 @@ describe('GameStateManager', () => {
     });
   });
 
+  describe('Effect caching', () => {
+    it('should return same prestige effect value on repeated calls within a tick', () => {
+      // Call getPrestigeEffect multiple times — should get consistent results
+      const first = game.getPrestigeEffect('prestige_income_multiplier');
+      const second = game.getPrestigeEffect('prestige_income_multiplier');
+      expect(first).toBe(second);
+      expect(first).toBe(0); // No prestige upgrades purchased
+    });
+
+    it('should return same achievement effect value on repeated calls within a tick', () => {
+      const first = game.getAchievementEffect('income_multiplier');
+      const second = game.getAchievementEffect('income_multiplier');
+      expect(first).toBe(second);
+      expect(first).toBe(0); // No achievements unlocked
+    });
+
+    it('should return same building boost value on repeated calls within a tick', () => {
+      const first = game.getPrestigeBuildingBoost('hamlet_hut');
+      const second = game.getPrestigeBuildingBoost('hamlet_hut');
+      expect(first).toBe(second);
+      expect(first).toBe(0); // No building boosts purchased
+    });
+
+    it('should reflect prestige upgrade purchases after cache invalidation', () => {
+      // Set up: give prestige currency and unlock village
+      game.getState().unlockedTiers.add(TierType.Village);
+      game.getState().prestigeCurrency.set(TierType.Village, 100);
+
+      // Find first village prestige upgrade with income_multiplier effect
+      const incomeUpgrade = game
+        .getState()
+        .prestigeUpgrades.find(
+          (u) => u.tier === TierType.Village && u.effect.type === 'prestige_income_multiplier',
+        );
+
+      if (incomeUpgrade) {
+        const before = game.getPrestigeEffect('prestige_income_multiplier');
+        game.purchasePrestigeUpgrade(incomeUpgrade.id);
+        const after = game.getPrestigeEffect('prestige_income_multiplier');
+
+        // After purchasing, the effect should increase
+        expect(after).toBeGreaterThan(before);
+      }
+    });
+
+    it('should reflect research purchases after cache invalidation', () => {
+      game.getState().researchPoints.set(TierType.Hamlet, 100);
+
+      // Cache a research effect value
+      const costBefore = game.getBuildingCost(game.getState().settlements[0].id, 'hamlet_hut');
+
+      // Purchase cost reduction research
+      game.purchaseResearch('hamlet_cost_reduction_1');
+
+      // Cost should now be lower (cache was cleared by purchaseResearch)
+      const costAfter = game.getBuildingCost(game.getState().settlements[0].id, 'hamlet_hut');
+
+      expect(costAfter).toBeLessThan(costBefore!);
+    });
+
+    it('should clear cache between update ticks', () => {
+      const settlement = game.getState().settlements[0];
+      settlement.currency = 1000;
+      game.buyBuilding(settlement.id, 'hamlet_hut');
+
+      // Run one update tick
+      game.update();
+
+      // Manually unlock an achievement to change effect values
+      const achievement = game
+        .getState()
+        .achievements.find((a) => a.bonus.type === 'income_multiplier');
+      if (achievement) {
+        achievement.unlocked = true;
+      }
+
+      // Run another tick — cache should be cleared and new values used
+      game.update();
+
+      // The achievement bonus should now be reflected in income
+      const incomeBonus = game.getAchievementEffect('income_multiplier');
+      if (achievement) {
+        expect(incomeBonus).toBeGreaterThan(0);
+      }
+    });
+  });
+
   describe('Auto-builder treasury cap', () => {
     let settlementId: string;
 

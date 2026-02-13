@@ -72,6 +72,7 @@ export class GameStateManager {
   private readonly SAVE_KEY = 'path-to-kingdoms-save';
   private autoSaveInterval: number | null = null;
   private pendingNotifications: GameNotification[] = [];
+  private effectCache: Map<string, number> = new Map();
 
   constructor() {
     // Initialize state first
@@ -629,81 +630,114 @@ export class GameStateManager {
 
   /**
    * Get aggregate prestige effect for a given type.
+   * Results are cached per effect type and cleared each update tick.
    */
   public getPrestigeEffect(type: PrestigeUpgrade['effect']['type']): number {
+    const cacheKey = `prestige:${type}`;
+    const cached = this.effectCache.get(cacheKey);
+    if (cached !== undefined) return cached;
+
     const upgrades = this.state.prestigeUpgrades.filter(
       (u) => u.purchased && u.effect.type === type,
     );
+    let result: number;
     switch (type) {
       case 'prestige_income_multiplier':
         // Additive sum (e.g., 0.15 + 0.25 = 0.40 → applied as 1 + total)
-        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        result = upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        break;
       case 'prestige_cost_reduction':
         // Multiplicative (e.g., 0.90 * 0.85 = 0.765)
-        return upgrades.reduce((mult, u) => mult * u.effect.value, 1);
+        result = upgrades.reduce((mult, u) => mult * u.effect.value, 1);
+        break;
       case 'prestige_research_bonus':
-        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        result = upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        break;
       case 'prestige_goal_reduction':
-        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        result = upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        break;
       case 'prestige_starting_currency':
         // Multiplicative (e.g., 2 * 3 = 6x)
-        return upgrades.reduce((mult, u) => mult * u.effect.value, 1);
+        result = upgrades.reduce((mult, u) => mult * u.effect.value, 1);
+        break;
       case 'prestige_autobuild_speed':
-        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        result = upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        break;
       case 'prestige_survival_speed':
         // Additive sum (e.g., 0.2 + 0.3 = 0.5 → applied as 1 + total multiplier)
-        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        result = upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        break;
       case 'prestige_flat_cost_count':
         // Additive sum of flat-cost building counts
-        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        result = upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        break;
       case 'prestige_cost_scaling_reduction':
         // Additive sum (reduces cost multiplier by total)
-        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        result = upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        break;
       case 'prestige_building_income_boost':
         // Handled per-building via getPrestigeBuildingBoost, not aggregated here
-        return 0;
+        result = 0;
+        break;
       case 'prestige_patronage_boost':
         // Additive sum (e.g., 0.5 + 0.75 = 1.25 → applied as 1 + total multiplier)
-        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        result = upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        break;
       case 'prestige_research_discount':
         // Multiplicative (e.g., 0.85 * 0.75 = 0.6375)
-        return upgrades.reduce((mult, u) => mult * u.effect.value, 1);
+        result = upgrades.reduce((mult, u) => mult * u.effect.value, 1);
+        break;
       case 'prestige_free_buildings':
         // Additive sum of free building counts
-        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        result = upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        break;
       case 'prestige_currency_boost':
         // Additive sum (e.g., 0.5 + 0.75 = 1.25 → applied as 1 + total)
-        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        result = upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        break;
       case 'prestige_mastery_boost':
         // Additive sum (e.g., 0.5 + 1.0 = 1.5 → mastery rate multiplied by 1 + total)
-        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        result = upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        break;
       case 'prestige_production_boost_amplifier':
         // Additive sum (e.g., 0.4 + 0.6 = 1.0 → production boosts are 100% stronger)
-        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        result = upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        break;
       case 'prestige_grant_building':
         // Handled per-building in spawnSettlement, not aggregated here
-        return 0;
+        result = 0;
+        break;
       case 'prestige_tier_requirement_reduction':
         // Additive sum (reduces tier advancement requirement)
-        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        result = upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        break;
       case 'prestige_building_synergy':
         // Handled per-building in calculateSettlementIncome, not aggregated here
-        return 0;
+        result = 0;
+        break;
       case 'prestige_parallel_slots':
         // Additive: each prestige upgrade adds extra parallel slots
-        return upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        result = upgrades.reduce((sum, u) => sum + u.effect.value, 0);
+        break;
       default:
-        return 0;
+        result = 0;
     }
+    this.effectCache.set(cacheKey, result);
+    return result;
   }
 
   /**
    * Get the prestige income boost for a specific building ID.
    * Returns the additive sum of all purchased prestige_building_income_boost upgrades
    * that target this building (e.g., 1.0 = +100% income for that building).
+   * Results are cached per building ID and cleared each update tick.
    */
   public getPrestigeBuildingBoost(buildingId: string): number {
-    return this.state.prestigeUpgrades
+    const cacheKey = `building_boost:${buildingId}`;
+    const cached = this.effectCache.get(cacheKey);
+    if (cached !== undefined) return cached;
+
+    const result = this.state.prestigeUpgrades
       .filter(
         (u) =>
           u.purchased &&
@@ -711,34 +745,50 @@ export class GameStateManager {
           u.effect.targetBuilding === buildingId,
       )
       .reduce((sum, u) => sum + u.effect.value, 0);
+    this.effectCache.set(cacheKey, result);
+    return result;
   }
 
   /**
    * Get aggregate achievement bonus for a given type.
+   * Results are cached per type+tier and cleared each update tick.
    */
   public getAchievementEffect(type: Achievement['bonus']['type'], tier?: TierType): number {
+    const cacheKey = `achievement:${type}:${tier ?? ''}`;
+    const cached = this.effectCache.get(cacheKey);
+    if (cached !== undefined) return cached;
+
     const achievements = this.state.achievements.filter((a) => a.unlocked && a.bonus.type === type);
+    let result: number;
     switch (type) {
       case 'income_multiplier':
-        return achievements.reduce((sum, a) => sum + a.bonus.value, 0);
+        result = achievements.reduce((sum, a) => sum + a.bonus.value, 0);
+        break;
       case 'cost_reduction':
-        return achievements.reduce((mult, a) => mult * a.bonus.value, 1);
+        result = achievements.reduce((mult, a) => mult * a.bonus.value, 1);
+        break;
       case 'research_bonus':
-        return achievements.reduce((sum, a) => sum + a.bonus.value, 0);
+        result = achievements.reduce((sum, a) => sum + a.bonus.value, 0);
+        break;
       case 'starting_currency':
-        return achievements.reduce((sum, a) => sum + a.bonus.value, 0);
+        result = achievements.reduce((sum, a) => sum + a.bonus.value, 0);
+        break;
       case 'tier_requirement_reduction':
         // Per-tier achievements (bonus.tier set) only apply to their specific tier;
         // global achievements (no bonus.tier) always apply
-        return achievements
+        result = achievements
           .filter((a) => a.bonus.tier === undefined || a.bonus.tier === tier)
           .reduce((sum, a) => sum + a.bonus.value, 0);
+        break;
       case 'building_synergy':
         // Handled per-building in calculateSettlementIncome, not aggregated here
-        return 0;
+        result = 0;
+        break;
       default:
-        return 0;
+        result = 0;
     }
+    this.effectCache.set(cacheKey, result);
+    return result;
   }
 
   public getPrestigeCurrency(tier: TierType): number {
@@ -796,6 +846,7 @@ export class GameStateManager {
    *        prestigeUpgrades, achievements, lifetimeCompletions, settings.
    */
   public performPrestige(): boolean {
+    this.clearEffectCache();
     if (!this.canPrestige()) return false;
 
     // Calculate and award prestige currencies
@@ -839,6 +890,7 @@ export class GameStateManager {
    * Purchase a prestige upgrade with prestige currency.
    */
   public purchasePrestigeUpgrade(upgradeId: string): boolean {
+    this.clearEffectCache();
     const upgrade = this.state.prestigeUpgrades.find((u) => u.id === upgradeId);
     if (!upgrade || upgrade.purchased) return false;
 
@@ -952,23 +1004,31 @@ export class GameStateManager {
       if (conditionMet) {
         this.addNotification('achievement_unlocked', `Achievement: ${achievement.name}`);
         achievement.unlocked = true;
+        this.clearEffectCache();
       }
     }
   }
 
   private getResearchEffect(type: string, tier?: TierType): number {
+    const cacheKey = `research:${type}:${tier ?? ''}`;
+    const cached = this.effectCache.get(cacheKey);
+    if (cached !== undefined) return cached;
+
     const upgrades = this.state.research.filter(
       (r) => r.purchased && r.effect.type === type && (tier !== undefined ? r.tier === tier : true),
     );
 
+    let result: number;
     if (type === 'cost_reduction') {
-      return upgrades.reduce((mult, upgrade) => mult * (upgrade.effect.value ?? 1), 1);
-    }
-    if (type === 'parallel_slots') {
+      result = upgrades.reduce((mult, upgrade) => mult * (upgrade.effect.value ?? 1), 1);
+    } else if (type === 'parallel_slots') {
       // Additive: each parallel_slots research adds extra slots
-      return upgrades.reduce((sum, upgrade) => sum + (upgrade.effect.value ?? 0), 0);
+      result = upgrades.reduce((sum, upgrade) => sum + (upgrade.effect.value ?? 0), 0);
+    } else {
+      result = upgrades.reduce((sum, upgrade) => sum + (upgrade.effect.value ?? 0), 0);
     }
-    return upgrades.reduce((sum, upgrade) => sum + (upgrade.effect.value ?? 0), 0);
+    this.effectCache.set(cacheKey, result);
+    return result;
   }
 
   private checkSettlementCompletion(settlement: Settlement): void {
@@ -1088,6 +1148,7 @@ export class GameStateManager {
   }
 
   public purchaseResearch(researchId: string): boolean {
+    this.clearEffectCache();
     const research = this.state.research.find((r) => r.id === researchId);
     if (!research || research.purchased) return false;
 
@@ -1253,10 +1314,17 @@ export class GameStateManager {
     }
   }
 
+  private clearEffectCache(): void {
+    this.effectCache.clear();
+  }
+
   public update(): void {
     const now = Date.now();
     const deltaTime = (now - this.lastUpdate) / 1000;
     this.lastUpdate = now;
+
+    // Clear cached effect lookups so they are recomputed at most once per tick
+    this.clearEffectCache();
 
     // Update currency for each settlement based on its income
     this.state.settlements.forEach((settlement) => {
@@ -1618,6 +1686,7 @@ export class GameStateManager {
         settings,
       };
 
+      this.clearEffectCache();
       console.warn(
         `Game loaded successfully from ${new Date(saveData.timestamp).toLocaleString()}`,
       );

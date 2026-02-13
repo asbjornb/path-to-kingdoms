@@ -4,8 +4,6 @@ export const TIER_DATA: TierDefinition[] = [
   {
     type: TierType.Hamlet,
     name: 'Hamlet',
-    unlockRequirement: 0,
-    completionThreshold: 10,
     buildings: [
       {
         id: 'hamlet_hut',
@@ -13,7 +11,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 10,
         baseIncome: 1,
         costMultiplier: 1.17,
-        description: 'A simple dwelling for a small family',
       },
       {
         id: 'hamlet_garden',
@@ -21,7 +18,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 50,
         baseIncome: 3,
         costMultiplier: 1.24,
-        description: 'Grows vegetables for the community',
       },
       {
         id: 'hamlet_workshop',
@@ -29,7 +25,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 200,
         baseIncome: 8,
         costMultiplier: 1.3,
-        description: 'Basic tools and crafts are made here',
       },
       {
         id: 'hamlet_shrine',
@@ -37,7 +32,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 100,
         baseIncome: 2,
         costMultiplier: 1.35,
-        description: 'A small sacred place that inspires the villagers',
         effect: {
           type: 'income_multiplier',
           value: 0.05,
@@ -50,7 +44,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 150,
         baseIncome: 4,
         costMultiplier: 1.24,
-        description: 'Trades goods with passing travelers',
         effect: {
           type: 'cost_reduction',
           value: 0.02,
@@ -63,7 +56,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 500,
         baseIncome: 5,
         costMultiplier: 1.48,
-        description: 'Stores knowledge and speeds learning',
         effect: {
           type: 'completion_bonus',
           value: 2,
@@ -75,8 +67,6 @@ export const TIER_DATA: TierDefinition[] = [
   {
     type: TierType.Village,
     name: 'Village',
-    unlockRequirement: 4,
-    completionThreshold: 100,
     buildings: [
       {
         id: 'village_cottage',
@@ -84,7 +74,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 100,
         baseIncome: 10,
         costMultiplier: 1.15,
-        description: 'A cozy home for villagers',
       },
       {
         id: 'village_farm',
@@ -92,7 +81,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 500,
         baseIncome: 30,
         costMultiplier: 1.2,
-        description: 'Produces food for the growing population',
       },
       {
         id: 'village_mill',
@@ -100,7 +88,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 2000,
         baseIncome: 80,
         costMultiplier: 1.25,
-        description: 'Grinds grain into flour',
       },
       {
         id: 'village_chapel',
@@ -108,7 +95,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 5000,
         baseIncome: 150,
         costMultiplier: 1.3,
-        description: 'A place of worship and community',
       },
       {
         id: 'village_well',
@@ -116,7 +102,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 800,
         baseIncome: 15,
         costMultiplier: 1.25,
-        description: 'A communal gathering spot that nourishes the village',
         effect: {
           type: 'income_per_building',
           value: 2,
@@ -129,7 +114,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 1500,
         baseIncome: 20,
         costMultiplier: 1.3,
-        description: 'Traditional remedies that keep the village thriving',
         effect: {
           type: 'goal_reduction',
           value: 0.03,
@@ -141,8 +125,6 @@ export const TIER_DATA: TierDefinition[] = [
   {
     type: TierType.Town,
     name: 'Town',
-    unlockRequirement: 4,
-    completionThreshold: 1000,
     buildings: [
       {
         id: 'town_house',
@@ -150,7 +132,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 1000,
         baseIncome: 100,
         costMultiplier: 1.15,
-        description: 'Multi-story housing for townspeople',
       },
       {
         id: 'town_market',
@@ -158,7 +139,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 5000,
         baseIncome: 300,
         costMultiplier: 1.2,
-        description: 'Bustling trade center',
       },
       {
         id: 'town_forge',
@@ -166,7 +146,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 20000,
         baseIncome: 800,
         costMultiplier: 1.25,
-        description: 'Advanced metalworking facility',
       },
       {
         id: 'town_guild',
@@ -174,7 +153,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 50000,
         baseIncome: 1500,
         costMultiplier: 1.3,
-        description: 'Center for skilled craftsmen',
       },
       {
         id: 'town_watchtower',
@@ -182,7 +160,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 8000,
         baseIncome: 150,
         costMultiplier: 1.25,
-        description: 'Guards the forge roads, boosting smithing output',
         effect: {
           type: 'production_boost',
           value: 0.15,
@@ -196,7 +173,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 15000,
         baseIncome: 200,
         costMultiplier: 1.3,
-        description: 'Stores surplus to feed a growing workforce',
         effect: {
           type: 'income_per_building',
           value: 25,
@@ -208,8 +184,6 @@ export const TIER_DATA: TierDefinition[] = [
   {
     type: TierType.City,
     name: 'City',
-    unlockRequirement: 3,
-    completionThreshold: 10000,
     buildings: [
       {
         id: 'city_apartment',
@@ -217,7 +191,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 10000,
         baseIncome: 1000,
         costMultiplier: 1.15,
-        description: 'Dense urban housing',
       },
       {
         id: 'city_bazaar',
@@ -225,7 +198,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 50000,
         baseIncome: 3000,
         costMultiplier: 1.2,
-        description: 'Extensive marketplace',
       },
       {
         id: 'city_university',
@@ -233,7 +205,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 200000,
         baseIncome: 8000,
         costMultiplier: 1.25,
-        description: 'Center of learning and research',
       },
       {
         id: 'city_cathedral',
@@ -241,7 +212,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 500000,
         baseIncome: 15000,
         costMultiplier: 1.3,
-        description: 'Magnificent religious structure',
       },
       {
         id: 'city_observatory',
@@ -249,7 +219,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 80000,
         baseIncome: 2000,
         costMultiplier: 1.25,
-        description: 'Charts the stars to predict fortunes and shorten campaigns',
         effect: {
           type: 'goal_reduction',
           value: 0.02,
@@ -262,7 +231,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 150000,
         baseIncome: 4000,
         costMultiplier: 1.3,
-        description: 'Merchant consortium that amplifies bazaar commerce',
         effect: {
           type: 'production_boost',
           value: 0.12,
@@ -275,8 +243,6 @@ export const TIER_DATA: TierDefinition[] = [
   {
     type: TierType.County,
     name: 'County',
-    unlockRequirement: 3,
-    completionThreshold: 100000,
     buildings: [
       {
         id: 'county_manor',
@@ -284,7 +250,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 100000,
         baseIncome: 10000,
         costMultiplier: 1.15,
-        description: 'Estate for the nobility',
       },
       {
         id: 'county_plantation',
@@ -292,7 +257,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 500000,
         baseIncome: 30000,
         costMultiplier: 1.2,
-        description: 'Large agricultural operation',
       },
       {
         id: 'county_fortress',
@@ -300,7 +264,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 2000000,
         baseIncome: 80000,
         costMultiplier: 1.25,
-        description: 'Military stronghold',
       },
       {
         id: 'county_courthouse',
@@ -308,7 +271,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 300000,
         baseIncome: 15000,
         costMultiplier: 1.25,
-        description: 'Administers justice and preserves records of the realm',
         effect: {
           type: 'completion_bonus',
           value: 4,
@@ -321,7 +283,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 800000,
         baseIncome: 25000,
         costMultiplier: 1.3,
-        description: 'Efficient revenue collection across the county',
         effect: {
           type: 'income_multiplier',
           value: 0.04,
@@ -333,8 +294,6 @@ export const TIER_DATA: TierDefinition[] = [
   {
     type: TierType.Duchy,
     name: 'Duchy',
-    unlockRequirement: 2,
-    completionThreshold: 1000000,
     buildings: [
       {
         id: 'duchy_palace',
@@ -342,7 +301,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 1000000,
         baseIncome: 100000,
         costMultiplier: 1.15,
-        description: 'Seat of ducal power',
       },
       {
         id: 'duchy_port',
@@ -350,7 +308,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 5000000,
         baseIncome: 300000,
         costMultiplier: 1.2,
-        description: 'Major trading hub',
       },
       {
         id: 'duchy_academy',
@@ -358,7 +315,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 20000000,
         baseIncome: 800000,
         costMultiplier: 1.25,
-        description: 'Elite institution of knowledge',
       },
       {
         id: 'duchy_mint',
@@ -366,7 +322,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 3000000,
         baseIncome: 150000,
         costMultiplier: 1.25,
-        description: 'Stamps currency and stabilizes trade prices',
         effect: {
           type: 'cost_reduction',
           value: 0.015,
@@ -379,7 +334,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 8000000,
         baseIncome: 200000,
         costMultiplier: 1.3,
-        description: 'Each fleet expands trade routes, boosting all fleet income',
         effect: {
           type: 'production_boost',
           value: 0.1,
@@ -392,8 +346,6 @@ export const TIER_DATA: TierDefinition[] = [
   {
     type: TierType.Realm,
     name: 'Realm',
-    unlockRequirement: 2,
-    completionThreshold: 10000000,
     buildings: [
       {
         id: 'realm_citadel',
@@ -401,7 +353,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 10000000,
         baseIncome: 1000000,
         costMultiplier: 1.15,
-        description: 'Impregnable fortress city',
       },
       {
         id: 'realm_metropolis',
@@ -409,7 +360,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 50000000,
         baseIncome: 3000000,
         costMultiplier: 1.2,
-        description: 'Sprawling urban center',
       },
       {
         id: 'realm_wonder',
@@ -417,7 +367,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 200000000,
         baseIncome: 8000000,
         costMultiplier: 1.25,
-        description: 'Architectural marvel',
       },
       {
         id: 'realm_oracle',
@@ -425,7 +374,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 30000000,
         baseIncome: 1500000,
         costMultiplier: 1.25,
-        description: 'Prophetic visions reveal shortcuts to destiny',
         effect: {
           type: 'goal_reduction',
           value: 0.015,
@@ -438,7 +386,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 80000000,
         baseIncome: 2000000,
         costMultiplier: 1.3,
-        description: 'A continental marketplace linking all settlements',
         effect: {
           type: 'income_per_building',
           value: 250000,
@@ -450,8 +397,6 @@ export const TIER_DATA: TierDefinition[] = [
   {
     type: TierType.Kingdom,
     name: 'Kingdom',
-    unlockRequirement: 1,
-    completionThreshold: 100000000,
     buildings: [
       {
         id: 'kingdom_capital',
@@ -459,7 +404,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 100000000,
         baseIncome: 10000000,
         costMultiplier: 1.15,
-        description: 'Seat of the kingdom',
       },
       {
         id: 'kingdom_empire',
@@ -467,7 +411,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 500000000,
         baseIncome: 30000000,
         costMultiplier: 1.2,
-        description: 'Administrative heart of the realm',
       },
       {
         id: 'kingdom_monument',
@@ -475,7 +418,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 2000000000,
         baseIncome: 80000000,
         costMultiplier: 1.25,
-        description: 'Legacy for the ages',
       },
       {
         id: 'kingdom_treasury',
@@ -483,7 +425,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 300000000,
         baseIncome: 15000000,
         costMultiplier: 1.25,
-        description: "The crown's wealth amplifies all enterprise",
         effect: {
           type: 'income_multiplier',
           value: 0.03,
@@ -496,7 +437,6 @@ export const TIER_DATA: TierDefinition[] = [
         baseCost: 800000000,
         baseIncome: 25000000,
         costMultiplier: 1.3,
-        description: 'Archives of all knowledge gathered across the realm',
         effect: {
           type: 'completion_bonus',
           value: 8,
