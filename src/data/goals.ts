@@ -5,13 +5,27 @@ import { TIER_DATA } from './tiers';
 // goal type). Other goal types apply their own dampening to account for nonlinear scaling.
 const TIER_DIFFICULTY: Record<TierType, number> = {
   [TierType.Hamlet]: 1.2,
-  [TierType.Village]: 3.0,
-  [TierType.Town]: 3.5,
-  [TierType.City]: 3.8,
+  [TierType.Village]: 3.8,
+  [TierType.Town]: 4.0,
+  [TierType.City]: 4.5,
   [TierType.County]: 3.5,
   [TierType.Duchy]: 3.5,
-  [TierType.Realm]: 8.5,
+  [TierType.Realm]: 9.5,
   [TierType.Kingdom]: 6.0,
+};
+
+// Building goal scale: decoupled from TIER_DIFFICULTY because building costs grow
+// exponentially and each tier has different effect synergies (goal_reduction, income_per_building)
+// that dramatically change how fast buildings can be bought.
+const BUILDING_TIER_SCALE: Record<TierType, number> = {
+  [TierType.Hamlet]: 1.05,
+  [TierType.Village]: 1.85,
+  [TierType.Town]: 1.35,
+  [TierType.City]: 1.9,
+  [TierType.County]: 1.33,
+  [TierType.Duchy]: 1.4,
+  [TierType.Realm]: 2.45,
+  [TierType.Kingdom]: 1.38,
 };
 
 export const GoalGenerator = {
@@ -77,12 +91,12 @@ export const GoalGenerator = {
       // Lifetime currency goals: linear difficulty (main tuning target)
       {
         type: GoalType.AccumulateCurrency,
-        baseValue: Math.round(100000 * costScale * difficulty),
+        baseValue: Math.round(120000 * costScale * difficulty),
         description: 'Earn {value} total currency',
       },
       {
         type: GoalType.AccumulateCurrency,
-        baseValue: Math.round(150000 * costScale * difficulty),
+        baseValue: Math.round(180000 * costScale * difficulty),
         description: 'Earn {value} total currency',
       },
 
@@ -114,20 +128,18 @@ export const GoalGenerator = {
     ];
 
     // Building count goals (one for each building type)
-    // Base count of 30 with position factor (1.5x for cheapest, 0.4x for most expensive).
-    // Difficulty is heavily dampened (^0.15) since building costs grow exponentially.
-    // Cost multiplier adjustment: buildings with aggressive cost scaling (1.25+) get reduced
-    // targets, scaled by position factor so cheap buildings aren't unnecessarily penalized.
-    const buildingDifficulty = Math.pow(difficulty, 0.15);
+    // Per-tier scale (decoupled from TIER_DIFFICULTY) with position factor (1.5x for cheapest,
+    // 0.4x for most expensive). Cost multiplier adjustment reduces targets for buildings with
+    // aggressive cost scaling (1.25+), dampened by position to avoid over-penalizing expensive
+    // buildings that are quickly affordable once income is high.
+    const buildingScale = BUILDING_TIER_SCALE[tierType];
     const buildingIndex = tierDef.buildings.length;
     tierDef.buildings.forEach((building, i) => {
       const positionFactor = 1.5 - (i / buildingIndex) * 1.1; // 1.5 down to 0.4
-      // Scale cost multiplier penalty by position: high-position expensive buildings
-      // get stronger reduction, low-position ones barely affected
       const costMultAdjust = Math.pow(1.15 / building.costMultiplier, positionFactor * 2.5);
       const targetCount = Math.max(
         10,
-        Math.round(30 * positionFactor * buildingDifficulty * costMultAdjust),
+        Math.round(30 * positionFactor * buildingScale * costMultAdjust),
       );
 
       templates.push({

@@ -116,8 +116,8 @@ export const TIER_DATA: TierDefinition[] = [
         costMultiplier: 1.3,
         effect: {
           type: 'goal_reduction',
-          value: 0.03,
-          description: '-3% goal targets per herbalist',
+          value: 0.02,
+          description: '-2% goal targets per herbalist',
         },
       },
     ],
@@ -221,8 +221,8 @@ export const TIER_DATA: TierDefinition[] = [
         costMultiplier: 1.25,
         effect: {
           type: 'goal_reduction',
-          value: 0.02,
-          description: '-2% goal targets per observatory',
+          value: 0.015,
+          description: '-1.5% goal targets per observatory',
         },
       },
       {
@@ -285,8 +285,8 @@ export const TIER_DATA: TierDefinition[] = [
         costMultiplier: 1.3,
         effect: {
           type: 'income_multiplier',
-          value: 0.04,
-          description: '+4% income from all buildings per tax office',
+          value: 0.03,
+          description: '+3% income from all buildings per tax office',
         },
       },
     ],
@@ -324,8 +324,8 @@ export const TIER_DATA: TierDefinition[] = [
         costMultiplier: 1.25,
         effect: {
           type: 'cost_reduction',
-          value: 0.015,
-          description: '-1.5% building costs per mint',
+          value: 0.01,
+          description: '-1% building costs per mint',
         },
       },
       {
