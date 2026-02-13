@@ -705,13 +705,13 @@ describe('GameStateManager', () => {
       // Run one update tick
       game.update();
 
-      // Manually unlock an achievement to change effect values
+      // Trigger the 'Humble Beginnings' achievement (complete 1 hamlet) through the proper API
+      game.getState().lifetimeCompletions.set(TierType.Hamlet, 1);
+      game.checkAchievements();
+
       const achievement = game
         .getState()
-        .achievements.find((a) => a.bonus.type === 'income_multiplier');
-      if (achievement) {
-        achievement.unlocked = true;
-      }
+        .achievements.find((a) => a.id === 'ach_hamlet_1' && a.bonus.type === 'income_multiplier');
 
       // Run another tick — cache should be cleared and new values used
       game.update();
