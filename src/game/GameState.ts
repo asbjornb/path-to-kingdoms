@@ -60,6 +60,10 @@ const MASTERY_AUTOBUILD_HALFPOINT = 500; // completions at which auto-build spee
 // The first building of each type bypasses this cap so settlements can bootstrap.
 const AUTO_BUILD_TREASURY_PCT = 0.05;
 
+// Maximum number of buildings that can be bought in a single bulk purchase.
+// Prevents UI freezes when cost scaling is low and thousands would be affordable.
+const MAX_BULK_BUY = 500;
+
 export class GameStateManager {
   private state: GameState;
   private lastUpdate: number = Date.now();
@@ -243,7 +247,7 @@ export class GameStateManager {
     const currentCount = settlement.buildings.get(buildingId) ?? 0;
     let total = 0;
     let count = 0;
-    while (true) {
+    while (count < MAX_BULK_BUY) {
       const nextCost = this.calculateBuildingCost(
         building.baseCost,
         building.costMultiplier,
@@ -262,11 +266,36 @@ export class GameStateManager {
     buildingId: string,
     requestedCount: number,
   ): number {
+    const settlement = this.state.settlements.find((s) => s.id === settlementId);
+    if (!settlement) return 0;
+
+    const tierDef = getTierByType(settlement.tier);
+    if (!tierDef) return 0;
+
+    const building = tierDef.buildings.find((b) => b.id === buildingId);
+    if (!building) return 0;
+
     let bought = 0;
-    for (let i = 0; i < requestedCount; i++) {
-      if (!this.buyBuilding(settlementId, buildingId)) break;
+    const count = Math.min(requestedCount, MAX_BULK_BUY);
+    for (let i = 0; i < count; i++) {
+      const currentCount = settlement.buildings.get(buildingId) ?? 0;
+      const cost = this.calculateBuildingCost(
+        building.baseCost,
+        building.costMultiplier,
+        currentCount,
+        settlementId,
+      );
+      if (settlement.currency < cost) break;
+      settlement.currency -= cost;
+      settlement.buildings.set(buildingId, currentCount + 1);
       bought++;
     }
+
+    if (bought > 0) {
+      settlement.totalIncome = this.calculateSettlementIncome(settlement);
+      this.checkSettlementCompletion(settlement);
+    }
+
     return bought;
   }
 
@@ -299,7 +328,7 @@ export class GameStateManager {
     const scalingReduction = this.getResearchEffect('cost_scaling_reduction', settlementTier);
     const prestigeScalingReduction = this.getPrestigeEffect('prestige_cost_scaling_reduction');
     const adjustedMultiplier = Math.max(
-      1.0,
+      1.01,
       multiplier - scalingReduction - prestigeScalingReduction,
     );
 
