@@ -774,8 +774,8 @@ export class UI {
       .sort((a, b) => {
         const aBudget = budgetByTier.get(a.tier) ?? 0;
         const bBudget = budgetByTier.get(b.tier) ?? 0;
-        const aAffordable = aBudget >= a.cost;
-        const bAffordable = bBudget >= b.cost;
+        const aAffordable = this.selectedPrestigeUpgrades.has(a.id) || aBudget >= a.cost;
+        const bAffordable = this.selectedPrestigeUpgrades.has(b.id) || bBudget >= b.cost;
         if (aAffordable !== bAffordable) return aAffordable ? -1 : 1;
         return a.cost - b.cost;
       });
