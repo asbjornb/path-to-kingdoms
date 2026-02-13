@@ -1,0 +1,188 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  lint-build-test:
+    name: Lint, Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Test
+        run: npm run test:run
+
+  balance-simulation:
+    name: Balance Simulation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Run balance simulation
+        id: sim
+        run: |
+          set +e
+          NO_COLOR=1 npx vitest run balance-sim --reporter=verbose 2>&1 | tee /tmp/balance-sim.txt
+          echo "sim_exit=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+
+      - name: Parse simulation output
+        if: always()
+        run: |
+          python3 << 'PYEOF'
+          import re
+
+          raw = ''
+          try:
+              with open('/tmp/balance-sim.txt', 'r') as f:
+                  raw = f.read()
+          except FileNotFoundError:
+              pass
+
+          # Strip ANSI escape codes
+          raw = re.sub(r'\x1b\[[0-9;]*m', '', raw)
+
+          # Extract per-tier summaries: "BALANCE SIMULATION — TIER" ... "X/Y goals within bounds"
+          tier_results = re.findall(
+              r'BALANCE SIMULATION\s*\W+\s*(\w+).*?(\d+)/(\d+)\s+goals within bounds',
+              raw,
+              re.DOTALL,
+          )
+
+          summary_rows = []
+          all_pass = True
+          for tier_name, passed, total in tier_results:
+              p, t = int(passed), int(total)
+              status = 'pass' if p == t else 'warn'
+              if p != t:
+                  all_pass = False
+              summary_rows.append(f'{tier_name.title()}|{passed}/{total}|{status}')
+
+          with open('/tmp/sim-summary.txt', 'w') as f:
+              f.write('\n'.join(summary_rows))
+
+          # Extract full table blocks (each bounded by three === lines)
+          blocks = re.findall(r'(={10,}.*?={10,}.*?={10,})', raw, re.DOTALL)
+          tables = '\n\n'.join(blocks) if blocks else raw
+
+          with open('/tmp/sim-tables.txt', 'w') as f:
+              f.write(tables)
+
+          with open('/tmp/sim-allpass.txt', 'w') as f:
+              f.write('true' if all_pass else 'false')
+          PYEOF
+
+      - name: Post simulation results to PR
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            let summaryRaw = '';
+            let tables = 'No simulation output captured.';
+            let allPass = false;
+
+            try { summaryRaw = fs.readFileSync('/tmp/sim-summary.txt', 'utf8').trim(); } catch {}
+            try { tables = fs.readFileSync('/tmp/sim-tables.txt', 'utf8').trim(); } catch {}
+            try { allPass = fs.readFileSync('/tmp/sim-allpass.txt', 'utf8').trim() === 'true'; } catch {}
+
+            // Build summary table
+            let summaryTable = '';
+            if (summaryRaw) {
+              const rows = summaryRaw.split('\n').map(line => {
+                const [tier, count, status] = line.split('|');
+                const icon = status === 'pass' ? '✅' : '⚠️';
+                return `| ${tier} | ${count} ${icon} |`;
+              });
+              summaryTable = [
+                '| Tier | Goals in Bounds |',
+                '|------|----------------|',
+                ...rows,
+              ].join('\n');
+            }
+
+            const simExit = parseInt('${{ steps.sim.outputs.sim_exit }}', 10);
+            const passed = allPass && simExit === 0;
+            const icon = passed ? '✅' : '⚠️';
+            const status = passed
+              ? 'All goals within expected bounds'
+              : 'Some goals outside expected bounds';
+
+            // Truncate if needed (GitHub comment limit ~65536 chars)
+            if (tables.length > 55000) {
+              tables = tables.slice(0, 55000) + '\n... (truncated)';
+            }
+
+            const marker = '<!-- balance-simulation-results -->';
+            const body = [
+              marker,
+              `## ${icon} Balance Simulation Results`,
+              '',
+              `**Status:** ${status}`,
+              '',
+              summaryTable,
+              '',
+              '<details>',
+              '<summary>Full simulation output</summary>',
+              '',
+              '```',
+              tables,
+              '```',
+              '',
+              '</details>',
+            ].join('\n');
+
+            // Find existing comment to update (avoids spamming on repeated pushes)
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c => c.body?.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
