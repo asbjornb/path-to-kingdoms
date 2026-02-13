@@ -533,11 +533,7 @@ export class UI {
     buyAmount: BuyAmount,
   ): { cost: number; qty: number } {
     if (buyAmount === 'max') {
-      const qty = this.game.getMaxAffordable(settlement.id, buildingId);
-      const cost =
-        qty > 0
-          ? (this.game.getBulkBuyCost(settlement.id, buildingId, qty) ?? 0)
-          : (this.game.getBuildingCost(settlement.id, buildingId) ?? 0);
+      const { count: qty, cost } = this.game.getMaxAffordableWithCost(settlement.id, buildingId);
       return { cost, qty };
     }
     const cost = this.game.getBulkBuyCost(settlement.id, buildingId, buyAmount) ?? 0;
@@ -1074,7 +1070,7 @@ export class UI {
       }
     }
 
-    // Update settlement-specific values
+    // Only update settlements for the active tier — non-active tiers are skipped entirely
     const settlements = this.game
       .getState()
       .settlements.filter((s) => s.tier === this.selectedTier);

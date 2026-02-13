@@ -73,6 +73,10 @@ export class GameStateManager {
   private autoSaveInterval: number | null = null;
   private pendingNotifications: GameNotification[] = [];
   private effectCache: Map<string, number> = new Map();
+  private maxAffordableCache: Map<
+    string,
+    { count: number; totalCost: number; threshold: number; buildingCount: number }
+  > = new Map();
 
   constructor() {
     // Initialize state first
@@ -246,6 +250,22 @@ export class GameStateManager {
     if (!building) return 0;
 
     const currentCount = settlement.buildings.get(buildingId) ?? 0;
+    const cacheKey = `${settlementId}:${buildingId}`;
+    const cached = this.maxAffordableCache.get(cacheKey);
+
+    if (cached !== undefined && cached.buildingCount === currentCount) {
+      if (cached.count === 0 && settlement.currency < cached.threshold) {
+        return 0;
+      }
+      if (
+        cached.count > 0 &&
+        settlement.currency >= cached.totalCost &&
+        settlement.currency < cached.threshold
+      ) {
+        return cached.count;
+      }
+    }
+
     let total = 0;
     let count = 0;
     while (count < MAX_BULK_BUY) {
@@ -255,11 +275,43 @@ export class GameStateManager {
         currentCount + count,
         settlementId,
       );
-      if (total + nextCost > settlement.currency) break;
+      if (total + nextCost > settlement.currency) {
+        this.maxAffordableCache.set(cacheKey, {
+          count,
+          totalCost: total,
+          threshold: total + nextCost,
+          buildingCount: currentCount,
+        });
+        return count;
+      }
       total += nextCost;
       count++;
     }
+
+    this.maxAffordableCache.set(cacheKey, {
+      count,
+      totalCost: total,
+      threshold: Infinity,
+      buildingCount: currentCount,
+    });
     return count;
+  }
+
+  /**
+   * Get max affordable count and total cost in one call, using the cache.
+   * Avoids a separate getBulkBuyCost call when buy mode is 'max'.
+   */
+  public getMaxAffordableWithCost(
+    settlementId: string,
+    buildingId: string,
+  ): { count: number; cost: number } {
+    const count = this.getMaxAffordable(settlementId, buildingId);
+    if (count > 0) {
+      const cacheKey = `${settlementId}:${buildingId}`;
+      const cached = this.maxAffordableCache.get(cacheKey);
+      return { count, cost: cached?.totalCost ?? 0 };
+    }
+    return { count: 0, cost: this.getBuildingCost(settlementId, buildingId) ?? 0 };
   }
 
   public buyMultipleBuildings(
@@ -915,6 +967,7 @@ export class GameStateManager {
    */
   public performPrestige(): boolean {
     this.clearEffectCache();
+    this.invalidateMaxAffordableCache();
     if (!this.canPrestige()) return false;
 
     // Calculate and award prestige currencies
@@ -959,6 +1012,7 @@ export class GameStateManager {
    */
   public purchasePrestigeUpgrade(upgradeId: string): boolean {
     this.clearEffectCache();
+    this.invalidateMaxAffordableCache();
     const upgrade = this.state.prestigeUpgrades.find((u) => u.id === upgradeId);
     if (!upgrade || upgrade.purchased) return false;
 
@@ -1073,6 +1127,7 @@ export class GameStateManager {
         this.addNotification('achievement_unlocked', `Achievement: ${achievement.name}`);
         achievement.unlocked = true;
         this.clearEffectCache();
+        this.invalidateMaxAffordableCache();
       }
     }
   }
@@ -1217,6 +1272,7 @@ export class GameStateManager {
 
   public purchaseResearch(researchId: string): boolean {
     this.clearEffectCache();
+    this.invalidateMaxAffordableCache();
     const research = this.state.research.find((r) => r.id === researchId);
     if (!research || research.purchased) return false;
 
@@ -1453,6 +1509,15 @@ export class GameStateManager {
     this.effectCache.clear();
   }
 
+  /**
+   * Invalidate the maxAffordable cache when cost calculations change
+   * (research/prestige/achievement purchased, game loaded, prestige reset).
+   * NOT called per-tick — the threshold-based cache handles gradual currency changes.
+   */
+  private invalidateMaxAffordableCache(): void {
+    this.maxAffordableCache.clear();
+  }
+
   public update(): void {
     const now = Date.now();
     const deltaTime = (now - this.lastUpdate) / 1000;
@@ -1488,11 +1553,44 @@ export class GameStateManager {
     }
   }
 
+  /**
+   * Buy a building for auto-build without recalculating income or checking completion.
+   * Used by processAutoBuildingPurchases to batch income recalculations.
+   */
+  private autoBuyBuilding(settlement: Settlement, buildingId: string): boolean {
+    const tierDef = getTierByType(settlement.tier);
+    if (!tierDef) return false;
+
+    const building = tierDef.buildings.find((b) => b.id === buildingId);
+    if (!building) return false;
+
+    const currentCount = settlement.buildings.get(buildingId) ?? 0;
+    const cost = this.calculateBuildingCost(
+      building.baseCost,
+      building.costMultiplier,
+      currentCount,
+      settlement.id,
+    );
+
+    if (settlement.currency < cost) return false;
+
+    // Treasury cap: skip if cost exceeds X% of treasury, unless first building
+    if (currentCount > 0 && cost > settlement.currency * AUTO_BUILD_TREASURY_PCT) {
+      return false;
+    }
+
+    settlement.currency -= cost;
+    settlement.buildings.set(buildingId, currentCount + 1);
+    return true;
+  }
+
   private processAutoBuildingPurchases(now: number): void {
     // Get all purchased auto-building research
     const autoBuildingResearch = this.state.research.filter(
       (r) => r.purchased && r.effect.type === 'auto_building',
     );
+
+    const dirtySettlements = new Set<Settlement>();
 
     for (const research of autoBuildingResearch) {
       const buildingId = research.effect.buildingId;
@@ -1516,29 +1614,26 @@ export class GameStateManager {
 
       // Check if enough time has passed
       if (now - lastPurchaseTime >= interval) {
-        // Find settlements of the same tier that can afford this building
+        // Find settlements of the same tier
         const tierSettlements = this.state.settlements.filter((s) => s.tier === research.tier);
 
         let bought = false;
         for (const settlement of tierSettlements) {
-          const cost = this.getBuildingCost(settlement.id, buildingId);
-          if (cost !== null && settlement.currency >= cost) {
-            // Treasury cap: skip if cost exceeds X% of treasury, unless it's the
-            // first building of this type (so settlements can always bootstrap).
-            const currentCount = settlement.buildings.get(buildingId) ?? 0;
-            if (currentCount > 0 && cost > settlement.currency * AUTO_BUILD_TREASURY_PCT) {
-              continue;
-            }
-            // Try to buy the building
-            if (this.buyBuilding(settlement.id, buildingId)) {
-              bought = true;
-            }
+          if (this.autoBuyBuilding(settlement, buildingId)) {
+            dirtySettlements.add(settlement);
+            bought = true;
           }
         }
         if (bought) {
           this.state.autoBuildingTimers.set(research.id, now);
         }
       }
+    }
+
+    // Batch: recalculate income and check completion once per affected settlement
+    for (const settlement of dirtySettlements) {
+      settlement.totalIncome = this.calculateSettlementIncome(settlement);
+      this.checkSettlementCompletion(settlement);
     }
   }
 
@@ -1828,6 +1923,7 @@ export class GameStateManager {
       };
 
       this.clearEffectCache();
+      this.invalidateMaxAffordableCache();
       console.warn(
         `Game loaded successfully from ${new Date(saveData.timestamp).toLocaleString()}`,
       );
