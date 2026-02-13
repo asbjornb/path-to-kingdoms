@@ -6,7 +6,7 @@ import prettierConfig from 'eslint-config-prettier';
 
 export default [
   {
-    ignores: ['node_modules/**', 'dist/**', 'build/**', '*.config.js'],
+    ignores: ['node_modules/**', 'dist/**', 'build/**', '*.config.js', '*.config.ts'],
   },
   {
     files: ['src/**/*.ts', 'src/**/*.tsx'],
@@ -31,6 +31,9 @@ export default [
         URL: 'readonly',
         Blob: 'readonly',
         FileReader: 'readonly',
+        fetch: 'readonly',
+        setTimeout: 'readonly',
+        __APP_VERSION__: 'readonly',
       },
     },
     plugins: {

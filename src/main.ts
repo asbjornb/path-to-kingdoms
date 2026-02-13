@@ -1,6 +1,7 @@
 import { GameStateManager } from './game/GameState';
 import { UI } from './ui/UI';
 import { TierType, BuyAmount } from './types/game';
+import { startVersionChecker } from './version';
 
 let game: GameStateManager;
 let ui: UI;
@@ -217,6 +218,9 @@ function initGame(): void {
 
   // Initial render
   ui.render();
+
+  // Check for new versions periodically
+  startVersionChecker();
 }
 
 document.addEventListener('DOMContentLoaded', initGame);
