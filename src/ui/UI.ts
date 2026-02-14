@@ -288,6 +288,7 @@ export class UI {
                 </label>
               </div>
               ${this.renderMastery()}
+              ${this.renderPatronage()}
               <div class="tier-progress">
                 ${this.renderTierProgress()}
               </div>
@@ -1204,6 +1205,22 @@ export class UI {
     `;
   }
 
+  private renderPatronage(): string {
+    const bonus = this.game.getCrossTierBonusForTier(this.selectedTier);
+    if (bonus < 0.01) return '';
+
+    const tooltip =
+      'Patronage income from completing higher-tier settlements. ' +
+      "Each completion grants 5% of that tier's base building income to all lower-tier settlements.";
+
+    return `
+      <div class="patronage-display" id="patronage-display" title="${this.escapeAttr(tooltip)}">
+        <span class="patronage-label">Patronage</span>
+        <span class="patronage-value">+${formatIncome(bonus)}/s to all settlements</span>
+      </div>
+    `;
+  }
+
   private renderTierProgress(): string {
     const state = this.game.getState();
     const completedCount = state.completedSettlements.get(this.selectedTier) ?? 0;
@@ -1326,6 +1343,16 @@ export class UI {
       const bonusEls = masteryEl.querySelectorAll('.mastery-bonus');
       if (bonusEls[0] !== undefined) {
         bonusEls[0].textContent = `${incomeMultiplier.toFixed(2)}x income`;
+      }
+    }
+
+    // Update patronage display
+    const patronageEl = document.getElementById('patronage-display');
+    if (patronageEl !== null) {
+      const bonus = this.game.getCrossTierBonusForTier(this.selectedTier);
+      const valueEl = patronageEl.querySelector('.patronage-value');
+      if (valueEl !== null) {
+        valueEl.textContent = `+${formatIncome(bonus)}/s to all settlements`;
       }
     }
 

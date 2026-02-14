@@ -668,6 +668,25 @@ export class GameStateManager {
     return this.calculateCrossTierBonus(settlement);
   }
 
+  public getCrossTierBonusForTier(tier: TierType): number {
+    const tierIndex = TIER_DATA.findIndex((t) => t.type === tier);
+    if (tierIndex === -1) return 0;
+
+    let bonus = 0;
+    for (let i = tierIndex + 1; i < TIER_DATA.length; i++) {
+      const higherTier = TIER_DATA[i];
+      const completedCount = this.state.completedSettlements.get(higherTier.type) ?? 0;
+      if (completedCount === 0) continue;
+      const tierBaseIncome = higherTier.buildings[0]?.baseIncome ?? 1;
+      bonus += completedCount * tierBaseIncome * PATRONAGE_PER_COMPLETION;
+    }
+
+    const patronageBoost = 1 + this.getPrestigeEffect('prestige_patronage_boost');
+    bonus *= patronageBoost;
+
+    return bonus;
+  }
+
   /**
    * Get the effective per-unit income for a building in a settlement,
    * accounting for production boosts, achievement synergies, prestige synergies,

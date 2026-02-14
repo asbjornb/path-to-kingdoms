@@ -143,6 +143,29 @@
   font-size: 0.75rem;
 }
 
+.patronage-display {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.4rem 0.75rem;
+  background: linear-gradient(135deg, rgba(192, 132, 252, 0.1) 0%, rgba(168, 85, 247, 0.05) 100%);
+  border: 1px solid rgba(192, 132, 252, 0.25);
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+}
+
+.patronage-label {
+  color: #c084fc;
+  font-weight: bold;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.patronage-value {
+  color: #a855f7;
+  font-size: 0.8rem;
+}
+
 .tier-progress {
   display: flex;
   flex-direction: column;
@@ -1570,6 +1593,20 @@
   }
 
   .mastery-bonus {
+    font-size: 0.75rem;
+  }
+
+  .patronage-display {
+    flex-wrap: wrap;
+    gap: 0.25rem 0.5rem;
+    padding: 0.3rem 0.5rem;
+  }
+
+  .patronage-label {
+    font-size: 0.85rem;
+  }
+
+  .patronage-value {
     font-size: 0.75rem;
   }
 
