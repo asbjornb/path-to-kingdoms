@@ -402,8 +402,8 @@ export class UI {
           </div>
           ${((): string => {
             const crossBonus = this.game.getCrossTierBonus(settlement.id);
-            return crossBonus > 0.01
-              ? `<div class="settlement-stat cross-tier-stat">
+            return crossBonus >= 1
+              ? `<div class="settlement-stat cross-tier-stat" title="Bonus income from completing higher-tier settlements. Each completion grants 5% of that tier's base building income to all lower-tier settlements.">
                 <span class="stat-label">Patronage:</span>
                 <span class="stat-value cross-tier-value">+${formatIncome(crossBonus)}</span>
               </div>`
