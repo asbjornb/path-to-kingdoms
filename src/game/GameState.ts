@@ -743,24 +743,22 @@ export class GameStateManager {
   }
 
   /**
-   * Apply a logarithmic soft cap to mastery completions.
+   * Apply a square-root soft cap to mastery completions.
    * Below MASTERY_SOFTCAP_START: linear (unchanged).
-   * Above: excess compressed via ln(1 + excess / softcap).
+   * Above: excess compressed via sqrt(excess * softcap).
    */
   private getEffectiveMasteryCompletions(completions: number): number {
     if (completions <= MASTERY_SOFTCAP_START) {
       return completions;
     }
     const excess = completions - MASTERY_SOFTCAP_START;
-    return (
-      MASTERY_SOFTCAP_START + MASTERY_SOFTCAP_START * Math.log(1 + excess / MASTERY_SOFTCAP_START)
-    );
+    return MASTERY_SOFTCAP_START + Math.sqrt(excess * MASTERY_SOFTCAP_START);
   }
 
   /**
    * Get the income multiplier from mastery for a tier.
    * Formula: 1 + (effective_completions * 0.001)
-   * Soft-capped: linear up to 200, then logarithmic diminishing returns.
+   * Soft-capped: linear up to 200, then square-root diminishing returns.
    */
   public getMasteryIncomeMultiplier(tier: TierType): number {
     const completions = this.getMasteryLevel(tier);
@@ -784,14 +782,14 @@ export class GameStateManager {
 
   /**
    * Get the auto-build speed bonus from mastery.
-   * Uses hyperbolic curve: completions / (completions + 500)
-   * Linear-feeling early, sub-linear after ~500, asymptotically approaches 1.
+   * Uses soft-capped completions fed into hyperbolic curve: c / (c + 500).
    * Applied as: interval * (1 - speedBonus)
    */
   public getMasteryAutoBuildSpeed(tier: TierType): number {
     const completions = this.getMasteryLevel(tier);
     if (completions === 0) return 0;
-    return completions / (completions + MASTERY_AUTOBUILD_HALFPOINT);
+    const effective = this.getEffectiveMasteryCompletions(completions);
+    return effective / (effective + MASTERY_AUTOBUILD_HALFPOINT);
   }
 
   // ===== Prestige & Achievement Effect Helpers =====
