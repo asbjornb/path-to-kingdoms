@@ -1306,7 +1306,7 @@ export class UI {
     if (countChanged || idsChanged) {
       this.lastSettlementCount = currentSettlementCount;
       this.lastSettlementIds = currentSettlementIds;
-      if (!this.prestigeShopOpen) {
+      if (!this.prestigeShopOpen && !this.gameInfoOpen) {
         this.render(); // Full re-render when settlements change
       }
       return;
