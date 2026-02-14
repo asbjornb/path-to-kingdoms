@@ -102,10 +102,10 @@ describe('UI', () => {
           expect(description).toBeTruthy();
         }
 
-        // Should have either a button or purchased label
-        const button = item.querySelector('.research-btn');
+        // Unpurchased items should be clickable, purchased items should have a label
+        const isClickable = item.classList.contains('clickable');
         const purchasedLabel = item.querySelector('.purchased-label');
-        expect(button || purchasedLabel).toBeTruthy();
+        expect(isClickable || purchasedLabel).toBeTruthy();
       });
     });
   });

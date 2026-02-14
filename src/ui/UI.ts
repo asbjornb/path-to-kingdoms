@@ -557,19 +557,15 @@ export class UI {
 
             const hint = this.game.getResearchComparisonHint(research);
             return `
-            <div class="research-item">
+            <div class="research-item clickable ${!canAfford ? 'cant-afford' : ''}"
+              data-cost="${research.cost}"
+              onclick="window.purchaseResearch('${research.id}')"
+            >
               <div class="research-item-top">
                 <span class="research-item-name">${research.name}</span>
                 <span class="research-cost">${research.cost} pts</span>
               </div>
               <p class="research-desc">${research.description}${hint !== '' ? ` <span class="research-hint">${hint}</span>` : ''}</p>
-              <button
-                class="research-btn ${!canAfford ? 'disabled' : ''}"
-                onclick="window.purchaseResearch('${research.id}')"
-                ${!canAfford ? 'disabled' : ''}
-              >
-                Research
-              </button>
             </div>
           `;
           })
@@ -1436,22 +1432,18 @@ export class UI {
       });
     });
 
-    // Update research button states
-    const researchButtons = document.querySelectorAll('.research-btn');
-    researchButtons.forEach((button) => {
-      if (!(button instanceof HTMLButtonElement)) return;
-      const costText = button.textContent?.match(/\((\d+)\s+points\)/);
-      if (costText && costText[1]) {
-        const cost = parseInt(costText[1]);
-        const canAfford = this.game.getResearchPoints(this.selectedTier) >= cost;
+    // Update research item affordability states
+    const researchItems = document.querySelectorAll('.research-item.clickable');
+    researchItems.forEach((item) => {
+      if (!(item instanceof HTMLElement)) return;
+      const cost = parseInt(item.dataset.cost ?? '0');
+      if (cost <= 0) return;
+      const canAfford = this.game.getResearchPoints(this.selectedTier) >= cost;
 
-        if (canAfford && button.disabled === true) {
-          button.disabled = false;
-          button.classList.remove('disabled');
-        } else if (!canAfford && button.disabled === false) {
-          button.disabled = true;
-          button.classList.add('disabled');
-        }
+      if (canAfford && item.classList.contains('cant-afford')) {
+        item.classList.remove('cant-afford');
+      } else if (!canAfford && !item.classList.contains('cant-afford')) {
+        item.classList.add('cant-afford');
       }
     });
   }
