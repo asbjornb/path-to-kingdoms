@@ -949,6 +949,15 @@ export class UI {
                 capture the spirit of the original while continuing its legacy with
                 new improvements and original content.
               </p>
+              <p style="margin-top: 0.5rem;">
+                The original game is still playable at
+                <a href="https://astarsearcher.bitbucket.io/"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   style="color: #8b5cf6; text-decoration: underline;">
+                  astarsearcher.bitbucket.io</a>
+                &mdash; give it a try!
+              </p>
             </section>
 
             <section class="game-info-section">
