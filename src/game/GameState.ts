@@ -59,6 +59,7 @@ const PATRONAGE_PER_COMPLETION = 0.05; // fraction of higher tier's first buildi
 const MASTERY_INCOME_PER_COMPLETION = 0.001; // +0.1% income per completion
 const MASTERY_STARTING_CURRENCY_FACTOR = 0.1; // completions * baseCurrency * this
 const MASTERY_AUTOBUILD_HALFPOINT = 500; // completions at which auto-build speed reaches 50%
+const MASTERY_SOFTCAP_START = 200; // completions at which diminishing returns begin
 
 // Auto-builders will only spend up to this fraction of treasury per purchase.
 // Prevents expensive buildings from draining the entire treasury in one shot.
@@ -742,25 +743,43 @@ export class GameStateManager {
   }
 
   /**
+   * Apply a logarithmic soft cap to mastery completions.
+   * Below MASTERY_SOFTCAP_START: linear (unchanged).
+   * Above: excess compressed via ln(1 + excess / softcap).
+   */
+  private getEffectiveMasteryCompletions(completions: number): number {
+    if (completions <= MASTERY_SOFTCAP_START) {
+      return completions;
+    }
+    const excess = completions - MASTERY_SOFTCAP_START;
+    return (
+      MASTERY_SOFTCAP_START + MASTERY_SOFTCAP_START * Math.log(1 + excess / MASTERY_SOFTCAP_START)
+    );
+  }
+
+  /**
    * Get the income multiplier from mastery for a tier.
-   * Formula: 1 + (completions * 0.001)
-   * 1000 completions = 2x, 2000 = 3x, 5000 = 6x
+   * Formula: 1 + (effective_completions * 0.001)
+   * Soft-capped: linear up to 200, then logarithmic diminishing returns.
    */
   public getMasteryIncomeMultiplier(tier: TierType): number {
     const completions = this.getMasteryLevel(tier);
+    const effective = this.getEffectiveMasteryCompletions(completions);
     const masteryBoost = 1 + this.getPrestigeEffect('prestige_mastery_boost');
-    return 1 + completions * MASTERY_INCOME_PER_COMPLETION * masteryBoost;
+    return 1 + effective * MASTERY_INCOME_PER_COMPLETION * masteryBoost;
   }
 
   /**
    * Get the starting currency bonus from mastery for a tier.
+   * Uses soft-capped completions for diminishing returns.
    */
   public getMasteryStartingCurrency(tier: TierType): number {
     const completions = this.getMasteryLevel(tier);
+    const effective = this.getEffectiveMasteryCompletions(completions);
     const tierDef = getTierByType(tier);
     if (!tierDef) return 0;
     const baseCurrency = tierDef.buildings[0]?.baseCost ?? 10;
-    return Math.floor(completions * baseCurrency * MASTERY_STARTING_CURRENCY_FACTOR);
+    return Math.floor(effective * baseCurrency * MASTERY_STARTING_CURRENCY_FACTOR);
   }
 
   /**

@@ -1019,7 +1019,9 @@ export class UI {
                   Each settlement completion adds permanent mastery to that tier.
                   Mastery provides a stacking income bonus (+0.1% per completion),
                   starting currency for new settlements, and faster auto-build speed.
-                  Mastery resets on prestige but accumulates faster each run.
+                  Income and starting currency bonuses have diminishing returns
+                  past 200 completions. Mastery resets on prestige but accumulates
+                  faster each run.
                 </p>
               </details>
             </section>
@@ -1193,6 +1195,7 @@ export class UI {
     const tooltip =
       'Mastery is earned by completing settlements. Each completion gives +0.1% income, ' +
       'starting currency for new settlements, and faster auto-building for this tier. ' +
+      'Income and starting currency have diminishing returns past 200 completions. ' +
       'Auto-build speed has a soft cap (50% at 500 completions, max 90%). ' +
       'Mastery resets on prestige.';
 
