@@ -94,7 +94,7 @@
 
 .settlements-area {
   flex: 1;
-  padding: 1rem;
+  padding: 0.75rem;
   overflow-y: auto;
 }
 
@@ -204,7 +204,7 @@
   background: #2a2a2a;
   border: 1px solid #333;
   border-radius: 8px;
-  padding: 1rem;
+  padding: 0.75rem;
 }
 
 .settlement.complete {
@@ -236,7 +236,7 @@
 .building {
   display: flex;
   flex-direction: column;
-  padding: 0.5rem;
+  padding: 0.35rem;
   background: #1a1a1a;
   border-radius: 4px;
   gap: 0.15rem;
@@ -311,10 +311,10 @@
 }
 
 .research-panel {
-  width: 350px;
+  width: 380px;
   background: #1a1a1a;
   border-left: 1px solid #333;
-  padding: 1rem;
+  padding: 0.75rem;
   overflow-y: auto;
 }
 
@@ -1455,7 +1455,7 @@
 
 @media (min-width: 1200px) {
   .settlements-area {
-    padding: 1.25rem 1.5rem;
+    padding: 1rem 1.25rem;
   }
 
   .settlements-list {
@@ -1463,7 +1463,7 @@
   }
 
   .settlement {
-    padding: 1.25rem;
+    padding: 1rem;
   }
 
   .buildings {
@@ -1471,12 +1471,12 @@
   }
 
   .building {
-    padding: 0.6rem 0.75rem;
+    padding: 0.5rem 0.6rem;
   }
 
   .research-panel {
-    width: 380px;
-    padding: 1rem 1.25rem;
+    width: 420px;
+    padding: 0.75rem 1rem;
   }
 
   .research-list {
