@@ -56,7 +56,7 @@ function createSettlement(tierType: TierType): Settlement {
 const PATRONAGE_PER_COMPLETION = 0.01; // fraction of higher tier's first building income
 
 // Mastery: permanent bonuses from repeated tier completions (intentionally slow)
-const MASTERY_STARTING_CURRENCY_FACTOR = 0.1; // completions * baseCurrency * this
+const MASTERY_INCOME_PER_COMPLETION = 0.001; // +0.1% income per completion
 const MASTERY_AUTOBUILD_HALFPOINT = 500; // completions at which auto-build speed reaches 50%
 const MASTERY_SOFTCAP_START = 200; // completions at which diminishing returns begin
 
@@ -150,12 +150,6 @@ export class GameStateManager {
     const startingCapitalBonus = this.getResearchEffect('starting_capital', tierType);
     if (startingCapitalBonus > 0) {
       newSettlement.currency += startingCapitalBonus;
-    }
-
-    // Apply mastery starting currency bonus
-    const masteryBonus = this.getMasteryStartingCurrency(tierType);
-    if (masteryBonus > 0) {
-      newSettlement.currency += masteryBonus;
     }
 
     // Apply prestige starting currency multiplier
@@ -620,7 +614,16 @@ export class GameStateManager {
     // Apply achievement income multiplier (additive sum, applied as 1 + total)
     const achievementIncomeBonus = 1 + this.getAchievementEffect('income_multiplier');
 
-    return baseIncome * incomeMultiplier * prestigeIncomeBonus * achievementIncomeBonus;
+    // Apply mastery income multiplier
+    const masteryIncomeBonus = 1 + this.getMasteryIncomeMultiplier(settlement.tier);
+
+    return (
+      baseIncome *
+      incomeMultiplier *
+      prestigeIncomeBonus *
+      achievementIncomeBonus *
+      masteryIncomeBonus
+    );
   }
 
   /**
@@ -765,16 +768,15 @@ export class GameStateManager {
   }
 
   /**
-   * Get the starting currency bonus from mastery for a tier.
-   * Uses soft-capped completions for diminishing returns.
+   * Get the income multiplier bonus from mastery for a tier.
+   * +0.1% per completion, with soft cap past 200 completions.
+   * Returns the multiplier to apply (e.g. 0.05 for +5%).
    */
-  public getMasteryStartingCurrency(tier: TierType): number {
+  public getMasteryIncomeMultiplier(tier: TierType): number {
     const completions = this.getMasteryLevel(tier);
+    if (completions === 0) return 0;
     const effective = this.getEffectiveMasteryCompletions(completions);
-    const tierDef = getTierByType(tier);
-    if (!tierDef) return 0;
-    const baseCurrency = tierDef.buildings[0]?.baseCost ?? 10;
-    return Math.floor(effective * baseCurrency * MASTERY_STARTING_CURRENCY_FACTOR);
+    return effective * MASTERY_INCOME_PER_COMPLETION;
   }
 
   /**
