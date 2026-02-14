@@ -146,6 +146,11 @@ function initGame(): void {
     ui.render();
   };
 
+  window.toggleGameInfo = (): void => {
+    ui.toggleGameInfo();
+    ui.render();
+  };
+
   window.toggleCompactView = (): void => {
     game.toggleCompactView();
     ui.render();

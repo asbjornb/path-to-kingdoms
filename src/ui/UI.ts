@@ -30,6 +30,7 @@ export class UI {
   private prestigeShopSearchQuery: string = '';
   private holdBuyTimer: ReturnType<typeof setTimeout> | null = null;
   private holdBuyInterval: ReturnType<typeof setInterval> | null = null;
+  private gameInfoOpen: boolean = false;
 
   constructor(game: GameStateManager, container: HTMLElement) {
     this.game = game;
@@ -219,6 +220,10 @@ export class UI {
     this.showAchievements = !this.showAchievements;
   }
 
+  public toggleGameInfo(): void {
+    this.gameInfoOpen = !this.gameInfoOpen;
+  }
+
   public render(): void {
     this.isInitialized = true;
     this.lastSettlementCount = this.game.getState().settlements.length;
@@ -258,6 +263,7 @@ export class UI {
               <button onclick="window.exportSave()" class="save-btn">Export</button>
               <input type="file" id="import-file" style="display: none;" accept=".json" onchange="window.importSave(event)">
               <button onclick="document.getElementById('import-file').click()" class="save-btn">Import</button>
+              <button onclick="window.toggleGameInfo()" class="save-btn info-btn">Info</button>
             </div>
           </div>
         </header>
@@ -299,6 +305,7 @@ export class UI {
         </div>
       </div>
       ${this.renderPrestigeShopOverlay()}
+      ${this.renderGameInfoModal()}
     `;
 
     const newSettlementsArea = this.container.querySelector('.settlements-area');
@@ -918,6 +925,157 @@ export class UI {
             <button class="prestige-shop-confirm-btn" onclick="window.confirmPrestige()">
               Prestige${this.selectedPrestigeUpgrades.size > 0 ? ` (${this.selectedPrestigeUpgrades.size} upgrade${this.selectedPrestigeUpgrades.size !== 1 ? 's' : ''})` : ''}
             </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  private renderGameInfoModal(): string {
+    if (!this.gameInfoOpen) return '';
+
+    return `
+      <div class="game-info-overlay" onclick="if(event.target===this)window.toggleGameInfo()">
+        <div class="game-info-modal">
+          <div class="game-info-header">
+            <h2>Game Guide</h2>
+            <button class="game-info-close-btn" onclick="window.toggleGameInfo()">Close</button>
+          </div>
+
+          <div class="game-info-content">
+            <section class="game-info-section">
+              <h3>About</h3>
+              <p>
+                Path to Kingdoms is an idle game inspired by
+                <strong>Matter of Scale</strong> by astarsearcher &mdash; a wonderful
+                incremental game that has since been discontinued. This project aims to
+                capture the spirit of the original while continuing its legacy with
+                new improvements and original content.
+              </p>
+            </section>
+
+            <section class="game-info-section">
+              <h3>Core Loop</h3>
+              <p>
+                Build structures to earn income, complete goals to finish settlements,
+                finish enough settlements to unlock the next tier, and repeat across
+                8 tiers of civilization &mdash; from Hamlet all the way to Kingdom.
+              </p>
+            </section>
+
+            <section class="game-info-section">
+              <details>
+                <summary>Buildings &amp; Income</summary>
+                <p>
+                  Each tier has 6 unique buildings. Buying a building increases your
+                  settlement's income. Building costs rise with each purchase based on
+                  a cost multiplier, so timing your purchases matters. Some buildings
+                  have special effects like boosting income from other buildings,
+                  reducing costs, or granting completion bonuses.
+                </p>
+              </details>
+            </section>
+
+            <section class="game-info-section">
+              <details>
+                <summary>Goals &amp; Settlement Completion</summary>
+                <p>
+                  Every settlement has a randomly generated goal to complete &mdash;
+                  reach a target income, accumulate currency, build a certain number of
+                  structures, or survive for a duration. Once you meet the goal, the
+                  settlement is completed and you earn research points. Complete enough
+                  settlements in a tier to unlock the next one.
+                </p>
+              </details>
+            </section>
+
+            <section class="game-info-section">
+              <details>
+                <summary>Parallel Slots</summary>
+                <p>
+                  Initially you can only run one settlement at a time per tier.
+                  Research the "Parallel Slots" upgrade to run multiple settlements
+                  simultaneously, greatly speeding up your progress.
+                </p>
+              </details>
+            </section>
+
+            <section class="game-info-section">
+              <details>
+                <summary>Research</summary>
+                <p>
+                  Spend research points earned from completions on upgrades scoped to
+                  each tier. Options include cost reductions, extra parallel slots,
+                  starting income, starting buildings, auto-building, and reduced tier
+                  requirements. Research resets on prestige but can be re-purchased.
+                </p>
+              </details>
+            </section>
+
+            <section class="game-info-section">
+              <details>
+                <summary>Mastery</summary>
+                <p>
+                  Each settlement completion adds permanent mastery to that tier.
+                  Mastery provides a stacking income bonus (+0.1% per completion),
+                  starting currency for new settlements, and faster auto-build speed.
+                  Mastery resets on prestige but accumulates faster each run.
+                </p>
+              </details>
+            </section>
+
+            <section class="game-info-section">
+              <details>
+                <summary>Prestige</summary>
+                <p>
+                  Once you have at least one non-Hamlet tier completion, you can
+                  prestige. This resets your settlements, research, research points,
+                  mastery, and unlocked tiers &mdash; but you earn Crowns based on your
+                  tier completions. Spend Crowns in the Prestige Shop on powerful
+                  permanent upgrades: income multipliers, cost reductions, free
+                  buildings, extra parallel slots, and more. Strategic prestige timing
+                  is key to long-term progress.
+                </p>
+              </details>
+            </section>
+
+            <section class="game-info-section">
+              <details>
+                <summary>Cross-Tier Bonus (Patronage)</summary>
+                <p>
+                  Completing a higher-tier settlement grants a permanent 5% income
+                  bonus to all lower-tier settlements. This stacks with each completion
+                  and can be boosted further with prestige upgrades, creating a
+                  snowball effect as you progress.
+                </p>
+              </details>
+            </section>
+
+            <section class="game-info-section">
+              <details>
+                <summary>Achievements</summary>
+                <p>
+                  Unlock achievements by hitting milestones &mdash; tier completions,
+                  speed runs, building counts, currency thresholds, and more. Each
+                  achievement grants a permanent bonus such as income multipliers or
+                  cost reductions. Some achievements are hidden until discovered.
+                </p>
+              </details>
+            </section>
+
+            <section class="game-info-section">
+              <details>
+                <summary>Tips</summary>
+                <ul>
+                  <li>Hold the buy button to purchase buildings rapidly.</li>
+                  <li>Use the buy amount toggle (x1 / x10 / x100 / Max) for bulk purchases.</li>
+                  <li>Unlock parallel slots early &mdash; they are the biggest time saver.</li>
+                  <li>Check building effects carefully; some synergize with others.</li>
+                  <li>Don't wait too long to prestige &mdash; Crowns compound your progress.</li>
+                  <li>Toggle compact view for a denser layout when managing many settlements.</li>
+                </ul>
+              </details>
+            </section>
           </div>
         </div>
       </div>
