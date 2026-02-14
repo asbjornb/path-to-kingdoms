@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  max-width: 1400px;
+  max-width: 1600px;
   margin: 0 auto;
 }
 
@@ -311,7 +311,7 @@
 }
 
 .research-panel {
-  width: 300px;
+  width: 350px;
   background: #1a1a1a;
   border-left: 1px solid #333;
   padding: 1rem;
@@ -1327,6 +1327,47 @@
   color: #555;
   font-size: 0.75rem;
   font-weight: normal;
+}
+
+/* ===== Desktop Wide ===== */
+
+@media (min-width: 1200px) {
+  .settlements-area {
+    padding: 1.25rem 1.5rem;
+  }
+
+  .settlements-list {
+    gap: 1.25rem;
+  }
+
+  .settlement {
+    padding: 1.25rem;
+  }
+
+  .buildings {
+    gap: 0.6rem;
+  }
+
+  .building {
+    padding: 0.6rem 0.75rem;
+  }
+
+  .research-panel {
+    width: 380px;
+    padding: 1rem 1.25rem;
+  }
+
+  .research-list {
+    gap: 0.5rem;
+  }
+
+  .research-item {
+    padding: 0.6rem 0.75rem;
+  }
+
+  .research-desc {
+    font-size: 0.8rem;
+  }
 }
 
 /* ===== Mobile Responsive ===== */
