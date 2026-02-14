@@ -1442,9 +1442,9 @@ export function getPrestigeUpgradeCost(upgrade: PrestigeUpgrade): number {
 
 /**
  * Calculate prestige currency earned for a tier based on completions.
- * Formula: floor(sqrt(completions))
+ * Logarithmic scaling (base 3) — each additional crown requires 3× more completions.
  */
 export function calculatePrestigeCurrency(completions: number): number {
   if (completions <= 0) return 0;
-  return Math.floor(Math.sqrt(completions));
+  return 1 + Math.floor(Math.log(completions) / Math.log(3));
 }
