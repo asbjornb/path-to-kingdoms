@@ -51,8 +51,8 @@ function createSettlement(tierType: TierType): Settlement {
 }
 
 // Patronage: each completed higher-tier settlement gives a small flat income bonus
-// to all lower-tier settlements, scaled by the higher tier's base income and
-// decayed by tier distance. Slow but accumulates permanently.
+// to all lower-tier settlements, scaled by the higher tier's base income.
+// Slow but accumulates permanently.
 const PATRONAGE_PER_COMPLETION = 0.05; // fraction of higher tier's first building income
 
 // Mastery: permanent bonuses from repeated tier completions (intentionally slow)
@@ -635,7 +635,7 @@ export class GameStateManager {
   /**
    * Calculate the patronage bonus for a settlement.
    * Each completed settlement of a higher tier provides a small permanent
-   * income bonus, scaled by that tier's economic level and decayed by distance.
+   * income bonus, scaled by that tier's economic level.
    */
   private calculateCrossTierBonus(settlement: Settlement): number {
     const settlementTierIndex = TIER_DATA.findIndex((t) => t.type === settlement.tier);
@@ -646,14 +646,13 @@ export class GameStateManager {
     // Sum contributions from each higher tier's completed settlements
     for (let i = settlementTierIndex + 1; i < TIER_DATA.length; i++) {
       const higherTier = TIER_DATA[i];
-      const distance = i - settlementTierIndex;
 
       const completedCount = this.state.completedSettlements.get(higherTier.type) ?? 0;
       if (completedCount === 0) continue;
 
       // Base bonus scales with the higher tier's first building income
       const tierBaseIncome = higherTier.buildings[0]?.baseIncome ?? 1;
-      bonus += (completedCount * tierBaseIncome * PATRONAGE_PER_COMPLETION) / Math.pow(2, distance);
+      bonus += completedCount * tierBaseIncome * PATRONAGE_PER_COMPLETION;
     }
 
     // Apply prestige patronage boost
