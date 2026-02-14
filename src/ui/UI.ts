@@ -1032,8 +1032,13 @@ export class UI {
       );
     }
 
+    const tooltip =
+      'Mastery is earned by completing settlements. Each completion permanently increases income, ' +
+      'grants starting currency for new settlements, and speeds up auto-building for this tier. ' +
+      'Mastery persists through prestige resets.';
+
     return `
-      <div class="mastery-display" id="mastery-display">
+      <div class="mastery-display" id="mastery-display" title="${this.escapeAttr(tooltip)}">
         <span class="mastery-level">Mastery ${level}</span>
         <div class="mastery-bonuses">${bonuses.join('<span class="mastery-sep"> | </span>')}</div>
       </div>
