@@ -56,7 +56,7 @@ function createSettlement(tierType: TierType): Settlement {
 const PATRONAGE_PER_COMPLETION = 0.05; // fraction of higher tier's first building income
 
 // Mastery: permanent bonuses from repeated tier completions (intentionally slow)
-const MASTERY_INCOME_PER_COMPLETION = 0.005; // +0.5% income per completion
+const MASTERY_INCOME_PER_COMPLETION = 0.001; // +0.1% income per completion
 const MASTERY_STARTING_CURRENCY_FACTOR = 0.1; // completions * baseCurrency * this
 const MASTERY_AUTOBUILD_HALFPOINT = 500; // completions at which auto-build speed reaches 50%
 
@@ -744,8 +744,8 @@ export class GameStateManager {
 
   /**
    * Get the income multiplier from mastery for a tier.
-   * Formula: 1 + (completions * 0.005)
-   * 200 completions = 2x, 400 = 3x, 1000 = 6x
+   * Formula: 1 + (completions * 0.001)
+   * 1000 completions = 2x, 2000 = 3x, 5000 = 6x
    */
   public getMasteryIncomeMultiplier(tier: TierType): number {
     const completions = this.getMasteryLevel(tier);
