@@ -966,9 +966,9 @@ export class UI {
                 <p>
                   Each tier has 6 unique buildings. Buying a building increases your
                   settlement's income. Building costs rise with each purchase based on
-                  a cost multiplier, so timing your purchases matters. Some buildings
-                  have special effects like boosting income from other buildings,
-                  reducing costs, or granting completion bonuses.
+                  a cost multiplier. Some buildings have special effects like boosting
+                  income from other buildings, reducing costs, or granting completion
+                  bonuses.
                 </p>
               </details>
             </section>
@@ -980,8 +980,8 @@ export class UI {
                   Every settlement has a randomly generated goal to complete &mdash;
                   reach a target income, accumulate currency, build a certain number of
                   structures, or survive for a duration. Once you meet the goal, the
-                  settlement is completed and you earn research points. Complete enough
-                  settlements in a tier to unlock the next one.
+                  settlement is completed and you earn research points. Completing a
+                  settlement will spawn a new one.
                 </p>
               </details>
             </section>
@@ -990,9 +990,10 @@ export class UI {
               <details>
                 <summary>Parallel Slots</summary>
                 <p>
-                  Initially you can only run one settlement at a time per tier.
-                  Research the "Parallel Slots" upgrade to run multiple settlements
-                  simultaneously, greatly speeding up your progress.
+                  Hamlets are limited to one settlement at a time until you research
+                  the &ldquo;Parallel Slots&rdquo; upgrade. All other tiers have
+                  unlimited parallelism &mdash; the only bottleneck is how fast you
+                  can complete settlements in earlier tiers to unlock the next one.
                 </p>
               </details>
             </section>
