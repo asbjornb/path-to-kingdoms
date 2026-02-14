@@ -1024,11 +1024,11 @@ export class UI {
                 <summary>Mastery</summary>
                 <p>
                   Each settlement completion adds permanent mastery to that tier.
-                  Mastery provides a stacking income bonus (+0.1% per completion),
-                  starting currency for new settlements, and faster auto-build speed.
-                  Income and starting currency bonuses have diminishing returns
-                  past 200 completions. Mastery resets on prestige but accumulates
-                  faster each run.
+                  Mastery provides a stacking income bonus (+0.1% per completion)
+                  and faster auto-build speed.
+                  Income bonus has diminishing returns past 200 completions.
+                  Auto-build speed has a soft cap (50% at 500 completions, max 90%).
+                  Mastery resets on prestige but accumulates faster each run.
                 </p>
               </details>
             </section>
@@ -1184,12 +1184,14 @@ export class UI {
     const level = this.game.getMasteryLevel(this.selectedTier);
     if (level === 0) return '';
 
-    const startingCurrency = this.game.getMasteryStartingCurrency(this.selectedTier);
+    const incomeMultiplier = this.game.getMasteryIncomeMultiplier(this.selectedTier);
     const autoBuildSpeed = this.game.getMasteryAutoBuildSpeed(this.selectedTier);
 
     const bonuses: string[] = [];
-    if (startingCurrency > 0) {
-      bonuses.push(`<span class="mastery-bonus">+${formatNumber(startingCurrency)} start</span>`);
+    if (incomeMultiplier > 0) {
+      bonuses.push(
+        `<span class="mastery-bonus">+${(incomeMultiplier * 100).toFixed(1)}% income</span>`,
+      );
     }
     if (autoBuildSpeed > 0) {
       bonuses.push(
@@ -1199,8 +1201,8 @@ export class UI {
 
     const tooltip =
       'Mastery is earned by completing settlements. Each completion gives ' +
-      'starting currency for new settlements and faster auto-building for this tier. ' +
-      'Starting currency has diminishing returns past 200 completions. ' +
+      '+0.1% income and faster auto-building for this tier. ' +
+      'Income bonus has diminishing returns past 200 completions. ' +
       'Auto-build speed has a soft cap (50% at 500 completions, max 90%). ' +
       'Mastery resets on prestige.';
 
