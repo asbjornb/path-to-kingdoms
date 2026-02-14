@@ -118,7 +118,6 @@ export interface PrestigeUpgrade {
       | 'prestige_research_discount'
       | 'prestige_free_buildings'
       | 'prestige_currency_boost'
-      | 'prestige_mastery_boost'
       | 'prestige_production_boost_amplifier'
       | 'prestige_grant_building'
       | 'prestige_tier_requirement_reduction'

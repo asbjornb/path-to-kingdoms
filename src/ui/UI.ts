@@ -1174,12 +1174,10 @@ export class UI {
     const level = this.game.getMasteryLevel(this.selectedTier);
     if (level === 0) return '';
 
-    const incomeMultiplier = this.game.getMasteryIncomeMultiplier(this.selectedTier);
     const startingCurrency = this.game.getMasteryStartingCurrency(this.selectedTier);
     const autoBuildSpeed = this.game.getMasteryAutoBuildSpeed(this.selectedTier);
 
     const bonuses: string[] = [];
-    bonuses.push(`<span class="mastery-bonus">${incomeMultiplier.toFixed(2)}x income</span>`);
     if (startingCurrency > 0) {
       bonuses.push(`<span class="mastery-bonus">+${formatNumber(startingCurrency)} start</span>`);
     }
@@ -1190,9 +1188,9 @@ export class UI {
     }
 
     const tooltip =
-      'Mastery is earned by completing settlements. Each completion gives +0.1% income, ' +
-      'starting currency for new settlements, and faster auto-building for this tier. ' +
-      'Income and starting currency have diminishing returns past 200 completions. ' +
+      'Mastery is earned by completing settlements. Each completion gives ' +
+      'starting currency for new settlements and faster auto-building for this tier. ' +
+      'Starting currency has diminishing returns past 200 completions. ' +
       'Auto-build speed has a soft cap (50% at 500 completions, max 90%). ' +
       'Mastery resets on prestige.';
 
@@ -1334,14 +1332,9 @@ export class UI {
     const masteryEl = document.getElementById('mastery-display');
     if (masteryEl !== null) {
       const level = this.game.getMasteryLevel(this.selectedTier);
-      const incomeMultiplier = this.game.getMasteryIncomeMultiplier(this.selectedTier);
       const levelEl = masteryEl.querySelector('.mastery-level');
       if (levelEl !== null) {
         levelEl.textContent = `Mastery ${level}`;
-      }
-      const bonusEls = masteryEl.querySelectorAll('.mastery-bonus');
-      if (bonusEls[0] !== undefined) {
-        bonusEls[0].textContent = `${incomeMultiplier.toFixed(2)}x income`;
       }
     }
 

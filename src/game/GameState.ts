@@ -56,7 +56,6 @@ function createSettlement(tierType: TierType): Settlement {
 const PATRONAGE_PER_COMPLETION = 0.05; // fraction of higher tier's first building income
 
 // Mastery: permanent bonuses from repeated tier completions (intentionally slow)
-const MASTERY_INCOME_PER_COMPLETION = 0.001; // +0.1% income per completion
 const MASTERY_STARTING_CURRENCY_FACTOR = 0.1; // completions * baseCurrency * this
 const MASTERY_AUTOBUILD_HALFPOINT = 500; // completions at which auto-build speed reaches 50%
 const MASTERY_SOFTCAP_START = 200; // completions at which diminishing returns begin
@@ -615,22 +614,13 @@ export class GameStateManager {
     // Apply income multiplier effects
     const incomeMultiplier = this.getBuildingEffectMultiplier(settlement, 'income_multiplier');
 
-    // Apply mastery income multiplier
-    const masteryMultiplier = this.getMasteryIncomeMultiplier(settlement.tier);
-
     // Apply prestige income multiplier (additive sum, applied as 1 + total)
     const prestigeIncomeBonus = 1 + this.getPrestigeEffect('prestige_income_multiplier');
 
     // Apply achievement income multiplier (additive sum, applied as 1 + total)
     const achievementIncomeBonus = 1 + this.getAchievementEffect('income_multiplier');
 
-    return (
-      baseIncome *
-      incomeMultiplier *
-      masteryMultiplier *
-      prestigeIncomeBonus *
-      achievementIncomeBonus
-    );
+    return baseIncome * incomeMultiplier * prestigeIncomeBonus * achievementIncomeBonus;
   }
 
   /**
@@ -775,18 +765,6 @@ export class GameStateManager {
   }
 
   /**
-   * Get the income multiplier from mastery for a tier.
-   * Formula: 1 + (effective_completions * 0.001)
-   * Soft-capped: linear up to 200, then square-root diminishing returns.
-   */
-  public getMasteryIncomeMultiplier(tier: TierType): number {
-    const completions = this.getMasteryLevel(tier);
-    const effective = this.getEffectiveMasteryCompletions(completions);
-    const masteryBoost = 1 + this.getPrestigeEffect('prestige_mastery_boost');
-    return 1 + effective * MASTERY_INCOME_PER_COMPLETION * masteryBoost;
-  }
-
-  /**
    * Get the starting currency bonus from mastery for a tier.
    * Uses soft-capped completions for diminishing returns.
    */
@@ -885,10 +863,6 @@ export class GameStateManager {
         break;
       case 'prestige_currency_boost':
         // Additive sum (e.g., 0.5 + 0.75 = 1.25 → applied as 1 + total)
-        result = upgrades.reduce(additive, 0);
-        break;
-      case 'prestige_mastery_boost':
-        // Additive sum (e.g., 0.5 + 1.0 = 1.5 → mastery rate multiplied by 1 + total)
         result = upgrades.reduce(additive, 0);
         break;
       case 'prestige_production_boost_amplifier':

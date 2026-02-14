@@ -605,29 +605,6 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     purchased: false,
   },
 
-  // ===== Mastery boost =====
-
-  // County currency → Mastery grows faster
-  {
-    id: 'prestige_master_builder_1',
-    name: 'Master Builder',
-    description: 'Mastery income bonus grows 25% faster per completion',
-    cost: 3,
-    tier: TierType.County,
-    effect: { type: 'prestige_mastery_boost', value: 0.25 },
-    purchased: false,
-  },
-  // Kingdom currency → Mastery grows much faster
-  {
-    id: 'prestige_eternal_mastery_1',
-    name: 'Eternal Mastery',
-    description: 'Mastery income bonus grows 50% faster per completion',
-    cost: 2,
-    tier: TierType.Kingdom,
-    effect: { type: 'prestige_mastery_boost', value: 0.5 },
-    purchased: false,
-  },
-
   // ===== Production boost amplifier =====
 
   // County currency → Production boost buildings are stronger
@@ -639,7 +616,7 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     tier: TierType.County,
     effect: { type: 'prestige_production_boost_amplifier', value: 0.2 },
     purchased: false,
-    prerequisite: 'prestige_veteran_builders_1',
+    prerequisite: 'prestige_crown_tax_1',
   },
   // Duchy currency → Even stronger production boosts
   {
@@ -1094,17 +1071,6 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     purchased: false,
   },
 
-  // County currency → Small mastery boost
-  {
-    id: 'prestige_veteran_builders_1',
-    name: 'Veteran Builders',
-    description: 'Mastery income bonus grows 10% faster per completion',
-    cost: 1,
-    tier: TierType.County,
-    effect: { type: 'prestige_mastery_boost', value: 0.1 },
-    purchased: false,
-  },
-
   // Duchy currency → Small production boost amplifier
   {
     id: 'prestige_trade_routes_1',
@@ -1382,20 +1348,6 @@ export const PRESTIGE_UPGRADES: PrestigeUpgrade[] = [
     repeatable: true,
     level: 0,
   },
-  // County: Mastery Practice (+5% mastery per level)
-  {
-    id: 'prestige_repeatable_mastery',
-    name: 'Mastery Practice',
-    description: '+5% mastery per level',
-    cost: 3,
-    tier: TierType.County,
-    effect: { type: 'prestige_mastery_boost', value: 0.05 },
-    purchased: false,
-    prerequisite: 'prestige_master_builder_1',
-    repeatable: true,
-    level: 0,
-  },
-
   // Duchy: Trade Empire (+5% production boost per level)
   {
     id: 'prestige_repeatable_trade',
