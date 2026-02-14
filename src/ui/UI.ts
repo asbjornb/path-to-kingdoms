@@ -1033,7 +1033,7 @@ export class UI {
     }
 
     const tooltip =
-      'Mastery is earned by completing settlements. Each completion gives +0.5% income, ' +
+      'Mastery is earned by completing settlements. Each completion gives +0.1% income, ' +
       'starting currency for new settlements, and faster auto-building for this tier. ' +
       'Auto-build speed has a soft cap (50% at 500 completions, max 90%). ' +
       'Mastery resets on prestige.';
