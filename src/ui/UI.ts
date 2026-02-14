@@ -1033,9 +1033,10 @@ export class UI {
     }
 
     const tooltip =
-      'Mastery is earned by completing settlements. Each completion permanently increases income, ' +
-      'grants starting currency for new settlements, and speeds up auto-building for this tier. ' +
-      'Mastery persists through prestige resets.';
+      'Mastery is earned by completing settlements. Each completion gives +0.5% income, ' +
+      'starting currency for new settlements, and faster auto-building for this tier. ' +
+      'Auto-build speed has a soft cap (50% at 500 completions, max 90%). ' +
+      'Mastery resets on prestige.';
 
     return `
       <div class="mastery-display" id="mastery-display" title="${this.escapeAttr(tooltip)}">
