@@ -580,7 +580,7 @@ describe('GameStateManager', () => {
       game.buyBuilding(newHamlet.id, 'hamlet_hut');
       const incomeAfterHut = newHamlet.totalIncome;
 
-      // The hut adds 1 base income (plus tiny mastery multiplier), not ~20
+      // The hut adds 1 base income, not ~20
       expect(incomeAfterHut - incomeBeforeHut).toBeLessThan(2);
     });
   });
