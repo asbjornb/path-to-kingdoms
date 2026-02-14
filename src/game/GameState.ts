@@ -646,14 +646,12 @@ export class GameStateManager {
     // Sum contributions from each higher tier's completed settlements
     for (let i = settlementTierIndex + 1; i < TIER_DATA.length; i++) {
       const higherTier = TIER_DATA[i];
-      const distance = i - settlementTierIndex;
-
       const completedCount = this.state.completedSettlements.get(higherTier.type) ?? 0;
       if (completedCount === 0) continue;
 
       // Base bonus scales with the higher tier's first building income
       const tierBaseIncome = higherTier.buildings[0]?.baseIncome ?? 1;
-      bonus += (completedCount * tierBaseIncome * PATRONAGE_PER_COMPLETION) / Math.pow(2, distance);
+      bonus += completedCount * tierBaseIncome * PATRONAGE_PER_COMPLETION;
     }
 
     // Apply prestige patronage boost

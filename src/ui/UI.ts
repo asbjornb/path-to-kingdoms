@@ -402,7 +402,7 @@ export class UI {
           </div>
           ${((): string => {
             const crossBonus = this.game.getCrossTierBonus(settlement.id);
-            return crossBonus > 0.01
+            return crossBonus >= 1
               ? `<div class="settlement-stat cross-tier-stat">
                 <span class="stat-label">Patronage:</span>
                 <span class="stat-value cross-tier-value">+${formatIncome(crossBonus)}</span>

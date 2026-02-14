@@ -408,11 +408,11 @@ describe('GameStateManager', () => {
       const bonus = game.getCrossTierBonus(hamletSettlement!.id);
 
       // Village first building baseIncome = 10
-      // Patronage: 3 completions * 10 * 0.05 / 2^1 = 0.75
-      expect(bonus).toBeCloseTo(0.75, 4);
+      // Patronage: 3 completions * 10 * 0.05 = 1.5
+      expect(bonus).toBeCloseTo(1.5, 4);
     });
 
-    it('should decay patronage bonus with tier distance', () => {
+    it('should sum patronage bonus from multiple higher tiers without decay', () => {
       // Record completed villages and towns
       game.getState().completedSettlements.set(TierType.Village, 2);
       game.getState().completedSettlements.set(TierType.Town, 1);
@@ -420,9 +420,9 @@ describe('GameStateManager', () => {
       const hamletSettlement = game.getState().settlements.find((s) => s.tier === TierType.Hamlet);
       const bonus = game.getCrossTierBonus(hamletSettlement!.id);
 
-      // Village (distance 1): 2 * 10 * 0.05 / 2 = 0.5
-      // Town (distance 2): 1 * 85 * 0.05 / 4 = 1.0625
-      expect(bonus).toBeCloseTo(1.5625, 4);
+      // Village: 2 * 10 * 0.05 = 1.0
+      // Town: 1 * 85 * 0.05 = 4.25
+      expect(bonus).toBeCloseTo(5.25, 4);
     });
 
     it('should apply patronage bonus to currency in update loop', () => {
@@ -437,7 +437,7 @@ describe('GameStateManager', () => {
       game.update();
 
       // Hamlet should have gained currency from patronage even with 0 own income
-      // Bonus: 2 * 10 * 0.05 / 2 = 0.5/s, over 1 second = 0.5
+      // Bonus: 2 * 10 * 0.05 = 1.0/s, over 1 second = 1.0
       expect(hamletSettlement!.currency).toBeGreaterThan(initialCurrency);
     });
   });
