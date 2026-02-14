@@ -1210,7 +1210,7 @@ export class UI {
 
     const tooltip =
       'Patronage income from completing higher-tier settlements. ' +
-      "Each completion grants 2% of that tier's base building income to all lower-tier settlements.";
+      "Each completion grants 1% of that tier's base building income to all lower-tier settlements.";
 
     return `
       <div class="patronage-display" id="patronage-display" title="${this.escapeAttr(tooltip)}">

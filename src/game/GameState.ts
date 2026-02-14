@@ -53,7 +53,7 @@ function createSettlement(tierType: TierType): Settlement {
 // Patronage: each completed higher-tier settlement gives a small flat income bonus
 // to all lower-tier settlements, scaled by the higher tier's base income.
 // Slow but accumulates permanently.
-const PATRONAGE_PER_COMPLETION = 0.02; // fraction of higher tier's first building income
+const PATRONAGE_PER_COMPLETION = 0.01; // fraction of higher tier's first building income
 
 // Mastery: permanent bonuses from repeated tier completions (intentionally slow)
 const MASTERY_INCOME_PER_COMPLETION = 0.001; // +0.1% income per completion
