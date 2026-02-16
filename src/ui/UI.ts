@@ -411,7 +411,7 @@ export class UI {
           ${((): string => {
             const crossBonus = this.game.getCrossTierBonus(settlement.id);
             return crossBonus >= 1
-              ? `<div class="settlement-stat cross-tier-stat" title="Bonus income from completing higher-tier settlements. Each completion grants 5% of that tier's base building income to all lower-tier settlements.">
+              ? `<div class="settlement-stat cross-tier-stat" title="Bonus income from completing higher-tier settlements. Each completion grants 1% of that tier's base building income to all lower-tier settlements.">
                 <span class="stat-label">Patronage:</span>
                 <span class="stat-value cross-tier-value">+${formatIncome(crossBonus)}</span>
               </div>`
@@ -1052,10 +1052,11 @@ export class UI {
               <details>
                 <summary>Cross-Tier Bonus (Patronage)</summary>
                 <p>
-                  Completing a higher-tier settlement grants a permanent 5% income
-                  bonus to all lower-tier settlements. This stacks with each completion
-                  and can be boosted further with prestige upgrades, creating a
-                  snowball effect as you progress.
+                  Completing a higher-tier settlement grants a permanent income
+                  bonus to all lower-tier settlements, equal to 1% of that tier's
+                  base building income. This stacks with each completion and can be
+                  boosted further with prestige upgrades, creating a snowball effect
+                  as you progress.
                 </p>
               </details>
             </section>
