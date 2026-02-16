@@ -1217,7 +1217,7 @@ export class UI {
 
   private renderPatronage(): string {
     const bonus = this.game.getCrossTierBonusForTier(this.selectedTier);
-    if (bonus < 0.01) return '';
+    if (bonus < 1) return '';
 
     const tooltip =
       'Patronage income from completing higher-tier settlements. ' +
@@ -1226,7 +1226,7 @@ export class UI {
     return `
       <div class="patronage-display" id="patronage-display" title="${this.escapeAttr(tooltip)}">
         <span class="patronage-label">Patronage</span>
-        <span class="patronage-value">+${formatIncome(bonus)}/s to all settlements</span>
+        <span class="patronage-value">+${formatIncome(bonus)} to all settlements</span>
       </div>
     `;
   }
@@ -1357,7 +1357,7 @@ export class UI {
       const bonus = this.game.getCrossTierBonusForTier(this.selectedTier);
       const valueEl = patronageEl.querySelector('.patronage-value');
       if (valueEl !== null) {
-        valueEl.textContent = `+${formatIncome(bonus)}/s to all settlements`;
+        valueEl.textContent = `+${formatIncome(bonus)} to all settlements`;
       }
     }
 
