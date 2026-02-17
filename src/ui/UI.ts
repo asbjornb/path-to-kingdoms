@@ -14,6 +14,38 @@ import { getPrestigeUpgradeCost } from '../data/prestige';
 import { formatNumber, formatIncome } from '../utils/format';
 import { getAppVersion } from '../version';
 
+const PRESTIGE_EFFECT_CATEGORY: Record<string, string> = {
+  prestige_income_multiplier: 'income',
+  prestige_building_income_boost: 'income',
+  prestige_production_boost_amplifier: 'income',
+  prestige_building_synergy: 'income',
+  prestige_cost_reduction: 'cost',
+  prestige_cost_scaling_reduction: 'cost',
+  prestige_flat_cost_count: 'cost',
+  prestige_research_discount: 'cost',
+  prestige_goal_reduction: 'goals',
+  prestige_survival_speed: 'goals',
+  prestige_starting_currency: 'starting',
+  prestige_free_buildings: 'starting',
+  prestige_grant_building: 'starting',
+  prestige_autobuild_speed: 'autobuild',
+  prestige_currency_boost: 'currency',
+  prestige_patronage_boost: 'currency',
+  prestige_parallel_slots: 'progression',
+  prestige_tier_requirement_reduction: 'progression',
+  prestige_research_bonus: 'progression',
+};
+
+const PRESTIGE_CATEGORY_LABELS: { id: string; label: string }[] = [
+  { id: 'income', label: 'Income' },
+  { id: 'cost', label: 'Cost' },
+  { id: 'goals', label: 'Goals' },
+  { id: 'starting', label: 'Starting' },
+  { id: 'autobuild', label: 'Auto-build' },
+  { id: 'currency', label: 'Currency' },
+  { id: 'progression', label: 'Progression' },
+];
+
 export class UI {
   private game: GameStateManager;
   private container: HTMLElement;
@@ -146,11 +178,13 @@ export class UI {
   private getUpgradeSearchText(upgrade: PrestigeUpgrade): string {
     const tags = this.getUpgradeBuildingTags(upgrade);
     const tierName = upgrade.tier.charAt(0).toUpperCase() + upgrade.tier.slice(1);
+    const category = PRESTIGE_EFFECT_CATEGORY[upgrade.effect.type] ?? '';
     return [
       upgrade.name,
       upgrade.description,
       tierName,
       ...tags.map((t) => `${t.tierName} ${t.buildingName}`),
+      category !== '' ? `#${category}` : '',
     ]
       .join(' ')
       .toLowerCase();
@@ -164,6 +198,17 @@ export class UI {
       .split(/\s+/)
       .filter((t) => t.length > 0)
       .every((term) => searchText.includes(term));
+  }
+
+  private renderPrestigeCategoryButtons(context: 'shop' | 'owned'): string {
+    const currentQuery =
+      context === 'shop' ? this.prestigeShopSearchQuery : this.prestigeSearchQuery;
+    const filterFn =
+      context === 'shop' ? 'filterPrestigeShopByCategory' : 'filterPrestigeByCategory';
+    return `<div class="prestige-category-filters">${PRESTIGE_CATEGORY_LABELS.map(
+      ({ id, label }) =>
+        `<button class="prestige-category-btn${currentQuery === '#' + id ? ' active' : ''}" data-category="${id}" onclick="window.${filterFn}('#${id}')">${label}</button>`,
+    ).join('')}</div>`;
   }
 
   private renderUpgradeTags(upgrade: PrestigeUpgrade): string {
@@ -673,6 +718,7 @@ export class UI {
           showShop && purchasedUpgrades.length > 0
             ? `
           <input type="text" class="prestige-search-input" placeholder="Search upgrades..." value="${this.prestigeSearchQuery}" oninput="window.filterPrestigeUpgrades(this.value)">
+          ${this.renderPrestigeCategoryButtons('owned')}
           <div class="research-list">
             ${purchasedUpgrades
               .map((upgrade) => {
@@ -828,6 +874,7 @@ export class UI {
           <div class="prestige-shop-upgrades">
             <h3>Available Upgrades</h3>
             <input type="text" class="prestige-search-input" placeholder="Search upgrades..." value="${this.prestigeShopSearchQuery}" oninput="window.filterPrestigeShop(this.value)">
+            ${this.renderPrestigeCategoryButtons('shop')}
             ${
               purchasedUpgrades.length > 0
                 ? `

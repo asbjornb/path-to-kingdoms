@@ -20,6 +20,8 @@ declare global {
     toggleShowCompletedPrestige: () => void;
     filterPrestigeUpgrades: (query: string) => void;
     filterPrestigeShop: (query: string) => void;
+    filterPrestigeShopByCategory: (category: string) => void;
+    filterPrestigeByCategory: (category: string) => void;
     toggleAchievements: () => void;
     toggleGameInfo: () => void;
     toggleCompactView: () => void;

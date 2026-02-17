@@ -124,6 +124,12 @@ function initGame(): void {
       const matches = terms.length === 0 || terms.every((term) => searchText.includes(term));
       el.style.display = matches ? '' : 'none';
     });
+    // Update category button active states
+    const buttons = container.querySelectorAll('.prestige-category-btn');
+    buttons.forEach((btn) => {
+      const el = btn as HTMLElement;
+      el.classList.toggle('active', query === '#' + (el.dataset.category ?? ''));
+    });
   };
 
   window.filterPrestigeShop = (query: string): void => {
@@ -139,6 +145,32 @@ function initGame(): void {
       const matches = terms.length === 0 || terms.every((term) => searchText.includes(term));
       el.style.display = matches ? '' : 'none';
     });
+    // Update category button active states
+    const buttons = container.querySelectorAll('.prestige-category-btn');
+    buttons.forEach((btn) => {
+      const el = btn as HTMLElement;
+      el.classList.toggle('active', query === '#' + (el.dataset.category ?? ''));
+    });
+  };
+
+  window.filterPrestigeShopByCategory = (category: string): void => {
+    const container = document.querySelector('.prestige-shop-upgrades');
+    if (container === null) return;
+    const input = container.querySelector<HTMLInputElement>('.prestige-search-input');
+    const currentQuery = input?.value ?? '';
+    const newQuery = currentQuery === category ? '' : category;
+    if (input !== null) input.value = newQuery;
+    window.filterPrestigeShop(newQuery);
+  };
+
+  window.filterPrestigeByCategory = (category: string): void => {
+    const container = document.querySelector('.prestige-upgrades-section');
+    if (container === null) return;
+    const input = container.querySelector<HTMLInputElement>('.prestige-search-input');
+    const currentQuery = input?.value ?? '';
+    const newQuery = currentQuery === category ? '' : category;
+    if (input !== null) input.value = newQuery;
+    window.filterPrestigeUpgrades(newQuery);
   };
 
   window.toggleAchievements = (): void => {
