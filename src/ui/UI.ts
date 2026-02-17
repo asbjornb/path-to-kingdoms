@@ -1232,6 +1232,16 @@ export class UI {
   }
 
   private renderTierProgress(): string {
+    if (this.selectedTier === TierType.Kingdom) {
+      const state = this.game.getState();
+      const completedCount = state.completedSettlements.get(this.selectedTier) ?? 0;
+      return `
+        <div class="progress-info">
+          <span class="completed-count">${completedCount} completed</span>
+        </div>
+      `;
+    }
+
     const state = this.game.getState();
     const completedCount = state.completedSettlements.get(this.selectedTier) ?? 0;
     const requirement = this.game.getTierRequirement(this.selectedTier);
