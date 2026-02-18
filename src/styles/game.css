@@ -1646,15 +1646,18 @@
   }
 
   .settlements-area {
+    flex: 0 0 auto;
     padding: 0.75rem;
     overflow-y: visible;
   }
 
   .research-panel {
+    flex-shrink: 0;
     width: 100%;
     border-left: none;
     border-top: 1px solid #333;
     padding: 0.75rem;
+    padding-bottom: 5rem;
     max-height: none;
   }
 
